@@ -1,0 +1,14 @@
+{
+  "name": "Recipto",
+  "tagline": "Simple Receipts. Smart Records.",
+  "colors": {
+    "primary": "#2563EB",
+    "dark": "#1E293B",
+    "background": "#F8FAFC",
+    "accent": "#22C55E"
+  },
+  "fonts": {
+    "heading": "Poppins",
+    "body": "Inter"
+  }
+}

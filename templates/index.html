@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2563EB">
+  <title>Recipto - Generate Receipt</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <script>
+    (() => {
+      try {
+        const savedTheme = localStorage.getItem('recipto-theme');
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = savedTheme || systemTheme;
+      } catch (_) {
+        document.documentElement.dataset.theme = 'light';
+      }
+    })();
+  </script>
+  <style>
+    :root { --bg: #F8FAFC; --card: #FFFFFF; --text: #1E293B; --border: #E2E8F0; --primary: #2563EB; --primary-hover: #1D4ED8; --accent: #22C55E; --accent-hover: #16A34A; --muted: #64748B; --input: #FFFFFF; --surface: #EFF6FF; --shadow: rgba(30, 41, 59, .10); color-scheme: light; font-family: Inter, Arial, sans-serif; }
+    [data-theme="dark"] { --bg: #0F172A; --card: #1E293B; --text: #F8FAFC; --border: #334155; --primary: #60A5FA; --primary-hover: #93C5FD; --accent: #4ADE80; --accent-hover: #86EFAC; --muted: #CBD5E1; --input: #0F172A; --surface: #172554; --shadow: rgba(2, 6, 23, .42); color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { align-items: center; background: var(--bg); color: var(--text); display: flex; justify-content: center; margin: 0; min-height: 100vh; padding: 24px; transition: background .2s ease, color .2s ease; }
+    main { max-width: 600px; width: 100%; }
+    .navbar { align-items: center; display: flex; justify-content: space-between; margin-bottom: 18px; }
+    .nav-actions { align-items: center; display: flex; gap: 12px; }
+    .brand { align-items: center; color: var(--text); display: inline-flex; font-family: Poppins, Arial, sans-serif; font-size: 1.25rem; font-weight: 700; gap: 9px; letter-spacing: -.03em; text-decoration: none; }
+    .brand-mark { align-items: center; background: var(--primary); border-radius: 9px; color: #fff; display: inline-flex; font-family: Poppins, Arial, sans-serif; font-size: .95rem; height: 32px; justify-content: center; width: 32px; }
+    .history-link { color: var(--primary); font-size: .9rem; font-weight: 700; text-decoration: none; }
+    .history-link:hover { color: var(--primary-hover); text-decoration: underline; }
+    .theme-toggle { align-items: center; background: var(--card); border: 1px solid var(--border); border-radius: 9px; color: var(--text); cursor: pointer; display: inline-flex; font-size: 1rem; height: 36px; justify-content: center; min-height: 36px; padding: 0; transition: background .18s ease, border-color .18s ease, transform .18s ease; width: 36px; }
+    .theme-toggle:hover { background: var(--surface); border-color: var(--primary); transform: translateY(-1px); }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 16px 36px var(--shadow); padding: 32px; transition: background .2s ease, border-color .2s ease; }
+    h1, h2 { font-family: Poppins, Arial, sans-serif; letter-spacing: -.025em; }
+    h1 { font-size: 1.65rem; line-height: 1.2; margin: 0; }
+    .tagline { color: var(--primary); font-size: .94rem; font-weight: 700; margin: 8px 0 0; }
+    .subtitle { color: var(--muted); line-height: 1.55; margin: 10px 0 0; }
+    form { display: grid; gap: 18px; margin-top: 28px; }
+    label { color: var(--text); display: grid; font-size: .92rem; font-weight: 700; gap: 7px; }
+    input, select, button { border-radius: 9px; font: inherit; min-height: 46px; padding: 11px 12px; width: 100%; }
+    input, select { background: var(--input); border: 1px solid var(--border); color: var(--text); }
+    input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, .20); outline: 0; }
+    button { background: var(--primary); border: 1px solid var(--primary); color: #fff; cursor: pointer; font-weight: 700; transition: background .18s ease, box-shadow .18s ease, transform .18s ease; }
+    button:hover { background: var(--primary-hover); box-shadow: 0 8px 16px rgba(37, 99, 235, .22); transform: translateY(-1px); }
+    button:disabled { cursor: wait; opacity: .72; transform: none; }
+    .notice { background: #FEF2F2; border: 1px solid #FECACA; border-radius: 9px; color: #B91C1C; margin-top: 20px; padding: 12px 14px; }
+    .helper { color: var(--muted); font-size: .86rem; line-height: 1.45; margin: -8px 0 0; }
+    .batch { border-top: 1px solid var(--border); display: grid; gap: 14px; margin-top: 4px; padding-top: 20px; }
+    .batch h2 { font-size: 1rem; margin: 0; }
+    .month-grid, .actions { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+    .batch-button { background: var(--accent); border-color: var(--accent); }
+    .batch-button:hover { background: var(--accent-hover); box-shadow: 0 8px 16px rgba(34, 197, 94, .22); }
+    @media (max-width: 520px) { body { padding: 14px; } .card { border-radius: 14px; padding: 24px 20px; } .month-grid, .actions { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <nav class="navbar" aria-label="Primary navigation">
+      <a class="brand" href="{{ url_for('receipt_form') }}" aria-label="Recipto home"><span class="brand-mark">R</span>Recipto</a>
+      <div class="nav-actions">
+        <a class="history-link" href="{{ url_for('receipt_history') }}">Receipt History</a>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark theme" title="Switch theme"><span aria-hidden="true">🌙</span></button>
+      </div>
+    </nav>
+    <section class="card">
+      <h1>Generate a rent receipt</h1>
+      <p class="tagline">Simple Receipts. Smart Records.</p>
+      <p class="subtitle">Preview a professional receipt before creating its downloadable PDF.</p>
+
+      {% if error %}<div class="notice" role="alert">{{ error }}</div>{% endif %}
+
+      <form id="receipt-form" action="{{ url_for('preview_receipt') }}" method="post" novalidate>
+        <label>
+          Tenant Name
+          <input name="tenant_name" maxlength="120" required autocomplete="name" value="{{ form_values.get('tenant_name', '') }}">
+        </label>
+        <label>
+          Amount
+          <input name="amount" type="number" min="0.01" step="0.01" required placeholder="0.00" value="{{ form_values.get('amount', '') }}">
+        </label>
+        <label>
+          House / Gala No.
+          <input name="house_no" maxlength="120" required value="{{ form_values.get('house_no', '') }}">
+        </label>
+        <label>
+          Receipt Type
+          <select name="receipt_type" required>
+            <option value="signed" {% if form_values.get('receipt_type', 'signed') == 'signed' %}selected{% endif %}>Signed</option>
+            <option value="unsigned" {% if form_values.get('receipt_type') == 'unsigned' %}selected{% endif %}>Unsigned</option>
+          </select>
+        </label>
+        <div class="batch">
+          <h2>Batch Months</h2>
+          <div class="month-grid">
+            <label>
+              Start Month
+              <select name="start_month">
+                {% for value, label in month_options %}
+                  <option value="{{ value }}" {% if form_values.get('start_month', current_month) == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </label>
+            <label>
+              End Month
+              <select name="end_month">
+                {% for value, label in month_options %}
+                  <option value="{{ value }}" {% if form_values.get('end_month', current_month) == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </label>
+          </div>
+          <label>
+            Year
+            <input name="year" type="number" min="2000" max="9999" value="{{ form_values.get('year', current_year) }}">
+          </label>
+        </div>
+        <p class="helper">Previewing does not create a record. Downloading saves one receipt; batch generation creates one PDF per selected month.</p>
+        <div class="actions">
+          <button type="submit">Generate Receipt</button>
+          <button class="batch-button" type="submit" formaction="{{ url_for('generate_batch_receipts') }}">Generate Batch ZIP</button>
+        </div>
+      </form>
+    </section>
+  </main>
+  <script>
+    const themeToggle = document.querySelector('[data-theme-toggle]');
+    const themeIcon = themeToggle.querySelector('span');
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    function updateThemeToggle() {
+      const isDark = document.documentElement.dataset.theme === 'dark';
+      themeIcon.textContent = isDark ? '☀️' : '🌙';
+      themeToggle.setAttribute('aria-label', isDark ? 'Switch to light theme' : 'Switch to dark theme');
+      themeMeta.content = isDark ? '#0F172A' : '#2563EB';
+    }
+    updateThemeToggle();
+    themeToggle.addEventListener('click', () => {
+      const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = nextTheme;
+      try { localStorage.setItem('recipto-theme', nextTheme); } catch (_) {}
+      updateThemeToggle();
+    });
+
+    document.getElementById('receipt-form').addEventListener('submit', event => {
+      const button = event.submitter;
+      if (!button) return;
+      button.disabled = true;
+      button.textContent = button.classList.contains('batch-button') ? 'Preparing ZIP...' : 'Opening Preview...';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2563EB">
+  <title>Recipto - Receipt Preview</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <script>
+    (() => {
+      try {
+        const savedTheme = localStorage.getItem('recipto-theme');
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = savedTheme || systemTheme;
+      } catch (_) {
+        document.documentElement.dataset.theme = 'light';
+      }
+    })();
+  </script>
+  <style>
+    :root { --bg: #F8FAFC; --card: #FFFFFF; --text: #1E293B; --border: #E2E8F0; --primary: #2563EB; --primary-hover: #1D4ED8; --muted: #64748B; --surface: #EFF6FF; --shadow: rgba(30, 41, 59, .10); color-scheme: light; font-family: Inter, Arial, sans-serif; }
+    [data-theme="dark"] { --bg: #0F172A; --card: #1E293B; --text: #F8FAFC; --border: #334155; --primary: #60A5FA; --primary-hover: #93C5FD; --muted: #CBD5E1; --surface: #172554; --shadow: rgba(2, 6, 23, .42); color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); margin: 0; padding: 24px; transition: background .2s ease, color .2s ease; }
+    main { margin: 0 auto; max-width: 600px; }
+    .navbar { align-items: center; display: flex; justify-content: space-between; margin-bottom: 18px; }
+    .nav-actions { align-items: center; display: flex; gap: 12px; }
+    .brand { align-items: center; color: var(--text); display: inline-flex; font-family: Poppins, Arial, sans-serif; font-size: 1.25rem; font-weight: 700; gap: 9px; text-decoration: none; }
+    .brand-mark { align-items: center; background: var(--primary); border-radius: 9px; color: #fff; display: inline-flex; font-size: .95rem; height: 32px; justify-content: center; width: 32px; }
+    .history-link { color: var(--primary); font-size: .9rem; font-weight: 700; text-decoration: none; }
+    .theme-toggle { align-items: center; background: var(--card); border: 1px solid var(--border); border-radius: 9px; color: var(--text); cursor: pointer; display: inline-flex; font-size: 1rem; height: 36px; justify-content: center; padding: 0; transition: background .18s ease, border-color .18s ease, transform .18s ease; width: 36px; }
+    .theme-toggle:hover { background: var(--surface); border-color: var(--primary); transform: translateY(-1px); }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 16px 36px var(--shadow); padding: 24px; transition: background .2s ease, border-color .2s ease; }
+    h1 { font-family: Poppins, Arial, sans-serif; font-size: 1.45rem; letter-spacing: -.025em; margin: 0; }
+    .tagline { color: var(--primary); font-size: .88rem; font-weight: 700; margin: 6px 0 0; }
+    .meta { color: var(--muted); font-size: .9rem; margin: 8px 0 0; }
+    .actions { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; margin-top: 20px; }
+    .actions form { margin: 0; }
+    .button { background: var(--primary); border: 1px solid var(--primary); border-radius: 9px; color: #fff; cursor: pointer; display: inline-block; font: inherit; font-weight: 700; min-height: 44px; padding: 10px 14px; transition: background .18s ease, box-shadow .18s ease, transform .18s ease; width: 100%; }
+    .button:hover { background: var(--primary-hover); box-shadow: 0 8px 16px rgba(37, 99, 235, .22); transform: translateY(-1px); }
+    .button:disabled { cursor: wait; opacity: .72; transform: none; }
+    .button.secondary { background: var(--card); border-color: var(--border); color: var(--primary); }
+    .button.secondary:hover { background: var(--surface); box-shadow: none; }
+    .receipt-frame { background: var(--border); border-radius: 12px; margin-top: 22px; overflow: auto; padding: 12px; }
+    iframe { background: #fff; border: 0; display: block; height: 1125px; margin: 0 auto; width: 794px; }
+    @media (max-width: 520px) { body { padding: 14px; } .card { border-radius: 14px; padding: 20px; } .actions { grid-template-columns: 1fr; } .receipt-frame { padding: 8px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <nav class="navbar" aria-label="Primary navigation">
+      <a class="brand" href="{{ url_for('receipt_form') }}"><span class="brand-mark">R</span>Recipto</a>
+      <div class="nav-actions">
+        <a class="history-link" href="{{ url_for('receipt_history') }}">History</a>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark theme" title="Switch theme"><span aria-hidden="true">🌙</span></button>
+      </div>
+    </nav>
+    <section class="card">
+      <h1>Receipt Preview</h1>
+      <p class="tagline">Simple Receipts. Smart Records.</p>
+      <p class="meta">Provisional receipt no. {{ receipt_no }} - {{ rent_month }}</p>
+      <div class="actions">
+        <form id="download-form" action="{{ url_for('generate_pdf_download') }}" method="post">
+          <input type="hidden" name="tenant_name" value="{{ form_data.tenant_name }}">
+          <input type="hidden" name="amount" value="{{ form_data.amount }}">
+          <input type="hidden" name="house_no" value="{{ form_data.house_no }}">
+          <input type="hidden" name="receipt_type" value="{{ form_data.receipt_type }}">
+          <button class="button" type="submit">Download PDF</button>
+        </form>
+        <form action="{{ url_for('receipt_form') }}" method="get">
+          <input type="hidden" name="tenant_name" value="{{ form_data.tenant_name }}">
+          <input type="hidden" name="amount" value="{{ form_data.amount }}">
+          <input type="hidden" name="house_no" value="{{ form_data.house_no }}">
+          <input type="hidden" name="receipt_type" value="{{ form_data.receipt_type }}">
+          <button class="button secondary" type="submit">Edit</button>
+        </form>
+      </div>
+      <div class="receipt-frame">
+        <iframe title="Recipto rent receipt preview" srcdoc="{{ receipt_html|e }}"></iframe>
+      </div>
+    </section>
+  </main>
+  <script>
+    const themeToggle = document.querySelector('[data-theme-toggle]');
+    const themeIcon = themeToggle.querySelector('span');
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    function updateThemeToggle() {
+      const isDark = document.documentElement.dataset.theme === 'dark';
+      themeIcon.textContent = isDark ? '☀️' : '🌙';
+      themeToggle.setAttribute('aria-label', isDark ? 'Switch to light theme' : 'Switch to dark theme');
+      themeMeta.content = isDark ? '#0F172A' : '#2563EB';
+    }
+    updateThemeToggle();
+    themeToggle.addEventListener('click', () => {
+      const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = nextTheme;
+      try { localStorage.setItem('recipto-theme', nextTheme); } catch (_) {}
+      updateThemeToggle();
+    });
+
+    document.getElementById('download-form').addEventListener('submit', event => {
+      const button = event.currentTarget.querySelector('button');
+      button.disabled = true;
+      button.textContent = 'Preparing PDF...';
+    });
+  </script>
+</body>
+</html>

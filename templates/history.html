@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2563EB">
+  <title>Recipto - Receipt History</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <script>
+    (() => {
+      try {
+        const savedTheme = localStorage.getItem('recipto-theme');
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = savedTheme || systemTheme;
+      } catch (_) {
+        document.documentElement.dataset.theme = 'light';
+      }
+    })();
+  </script>
+  <style>
+    :root { --bg: #F8FAFC; --card: #FFFFFF; --text: #1E293B; --border: #E2E8F0; --primary: #2563EB; --primary-hover: #1D4ED8; --muted: #64748B; --surface: #EFF6FF; --table-heading: #1E3A8A; --shadow: rgba(30, 41, 59, .10); color-scheme: light; font-family: Inter, Arial, sans-serif; }
+    [data-theme="dark"] { --bg: #0F172A; --card: #1E293B; --text: #F8FAFC; --border: #334155; --primary: #60A5FA; --primary-hover: #93C5FD; --muted: #CBD5E1; --surface: #172554; --table-heading: #BFDBFE; --shadow: rgba(2, 6, 23, .42); color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); margin: 0; padding: 24px; transition: background .2s ease, color .2s ease; }
+    main { margin: 0 auto; max-width: 600px; }
+    .navbar { align-items: center; display: flex; justify-content: space-between; margin-bottom: 18px; }
+    .nav-actions { align-items: center; display: flex; gap: 12px; }
+    .brand { align-items: center; color: var(--text); display: inline-flex; font-family: Poppins, Arial, sans-serif; font-size: 1.25rem; font-weight: 700; gap: 9px; text-decoration: none; }
+    .brand-mark { align-items: center; background: var(--primary); border-radius: 9px; color: #fff; display: inline-flex; font-size: .95rem; height: 32px; justify-content: center; width: 32px; }
+    .back { color: var(--primary); font-size: .9rem; font-weight: 700; text-decoration: none; }
+    .theme-toggle { align-items: center; background: var(--card); border: 1px solid var(--border); border-radius: 9px; color: var(--text); cursor: pointer; display: inline-flex; font-size: 1rem; height: 36px; justify-content: center; padding: 0; transition: background .18s ease, border-color .18s ease, transform .18s ease; width: 36px; }
+    .theme-toggle:hover { background: var(--surface); border-color: var(--primary); transform: translateY(-1px); }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 16px 36px var(--shadow); padding: 24px; transition: background .2s ease, border-color .2s ease; }
+    h1 { font-family: Poppins, Arial, sans-serif; font-size: 1.45rem; letter-spacing: -.025em; margin: 0; }
+    .tagline { color: var(--primary); font-size: .88rem; font-weight: 700; margin: 6px 0 0; }
+    .subtitle { color: var(--muted); line-height: 1.5; margin: 8px 0 20px; }
+    .table-wrap { border: 1px solid var(--border); border-radius: 11px; overflow-x: auto; }
+    table { border-collapse: collapse; min-width: 700px; width: 100%; }
+    th, td { border-bottom: 1px solid var(--border); padding: 13px 14px; text-align: left; }
+    tr:last-child td { border-bottom: 0; }
+    th { background: var(--surface); color: var(--table-heading); font-size: .74rem; letter-spacing: .05em; text-transform: uppercase; }
+    td { color: var(--text); font-size: .88rem; }
+    .download { background: var(--primary); border: 0; border-radius: 7px; color: #fff; cursor: pointer; font: inherit; font-size: .82rem; font-weight: 700; padding: 8px 10px; transition: background .18s ease, transform .18s ease; white-space: nowrap; }
+    .download:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    .status { color: var(--muted); padding: 28px 16px; text-align: center; }
+    @media (max-width: 520px) { body { padding: 14px; } .card { border-radius: 14px; padding: 20px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <nav class="navbar" aria-label="Primary navigation">
+      <a class="brand" href="{{ url_for('receipt_form') }}"><span class="brand-mark">R</span>Recipto</a>
+      <div class="nav-actions">
+        <a class="back" href="{{ url_for('receipt_form') }}">Create Receipt</a>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark theme" title="Switch theme"><span aria-hidden="true">🌙</span></button>
+      </div>
+    </nav>
+    <section class="card">
+      <h1>Receipt History</h1>
+      <p class="tagline">Simple Receipts. Smart Records.</p>
+      <p class="subtitle">All generated receipts, ready to download again when needed.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Receipt No.</th><th>Tenant</th><th>Amount</th><th>Month / Year</th><th>Action</th></tr></thead>
+          <tbody id="history-rows"><tr><td class="status" colspan="5">Loading receipts...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+  <script>
+    const themeToggle = document.querySelector('[data-theme-toggle]');
+    const themeIcon = themeToggle.querySelector('span');
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    function updateThemeToggle() {
+      const isDark = document.documentElement.dataset.theme === 'dark';
+      themeIcon.textContent = isDark ? '☀️' : '🌙';
+      themeToggle.setAttribute('aria-label', isDark ? 'Switch to light theme' : 'Switch to dark theme');
+      themeMeta.content = isDark ? '#0F172A' : '#2563EB';
+    }
+    updateThemeToggle();
+    themeToggle.addEventListener('click', () => {
+      const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = nextTheme;
+      try { localStorage.setItem('recipto-theme', nextTheme); } catch (_) {}
+      updateThemeToggle();
+    });
+
+    const rows = document.getElementById('history-rows');
+    const apiUrl = {{ url_for('list_receipts')|tojson }};
+
+    function addCell(row, value) {
+      const cell = document.createElement('td');
+      cell.textContent = value;
+      row.appendChild(cell);
+    }
+
+    fetch(apiUrl)
+      .then(response => response.ok ? response.json() : Promise.reject())
+      .then(data => {
+        rows.replaceChildren();
+        if (!data.receipts || data.receipts.length === 0) {
+          rows.innerHTML = '<tr><td class="status" colspan="5">No receipts have been generated yet.</td></tr>';
+          return;
+        }
+        data.receipts.forEach(receipt => {
+          const row = document.createElement('tr');
+          addCell(row, receipt.receipt_no);
+          addCell(row, receipt.tenant_name);
+          addCell(row, `Rs ${Number(receipt.amount).toFixed(2)}`);
+          addCell(row, `${receipt.month} / ${receipt.year}`);
+          const action = document.createElement('td');
+          const form = document.createElement('form');
+          form.method = 'post';
+          form.action = {{ url_for('generate_pdf_download')|tojson }};
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'receipt_no';
+          input.value = receipt.receipt_no;
+          const button = document.createElement('button');
+          button.className = 'download';
+          button.type = 'submit';
+          button.textContent = 'Download PDF';
+          form.addEventListener('submit', () => { button.disabled = true; button.textContent = 'Preparing...'; });
+          form.append(input, button);
+          action.appendChild(form);
+          row.appendChild(action);
+          rows.appendChild(row);
+        });
+      })
+      .catch(() => { rows.innerHTML = '<tr><td class="status" colspan="5">Unable to load receipt history.</td></tr>'; });
+  </script>
+</body>
+</html>

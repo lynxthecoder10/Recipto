@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title>Recipto</title>
+  <rect width="64" height="64" rx="16" fill="#2563EB"/>
+  <path d="M18 47V17h15.5C42 17 47 21.7 47 29c0 5-2.5 8.7-7 10.5L48 47H37.5l-7-9.5H27V47H18Zm9-17h6c3.1 0 5-1.5 5-4.4 0-2.8-1.9-4.3-5-4.3h-6V30Z" fill="#fff"/>
+</svg>

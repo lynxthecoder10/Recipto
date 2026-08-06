@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Multi-Shop Receipt Generator</title>
+  <style>
+    :root { color-scheme: light; font-family: Arial, sans-serif; }
+    body { align-items: center; background: #f3f5f8; color: #1b2638; display: flex; justify-content: center; margin: 0; min-height: 100vh; padding: 24px; }
+    main { background: #fff; border-radius: 12px; box-shadow: 0 12px 32px rgba(25, 43, 68, .14); max-width: 560px; padding: 32px; width: 100%; }
+    h1 { font-size: 1.55rem; margin: 0 0 8px; }
+    p { color: #52616b; line-height: 1.5; }
+    form { display: grid; gap: 18px; margin-top: 24px; }
+    label { display: grid; font-weight: 700; gap: 7px; }
+    input, select, button { border: 1px solid #bcc7d3; border-radius: 7px; box-sizing: border-box; font: inherit; padding: 11px; width: 100%; }
+    input:focus, select:focus { border-color: #2463a5; outline: 3px solid #dcecff; }
+    fieldset { border: 0; margin: 0; padding: 0; }
+    .options { display: flex; gap: 24px; margin-top: 8px; }
+    .options label { align-items: center; display: flex; font-weight: 400; gap: 8px; }
+    .options input { width: auto; }
+    button { background: #1d5d9f; border: 0; color: #fff; cursor: pointer; font-weight: 700; }
+    button:hover { background: #174c82; }
+    .notice { border-radius: 7px; margin-top: 20px; padding: 12px 14px; }
+    .error { background: #fce8e6; color: #8b1f16; }
+    .success { background: #e6f4ea; color: #1e6c37; }
+    .download { color: #174c82; display: inline-block; font-weight: 700; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Multi-Shop Receipt Generator</h1>
+    <p>Create a numbered, print-ready receipt for any configured shop.</p>
+
+    {% if error %}
+      <div class="notice error" role="alert">{{ error }}</div>
+    {% endif %}
+    {% if success_message %}
+      <div class="notice success" role="status">
+        {{ success_message }}
+        {% if download_url %}<a class="download" href="{{ download_url }}">Download the PDF</a>{% endif %}
+      </div>
+    {% endif %}
+
+    <form action="{{ url_for('generate_receipt') }}" method="post" novalidate>
+      <label>
+        Customer Name
+        <input name="customer_name" maxlength="120" required value="{{ submitted.customer_name if submitted else '' }}" autocomplete="name">
+      </label>
+
+      <label>
+        Shop Name
+        <select name="shop_name" required>
+          <option value="" disabled {% if not submitted or not submitted.shop_name %}selected{% endif %}>Choose a shop</option>
+          {% for shop in shops %}
+            <option value="{{ shop }}" {% if submitted and submitted.shop_name == shop %}selected{% endif %}>{{ shop }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label>
+        Amount
+        <input name="amount" type="number" min="0.01" step="0.01" required value="{{ submitted.amount if submitted else '' }}" placeholder="0.00">
+      </label>
+
+      <label>
+        Date (optional)
+        <input name="date" type="date" value="{{ submitted.date if submitted else '' }}">
+      </label>
+
+      <fieldset>
+        <legend>Receipt Type</legend>
+        <div class="options">
+          <label><input type="radio" name="receipt_type" value="signed" {% if submitted and submitted.receipt_type == 'signed' %}checked{% endif %}> Signed</label>
+          <label><input type="radio" name="receipt_type" value="unsigned" {% if not submitted or submitted.receipt_type != 'signed' %}checked{% endif %}> Unsigned</label>
+        </div>
+      </fieldset>
+
+      <button type="submit">Generate Receipt PDF</button>
+    </form>
+  </main>
+</body>
+</html>

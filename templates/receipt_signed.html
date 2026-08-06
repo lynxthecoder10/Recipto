@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    @page { size: A4; margin: 8mm; }
+    body { -webkit-print-color-adjust: exact; color: #1E293B; font-family: Inter, Arial, sans-serif; print-color-adjust: exact; }
+  </style>
+</head>
+<body style="margin:0; font-size:10px; line-height:1.3;">
+  {% set bill_no = receipt_no|default(receipt.bill_number, true) %}
+  {% set name = receipt.customer_name %}
+  {% set amount = '%.2f'|format(receipt.amount) %}
+  {% set receipt_date = receipt.date %}
+
+  {% macro rent_receipt(copy_label) -%}
+  <section style="border:1px solid #CBD5E1; box-sizing:border-box; height:132mm; margin:0; padding:6mm 7mm; page-break-inside:avoid; position:relative;">
+    <table style="border-collapse:collapse; margin:0; width:100%;">
+      <tr>
+        <td style="padding:0; text-align:left; vertical-align:top; width:40%;">
+          <strong style="color:#2563EB; font-family:Poppins,Arial,sans-serif; font-size:16px; letter-spacing:-.4px;">Recipto</strong><br>
+          <span style="color:#64748B; font-size:8px; font-weight:600;">Simple Receipts. Smart Records.</span><br>
+          <span style="color:#64748B; font-size:8px;">{{ copy_label }}</span>
+        </td>
+        <td style="padding:0; text-align:right; vertical-align:top; width:60%;">
+          <strong style="color:#1E293B; font-family:Poppins,Arial,sans-serif; font-size:14px; letter-spacing:.4px;">RENT RECEIPT</strong><br>
+          <span style="color:#2563EB; font-size:9px; font-weight:700;">Receipt No. {{ bill_no }}</span>
+        </td>
+      </tr>
+    </table>
+
+    <div style="-webkit-transform:rotate(90deg); -webkit-transform-origin:left top; color:#2563EB; font-size:8px; font-weight:700; position:absolute; right:-2mm; top:36mm; transform:rotate(90deg); transform-origin:left top; white-space:nowrap;">Owner Name: ____________________</div>
+    <div style="-webkit-transform:rotate(90deg); -webkit-transform-origin:left top; color:#64748B; font-size:8px; position:absolute; right:3mm; top:36mm; transform:rotate(90deg); transform-origin:left top; white-space:nowrap;">Address: ______________________________</div>
+    <div style="border-top:2px solid #2563EB; margin:4mm 0 3mm;"></div>
+
+    <table style="border-collapse:collapse; margin:0; width:100%;">
+      <tr>
+        <td style="background:#EFF6FF; border-bottom:1px solid #BFDBFE; color:#1E3A8A; padding:2mm; width:50%;"><strong>Bill No.:</strong> {{ bill_no }}</td>
+        <td style="background:#EFF6FF; border-bottom:1px solid #BFDBFE; color:#1E3A8A; padding:2mm; text-align:right; width:50%;"><strong>Date:</strong> {{ receipt_date }}</td>
+      </tr>
+      <tr>
+        <td colspan="2" style="padding:2.5mm 0 1.5mm;"><strong style="color:#334155;">Tenant Name:</strong> <span style="border-bottom:1px solid #94A3B8; display:inline-block; min-width:135mm;">{{ name }}</span></td>
+      </tr>
+      <tr>
+        <td colspan="2" style="padding:1.5mm 0;"><strong style="color:#334155;">Rent of House / Gala No.:</strong> <span style="border-bottom:1px solid #94A3B8; display:inline-block; min-width:113mm;">{{ receipt.shop_name }}</span></td>
+      </tr>
+    </table>
+
+    <p style="font-size:11px; line-height:1.7; margin:6mm 0 4mm; text-align:justify;">Received from <strong style="border-bottom:1px solid #94A3B8; display:inline-block; min-width:48mm; text-align:center;">{{ name }}</strong> a sum of Rs <strong style="border-bottom:1px solid #94A3B8; display:inline-block; min-width:32mm; text-align:center;">{{ amount }}</strong> as monthly rent for the month of <strong style="border-bottom:1px solid #94A3B8; display:inline-block; min-width:34mm; text-align:center;">{{ rent_month }}</strong>.</p>
+    <p style="color:#475569; font-size:9px; line-height:1.5; margin:0 0 4mm;">Including all occupier's taxes Rs <strong style="border-bottom:1px solid #94A3B8; display:inline-block; min-width:32mm; text-align:center;">__________</strong> E.E. Contents Received</p>
+
+    <table style="border-collapse:collapse; margin-top:5mm; width:100%;">
+      <tr>
+        <td style="background:#F0FDF4; border:1px solid #22C55E; color:#166534; font-size:11px; padding:3mm; width:54%;"><strong>Amount Received: Rs {{ amount }}</strong></td>
+        <td style="padding:0 0 0 6mm; text-align:center; vertical-align:bottom; width:46%;"><img src="{{ signature_path }}" alt="Owner signature" style="display:block; height:17mm; margin:0 auto; max-width:60mm; object-fit:contain;"><div style="border-top:1px solid #2563EB; color:#334155; margin:1mm auto 0; padding-top:1mm; width:58mm;">Authorized Signature</div></td>
+      </tr>
+    </table>
+    <div style="bottom:4mm; color:#64748B; font-size:8px; left:7mm; position:absolute; right:7mm; text-align:center;">This is a Recipto-generated rent receipt. Valid only for the amount stated above.</div>
+  </section>
+  {%- endmacro %}
+
+  {{ rent_receipt('ORIGINAL - OWNER COPY') }}
+  <div style="border-top:1px dashed #93C5FD; color:#2563EB; font-family:Inter,Arial,sans-serif; font-size:8px; height:7mm; line-height:7mm; text-align:center;">----------------------------------------------- CUT HERE -----------------------------------------------</div>
+  {{ rent_receipt('DUPLICATE - TENANT COPY') }}
+</body>
+</html>
