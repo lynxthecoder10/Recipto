@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+
+# databases
+*.db
+*.sqlite3
+
+# generated files
+generated_receipts/
+*.pdf
+*.zip
+
+# wkhtmltopdf binaries
+wkhtmltopdf/
+
+# env
+.env
