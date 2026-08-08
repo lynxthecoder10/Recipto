@@ -10,21 +10,41 @@ from datetime import date, datetime
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from io import BytesIO
 from pathlib import Path
+from urllib.parse import quote
 
-from flask import Flask, render_template, request, send_file, send_from_directory, url_for
+from flask import (
+    Flask,
+    flash,
+    redirect,
+    render_template,
+    request,
+    send_file,
+    send_from_directory,
+    url_for,
+)
 from werkzeug.exceptions import NotFound
 from werkzeug.utils import secure_filename
 
 from models.db import (
+    BillingDuplicateError,
+    BillingStorageError,
     ReceiptStorageError,
+    create_cycle_bills,
     create_numbered_receipt,
     create_receipt,
+    create_or_update_gala,
+    get_bill_by_no,
     get_numbered_receipt,
+    init_billing_store,
     init_db,
     init_receipt_store,
+    list_bills,
+    list_galas,
     list_numbered_receipts,
     preview_receipt_number,
+    update_bill_payment_status,
 )
+from utils.bill_logic import get_cycle
 from utils.pdf_generator import PdfGenerationError, generate_pdf, generate_pdf_bytes
 
 
@@ -32,6 +52,12 @@ from utils.pdf_generator import PdfGenerationError, generate_pdf, generate_pdf_b
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 GENERATED_RECEIPTS_DIR = os.path.join(PROJECT_ROOT, "generated_receipts")
 DEFAULT_SHOPS = "Main Shop,North Branch,South Branch"
+CYCLE_OPTIONS = (
+    ("C1", "C1: January - March"),
+    ("C2", "C2: April - June"),
+    ("C3", "C3: July - September"),
+    ("C4", "C4: October - December"),
+)
 
 
 def get_shop_choices() -> tuple[str, ...]:
@@ -75,6 +101,65 @@ def index_template_context(form_values: object | None = None, error: str | None 
     return context
 
 
+def bill_period_label(bill: dict[str, object]) -> str:
+    """Format a bill's stored month range for the management UI and WhatsApp text."""
+    start_month = int(bill["start_month"])
+    end_month = int(bill["end_month"])
+    start_label = datetime(int(bill["year"]), start_month, 1).strftime("%b")
+    end_label = datetime(int(bill["year"]), end_month, 1).strftime("%b")
+    return f"{start_label} - {end_label} {bill['year']}"
+
+
+def whatsapp_bill_url(bill: dict[str, object]) -> str | None:
+    """Build a user-clicked WhatsApp message link without sending data automatically."""
+    phone_digits = "".join(character for character in str(bill["phone_number"]) if character.isdigit())
+    if len(phone_digits) == 10:
+        phone_digits = f"91{phone_digits}"
+    elif len(phone_digits) == 11 and phone_digits.startswith("0"):
+        phone_digits = f"91{phone_digits[1:]}"
+
+    if not (phone_digits.startswith("91") and len(phone_digits) == 12):
+        return None
+
+    message = (
+        f"Hello {bill['tenant_name']},\n\n"
+        f"Your bill for {bill_period_label(bill)} has been generated.\n"
+        f"Bill No: {bill['bill_no']}\n"
+        f"Gala: {bill['gala_number']}\n"
+        f"Amount: Rs. {float(bill['amount']):.2f}\n"
+        f"Payment status: {str(bill['payment_status']).title()}"
+    )
+    return f"https://wa.me/{phone_digits}?text={quote(message)}"
+
+
+def billing_view_context(*, searched_bill: dict[str, object] | None = None, search_error: str | None = None) -> dict[str, object]:
+    """Provide the simple management dashboard with presentation-only bill details."""
+    bills = list_bills()
+    presented_bills: list[dict[str, object]] = []
+    for bill in bills:
+        view_bill = dict(bill)
+        view_bill["period_label"] = bill_period_label(view_bill)
+        view_bill["whatsapp_url"] = whatsapp_bill_url(view_bill)
+        presented_bills.append(view_bill)
+
+    presented_search = None
+    if searched_bill:
+        presented_search = dict(searched_bill)
+        presented_search["period_label"] = bill_period_label(presented_search)
+        presented_search["whatsapp_url"] = whatsapp_bill_url(presented_search)
+
+    current_time = datetime.now()
+    return {
+        "bills": presented_bills,
+        "cycle_options": CYCLE_OPTIONS,
+        "current_cycle": get_cycle(current_time.month),
+        "current_year": current_time.year,
+        "galas": list_galas(),
+        "search_error": search_error,
+        "searched_bill": presented_search,
+    }
+
+
 def create_app() -> Flask:
     """Create and configure the Flask application."""
     app = Flask(__name__)
@@ -88,6 +173,7 @@ def create_app() -> Flask:
     os.makedirs(GENERATED_RECEIPTS_DIR, exist_ok=True)
     init_db()
     init_receipt_store()
+    init_billing_store()
 
     @app.get("/")
     def receipt_form():
@@ -403,6 +489,106 @@ def create_app() -> Flask:
             return {"error": "Receipt not found."}, 404
         return receipt
 
+    @app.get("/billing")
+    def billing_dashboard():
+        """Display gala setup, cycle generation, search, and payment tracking."""
+        requested_bill_no = request.args.get("bill_no", "").strip()
+        try:
+            searched_bill = get_bill_by_no(requested_bill_no) if requested_bill_no else None
+            search_error = (
+                "No bill was found with that bill number." if requested_bill_no and not searched_bill else None
+            )
+            context = billing_view_context(
+                searched_bill=searched_bill,
+                search_error=search_error,
+            )
+        except sqlite3.Error:
+            return {"error": "The billing database could not be read."}, 500
+        return render_template("billing.html", **context)
+
+    @app.post("/billing/galas")
+    def save_gala():
+        """Create a gala or refresh its tenant and phone number."""
+        submitted = {
+            "gala_number": request.form.get("gala_number", "").strip(),
+            "tenant_name": request.form.get("tenant_name", "").strip(),
+            "phone_number": request.form.get("phone_number", "").strip(),
+        }
+        error, gala_data = validate_gala_submission(submitted)
+        if error:
+            flash(error, "error")
+            return redirect(url_for("billing_dashboard"))
+
+        try:
+            gala = create_or_update_gala(**gala_data)
+        except BillingStorageError as exc:
+            flash(str(exc), "error")
+        else:
+            flash(f"Gala {gala['gala_number']} saved for {gala['tenant_name']}.", "success")
+        return redirect(url_for("billing_dashboard"))
+
+    @app.post("/billing/generate")
+    def generate_cycle_bills():
+        """Create all selected three-month bills in one atomic transaction."""
+        submitted = {
+            "gala_selection": request.form.get("gala_selection", "").strip(),
+            "start_cycle": request.form.get("start_cycle", "").strip(),
+            "end_cycle": request.form.get("end_cycle", "").strip(),
+            "year": request.form.get("year", "").strip(),
+            "amount": request.form.get("amount", "").strip(),
+        }
+        error, bill_data = validate_cycle_bill_submission(submitted)
+        if error:
+            flash(error, "error")
+            return redirect(url_for("billing_dashboard"))
+
+        try:
+            available_galas = list_galas()
+            if bill_data["gala_selection"] == "all":
+                gala_ids = [int(gala["id"]) for gala in available_galas]
+            else:
+                gala_ids = [int(bill_data["gala_selection"])]
+            created_bills = create_cycle_bills(
+                gala_ids=gala_ids,
+                year=bill_data["year"],
+                start_cycle=bill_data["start_cycle"],
+                end_cycle=bill_data["end_cycle"],
+                amount=bill_data["amount"],
+            )
+        except BillingDuplicateError as exc:
+            flash(str(exc), "duplicate")
+        except (BillingStorageError, sqlite3.Error) as exc:
+            flash(str(exc) or "The bills could not be generated.", "error")
+        else:
+            flash(f"Created {len(created_bills)} pending bill(s).", "success")
+        return redirect(url_for("billing_dashboard"))
+
+    @app.post("/billing/bills/<path:bill_no>/payment")
+    def update_bill_payment(bill_no: str):
+        """Update a bill's payment status without altering its amount or period."""
+        payment_status = request.form.get("payment_status", "").strip().lower()
+        try:
+            bill = update_bill_payment_status(bill_no, payment_status)
+        except BillingStorageError as exc:
+            flash(str(exc), "error")
+        else:
+            if bill is None:
+                flash("Bill not found.", "error")
+            else:
+                flash(f"{bill['bill_no']} marked as {bill['payment_status']}.", "success")
+        return redirect(url_for("billing_dashboard", bill_no=bill_no))
+
+    @app.get("/bills/<path:bill_no>")
+    def get_bill(bill_no: str):
+        """Return a bill by its full number for lightweight integrations and support."""
+        try:
+            bill = get_bill_by_no(bill_no)
+        except sqlite3.Error:
+            return {"error": "The billing database could not be read."}, 500
+        if bill is None:
+            return {"error": "Bill not found."}, 404
+        return bill
+
     return app
 
 
@@ -496,6 +682,83 @@ def validate_batch_submission(
         "start_month": start_month,
         "end_month": end_month,
         "year": year,
+    }
+
+
+def validate_gala_submission(
+    submitted: dict[str, str]
+) -> tuple[str | None, dict[str, str] | None]:
+    """Validate the small gala directory form before persistence."""
+    gala_number = " ".join(submitted["gala_number"].split()).upper()
+    tenant_name = " ".join(submitted["tenant_name"].split())
+    phone_number = " ".join(submitted["phone_number"].split())
+    phone_digits = "".join(character for character in phone_number if character.isdigit())
+
+    if not gala_number:
+        return "Gala number is required.", None
+    if len(gala_number) > 50:
+        return "Gala number must be 50 characters or fewer.", None
+    if not tenant_name:
+        return "Tenant name is required.", None
+    if len(tenant_name) > 120:
+        return "Tenant name must be 120 characters or fewer.", None
+    if not phone_number:
+        return "Phone number is required for WhatsApp notifications.", None
+    if not (
+        len(phone_digits) == 10
+        or (len(phone_digits) == 11 and phone_digits.startswith("0"))
+        or (len(phone_digits) == 12 and phone_digits.startswith("91"))
+    ):
+        return "Enter a valid 10-digit Indian phone number.", None
+
+    return None, {
+        "gala_number": gala_number,
+        "tenant_name": tenant_name,
+        "phone_number": phone_number,
+    }
+
+
+def validate_cycle_bill_submission(
+    submitted: dict[str, str]
+) -> tuple[str | None, dict[str, object] | None]:
+    """Validate a same-year inclusive range of three-month billing cycles."""
+    valid_cycles = tuple(cycle for cycle, _ in CYCLE_OPTIONS)
+    start_cycle = submitted["start_cycle"]
+    end_cycle = submitted["end_cycle"]
+    gala_selection = submitted["gala_selection"]
+
+    if start_cycle not in valid_cycles or end_cycle not in valid_cycles:
+        return "Choose valid start and end billing cycles.", None
+    if valid_cycles.index(start_cycle) > valid_cycles.index(end_cycle):
+        return "End cycle must be the same as or after the start cycle.", None
+    if gala_selection != "all":
+        try:
+            if int(gala_selection) <= 0:
+                raise ValueError
+        except ValueError:
+            return "Choose a valid gala or all galas.", None
+
+    try:
+        year = int(submitted["year"])
+    except ValueError:
+        return "Enter a valid four-digit year.", None
+    if not 2000 <= year <= 9999:
+        return "Enter a valid four-digit year.", None
+
+    try:
+        amount = Decimal(submitted["amount"])
+    except (InvalidOperation, ValueError):
+        return "Amount must be a valid number.", None
+    if amount <= 0:
+        return "Amount must be greater than zero.", None
+
+    normalized_amount = amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    return None, {
+        "gala_selection": gala_selection,
+        "start_cycle": start_cycle,
+        "end_cycle": end_cycle,
+        "year": year,
+        "amount": float(normalized_amount),
     }
 
 

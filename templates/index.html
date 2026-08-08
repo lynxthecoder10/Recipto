@@ -62,6 +62,7 @@
     <nav class="navbar" aria-label="Primary navigation">
       <a class="brand" href="{{ url_for('receipt_form') }}" aria-label="Recipto home"><span class="brand-mark">R</span>Recipto</a>
       <div class="nav-actions">
+        <a class="history-link" href="{{ url_for('billing_dashboard') }}">Billing</a>
         <a class="history-link" href="{{ url_for('receipt_history') }}">Receipt History</a>
         <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark theme" title="Switch theme"><span aria-hidden="true">🌙</span></button>
       </div>

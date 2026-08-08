@@ -2,66 +2,119 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
   <style>
-    @page { size: A4; margin: 8mm; }
-    body { -webkit-print-color-adjust: exact; color: #1E293B; font-family: Inter, Arial, sans-serif; print-color-adjust: exact; }
+    @page { size: A4; margin: 0; }
+    * { box-sizing: border-box; }
+    body {
+      color: black;
+      font-family: "Times New Roman", serif;
+      font-size: 12px;
+      line-height: 1.3;
+      margin: 0;
+      padding: 8mm 0;
+    }
+    .receipt {
+      border: 1px solid black;
+      margin: 0 auto;
+      max-width: 390px;
+      padding: 5mm 6mm;
+      page-break-inside: avoid;
+      width: 390px;
+    }
+    .copy-label {
+      font-size: 9px;
+      letter-spacing: .3px;
+      margin: 0 0 2mm;
+      text-align: right;
+      text-transform: uppercase;
+    }
+    .receipt-header { text-align: center; }
+    .owner-name { font-size: 15px; font-weight: bold; letter-spacing: .4px; }
+    .proprietor { font-size: 10px; font-weight: bold; letter-spacing: 1px; margin-top: .5mm; }
+    .address { font-size: 10px; line-height: 1.25; margin-top: 1mm; }
+    .receipt-title { font-size: 14px; font-weight: bold; letter-spacing: .8px; margin: 2mm 0; }
+    .header-rule { border: 0; border-top: 1px solid black; margin: 2mm 0 3mm; }
+    table { border-collapse: collapse; }
+    .fields { width: 100%; }
+    .fields td { padding: 1.2mm 0; vertical-align: bottom; }
+    .fields .label { font-weight: bold; padding-right: 2mm; white-space: nowrap; width: 31%; }
+    .fields .value { border-bottom: 1px solid black; min-height: 5mm; }
+    .fields .right-label { font-weight: bold; padding-left: 3mm; padding-right: 1mm; white-space: nowrap; width: 13%; }
+    .sentence { font-size: 12px; line-height: 1.55; margin: 4mm 0 3mm; text-align: justify; }
+    .sentence strong { font-weight: bold; }
+    .footer { margin-top: 4mm; width: 100%; }
+    .footer td { padding: 0; vertical-align: bottom; width: 33.33%; }
+    .footer .footer-label { font-weight: bold; font-size: 10px; }
+    .footer-line { border-top: 1px solid black; height: 10mm; margin-right: 2mm; }
+    .signature-block { margin-right: 0; text-align: center; }
+    .rules { border-top: 1px solid black; font-size: 8px; line-height: 1.25; margin: 4mm 0 0; padding-top: 2mm; }
+    .rules-title { font-weight: bold; margin: 0 0 1mm; text-decoration: underline; }
+    .rules ol { margin: 0; padding-left: 4mm; }
+    .rules li { margin: 0; }
+    .cut-line { border: 0; border-top: 2px dashed black; margin: 20px 0; }
   </style>
 </head>
-<body style="margin:0; font-size:10px; line-height:1.3;">
+<body>
   {% set bill_no = receipt_no|default(receipt.bill_number, true) %}
-  {% set name = receipt.customer_name %}
-  {% set amount = '%.2f'|format(receipt.amount) %}
-  {% set receipt_date = receipt.date %}
+  {% set tenant_name = tenant_name|default(receipt.customer_name, true) %}
+  {% set amount = amount|default('%.2f'|format(receipt.amount), true) %}
+  {% set house_no = house_no|default(receipt.house_no|default(receipt.shop_name, true), true) %}
+  {% set receipt_date = date|default(receipt.date, true) %}
 
   {% macro rent_receipt(copy_label) -%}
-  <section style="border:1px solid #CBD5E1; box-sizing:border-box; height:132mm; margin:0; padding:6mm 7mm; page-break-inside:avoid; position:relative;">
-    <table style="border-collapse:collapse; margin:0; width:100%;">
+  <section class="receipt">
+    <div class="copy-label">{{ copy_label }}</div>
+    <header class="receipt-header">
+      <div class="owner-name">M. KANDA KUMARAN</div>
+      <div class="proprietor">PROPRIETOR</div>
+      <div class="address">Thiru Murugan Compound<br>Lake Road, Bhandup (W), Mumbai - 400078</div>
+      <div class="receipt-title">RENT RECEIPT</div>
+    </header>
+    <hr class="header-rule">
+
+    <table class="fields">
       <tr>
-        <td style="padding:0; text-align:left; vertical-align:top; width:40%;">
-          <strong style="color:#2563EB; font-family:Poppins,Arial,sans-serif; font-size:16px; letter-spacing:-.4px;">Recipto</strong><br>
-          <span style="color:#64748B; font-size:8px; font-weight:600;">Simple Receipts. Smart Records.</span><br>
-          <span style="color:#64748B; font-size:8px;">{{ copy_label }}</span>
-        </td>
-        <td style="padding:0; text-align:right; vertical-align:top; width:60%;">
-          <strong style="color:#1E293B; font-family:Poppins,Arial,sans-serif; font-size:14px; letter-spacing:.4px;">RENT RECEIPT</strong><br>
-          <span style="color:#2563EB; font-size:9px; font-weight:700;">Receipt No. {{ bill_no }}</span>
-        </td>
+        <td class="label">Bill No.</td>
+        <td class="value">{{ bill_no }}</td>
+        <td class="right-label">Date</td>
+        <td class="value">{{ receipt_date }}</td>
+      </tr>
+      <tr>
+        <td class="label">Tenant Name</td>
+        <td class="value" colspan="3">{{ tenant_name }}</td>
+      </tr>
+      <tr>
+        <td class="label">Rent of Gala/House No.</td>
+        <td class="value" colspan="3">{{ house_no }}</td>
+      </tr>
+      <tr>
+        <td class="label">Month</td>
+        <td class="value" colspan="3">{{ rent_month }}</td>
       </tr>
     </table>
 
-    <div style="-webkit-transform:rotate(90deg); -webkit-transform-origin:left top; color:#2563EB; font-size:8px; font-weight:700; position:absolute; right:-2mm; top:36mm; transform:rotate(90deg); transform-origin:left top; white-space:nowrap;">Owner Name: ____________________</div>
-    <div style="-webkit-transform:rotate(90deg); -webkit-transform-origin:left top; color:#64748B; font-size:8px; position:absolute; right:3mm; top:36mm; transform:rotate(90deg); transform-origin:left top; white-space:nowrap;">Address: ______________________________</div>
-    <div style="border-top:2px solid #2563EB; margin:4mm 0 3mm;"></div>
+    <p class="sentence">Received from <strong>{{ tenant_name }}</strong> a sum of <strong>Rs. {{ amount }}</strong> for the rent of Gala No. <strong>{{ house_no }}</strong> for the month of <strong>{{ rent_month }}</strong>.</p>
 
-    <table style="border-collapse:collapse; margin:0; width:100%;">
+    <table class="footer">
       <tr>
-        <td style="background:#EFF6FF; border-bottom:1px solid #BFDBFE; color:#1E3A8A; padding:2mm; width:50%;"><strong>Bill No.:</strong> {{ bill_no }}</td>
-        <td style="background:#EFF6FF; border-bottom:1px solid #BFDBFE; color:#1E3A8A; padding:2mm; text-align:right; width:50%;"><strong>Date:</strong> {{ receipt_date }}</td>
-      </tr>
-      <tr>
-        <td colspan="2" style="padding:2.5mm 0 1.5mm;"><strong style="color:#334155;">Tenant Name:</strong> <span style="border-bottom:1px solid #94A3B8; display:inline-block; min-width:135mm;">{{ name }}</span></td>
-      </tr>
-      <tr>
-        <td colspan="2" style="padding:1.5mm 0;"><strong style="color:#334155;">Rent of House / Gala No.:</strong> <span style="border-bottom:1px solid #94A3B8; display:inline-block; min-width:113mm;">{{ receipt.shop_name }}</span></td>
+        <td><div class="footer-line"></div><div class="footer-label">Received By</div></td>
+        <td><div class="footer-line"></div><div class="footer-label">Date</div></td>
+        <td class="signature-block"><div class="footer-line"></div><div class="footer-label">Signature</div></td>
       </tr>
     </table>
 
-    <p style="font-size:11px; line-height:1.7; margin:6mm 0 4mm; text-align:justify;">Received from <strong style="border-bottom:1px solid #94A3B8; display:inline-block; min-width:48mm; text-align:center;">{{ name }}</strong> a sum of Rs <strong style="border-bottom:1px solid #94A3B8; display:inline-block; min-width:32mm; text-align:center;">{{ amount }}</strong> as monthly rent for the month of <strong style="border-bottom:1px solid #94A3B8; display:inline-block; min-width:34mm; text-align:center;">{{ rent_month }}</strong>.</p>
-    <p style="color:#475569; font-size:9px; line-height:1.5; margin:0 0 4mm;">Including all occupier's taxes Rs <strong style="border-bottom:1px solid #94A3B8; display:inline-block; min-width:32mm; text-align:center;">__________</strong> E.E. Contents Received</p>
-
-    <table style="border-collapse:collapse; margin-top:5mm; width:100%;">
-      <tr>
-        <td style="background:#F0FDF4; border:1px solid #22C55E; color:#166534; font-size:11px; padding:3mm; width:54%;"><strong>Amount Received: Rs {{ amount }}</strong></td>
-        <td style="padding:0 0 0 6mm; text-align:center; vertical-align:bottom; width:46%;"><div style="height:17mm;"></div><div style="border-top:1px solid #2563EB; color:#334155; margin:1mm auto 0; padding-top:1mm; width:58mm;">Signature</div></td>
-      </tr>
-    </table>
-    <div style="bottom:4mm; color:#64748B; font-size:8px; left:7mm; position:absolute; right:7mm; text-align:center;">This is a Recipto-generated rent receipt. Valid only for the amount stated above.</div>
+    <div class="rules">
+      <p class="rules-title">Rules</p>
+      <ol>
+        <li>This receipt is valid only for the amount and month stated above.</li>
+        <li>Please preserve this receipt for your records.</li>
+      </ol>
+    </div>
   </section>
   {%- endmacro %}
 
-  {{ rent_receipt('ORIGINAL - OWNER COPY') }}
-  <div style="border-top:1px dashed #93C5FD; color:#2563EB; font-family:Inter,Arial,sans-serif; font-size:8px; height:7mm; line-height:7mm; text-align:center;">----------------------------------------------- CUT HERE -----------------------------------------------</div>
-  {{ rent_receipt('DUPLICATE - TENANT COPY') }}
+  {{ rent_receipt('Owner Copy') }}
+  <hr class="cut-line">
+  {{ rent_receipt('Tenant Copy') }}
 </body>
 </html>
