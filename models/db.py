@@ -12,6 +12,9 @@ from utils.bill_logic import (
     generate_next_bill_number,
     get_cycle_months,
     get_cycles_between,
+    get_cycle_code,
+    format_period_label,
+    calculate_months_count,
 )
 
 
@@ -100,10 +103,12 @@ def init_billing_store() -> None:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 gala_number TEXT NOT NULL UNIQUE,
                 tenant_name TEXT NOT NULL,
-                phone_number TEXT NOT NULL
+                phone_number TEXT NOT NULL,
+                monthly_rent REAL NOT NULL DEFAULT 0.0
             )
             """
         )
+        _migrate_galas_table_if_needed(connection)
         _migrate_bills_table_if_needed(connection)
         _create_bills_table(connection)
         connection.execute("DROP INDEX IF EXISTS idx_bills_lookup")
@@ -118,20 +123,23 @@ def init_billing_store() -> None:
 
 
 def _create_bills_table(connection: sqlite3.Connection) -> None:
-    """Create the current billing table shape, including database-level safeguards."""
+    """Create the current billing table shape supporting flexible month ranges."""
     connection.execute(
         """
         CREATE TABLE IF NOT EXISTS bills (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             bill_no TEXT NOT NULL UNIQUE,
             gala_id INTEGER NOT NULL,
-            start_month INTEGER NOT NULL CHECK (start_month IN (1, 4, 7, 10)),
-            end_month INTEGER NOT NULL CHECK (end_month IN (3, 6, 9, 12)),
+            start_month INTEGER NOT NULL CHECK (start_month BETWEEN 1 AND 12),
+            end_month INTEGER NOT NULL CHECK (end_month BETWEEN 1 AND 12 AND end_month >= start_month),
             year INTEGER NOT NULL CHECK (year BETWEEN 2000 AND 9999),
-            cycle TEXT NOT NULL CHECK (cycle IN ('C1', 'C2', 'C3', 'C4')),
+            cycle TEXT NOT NULL,
             amount REAL NOT NULL CHECK (amount > 0),
-            payment_status TEXT NOT NULL DEFAULT 'pending'
-                CHECK (payment_status IN ('paid', 'pending', 'partial', 'advance')),
+            payment_status TEXT NOT NULL DEFAULT 'Pending',
+            amount_paid REAL NOT NULL DEFAULT 0.0,
+            payment_method TEXT,
+            pending_amount REAL,
+            whatsapp_status TEXT DEFAULT 'Pending',
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (gala_id) REFERENCES galas(id) ON DELETE RESTRICT,
             UNIQUE (gala_id, start_month, end_month, year)
@@ -140,8 +148,28 @@ def _create_bills_table(connection: sqlite3.Connection) -> None:
     )
 
 
+def _migrate_galas_table_if_needed(connection: sqlite3.Connection) -> None:
+    """Upgrade galas table to include monthly_rent if missing."""
+    table_sql_row = connection.execute(
+        "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'galas'"
+    ).fetchone()
+    if not table_sql_row:
+        return
+
+    table_sql = str(table_sql_row["sql"] or "").lower()
+    if "monthly_rent" in table_sql:
+        return
+
+    connection.execute("BEGIN IMMEDIATE")
+    try:
+        connection.execute("ALTER TABLE galas ADD COLUMN monthly_rent REAL NOT NULL DEFAULT 0.0")
+        connection.commit()
+    except sqlite3.Error:
+        connection.rollback()
+        raise
+
 def _migrate_bills_table_if_needed(connection: sqlite3.Connection) -> None:
-    """Upgrade the legacy unpaid/paid status constraint without losing bill history."""
+    """Upgrade the bills table schema if legacy CHECK constraints are detected."""
     table_sql_row = connection.execute(
         "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'bills'"
     ).fetchone()
@@ -149,7 +177,15 @@ def _migrate_bills_table_if_needed(connection: sqlite3.Connection) -> None:
         return
 
     table_sql = str(table_sql_row["sql"] or "").lower()
-    if "'pending'" in table_sql and "'partial'" in table_sql and "'advance'" in table_sql:
+    if "whatsapp_status" not in table_sql:
+        try:
+            connection.execute("ALTER TABLE bills ADD COLUMN whatsapp_status TEXT DEFAULT 'Pending'")
+        except sqlite3.Error:
+            pass
+
+    needs_migration = "amount_paid" not in table_sql or "start_month in" in table_sql or "cycle in" in table_sql
+
+    if not needs_migration:
         return
 
     connection.execute("BEGIN IMMEDIATE")
@@ -159,22 +195,37 @@ def _migrate_bills_table_if_needed(connection: sqlite3.Connection) -> None:
         connection.execute("DROP INDEX IF EXISTS idx_bills_gala_period")
         connection.execute("ALTER TABLE bills RENAME TO bills_legacy")
         _create_bills_table(connection)
-        connection.execute(
-            """
-            INSERT INTO bills (
-                id, bill_no, gala_id, start_month, end_month, year, cycle, amount,
-                payment_status, created_at
+        
+        if "amount_paid" in table_sql:
+            connection.execute(
+                """
+                INSERT INTO bills (
+                    id, bill_no, gala_id, start_month, end_month, year, cycle, amount,
+                    payment_status, amount_paid, payment_method, pending_amount, created_at
+                )
+                SELECT id, bill_no, gala_id, start_month, end_month, year, cycle, amount,
+                    payment_status, amount_paid, payment_method, pending_amount, created_at
+                FROM bills_legacy
+                """
             )
-            SELECT id, bill_no, gala_id, start_month, end_month, year, cycle, amount,
-                CASE
-                    WHEN payment_status = 'unpaid' THEN 'pending'
-                    WHEN payment_status IN ('paid', 'pending', 'partial', 'advance') THEN payment_status
-                    ELSE 'pending'
-                END,
-                created_at
-            FROM bills_legacy
-            """
-        )
+        else:
+            connection.execute(
+                """
+                INSERT INTO bills (
+                    id, bill_no, gala_id, start_month, end_month, year, cycle, amount,
+                    payment_status, created_at
+                )
+                SELECT id, bill_no, gala_id, start_month, end_month, year, cycle, amount,
+                    CASE
+                        WHEN payment_status IN ('unpaid', 'pending') THEN 'Pending'
+                        WHEN payment_status = 'paid' THEN 'Full Paid'
+                        WHEN payment_status = 'partial' THEN 'Half Paid'
+                        ELSE 'Pending'
+                    END,
+                    created_at
+                FROM bills_legacy
+                """
+            )
         connection.execute("DROP TABLE bills_legacy")
         connection.commit()
     except sqlite3.Error:
@@ -183,9 +234,9 @@ def _migrate_bills_table_if_needed(connection: sqlite3.Connection) -> None:
 
 
 def create_or_update_gala(
-    *, gala_number: str, tenant_name: str, phone_number: str
+    *, gala_number: str, tenant_name: str, phone_number: str, monthly_rent: float
 ) -> dict[str, Any]:
-    """Create a gala or update its current tenant contact details atomically."""
+    """Create a gala or update its current tenant contact details and rent atomically."""
     with closing(get_receipts_connection()) as connection:
         try:
             connection.execute("BEGIN IMMEDIATE")
@@ -196,19 +247,19 @@ def create_or_update_gala(
                 connection.execute(
                     """
                     UPDATE galas
-                    SET tenant_name = ?, phone_number = ?
+                    SET tenant_name = ?, phone_number = ?, monthly_rent = ?
                     WHERE id = ?
                     """,
-                    (tenant_name, phone_number, existing["id"]),
+                    (tenant_name, phone_number, monthly_rent, existing["id"]),
                 )
                 gala_id = existing["id"]
             else:
                 cursor = connection.execute(
                     """
-                    INSERT INTO galas (gala_number, tenant_name, phone_number)
-                    VALUES (?, ?, ?)
+                    INSERT INTO galas (gala_number, tenant_name, phone_number, monthly_rent)
+                    VALUES (?, ?, ?, ?)
                     """,
-                    (gala_number, tenant_name, phone_number),
+                    (gala_number, tenant_name, phone_number, monthly_rent),
                 )
                 gala_id = cursor.lastrowid
 
@@ -229,6 +280,162 @@ def list_galas() -> list[dict[str, Any]]:
             "SELECT * FROM galas ORDER BY gala_number COLLATE NOCASE, id"
         ).fetchall()
     return [dict(row) for row in rows]
+
+
+def create_bill(
+    *,
+    gala_id: int,
+    year: int,
+    start_month: int,
+    end_month: int,
+    monthly_rent: float,
+    billing_type: str = "quarter",
+    cycle_code: str | None = None,
+) -> dict[str, Any]:
+    """Create a bill for a gala covering start_month to end_month (inclusive).
+    
+    Total Amount = Monthly Rent * Number of Months.
+    """
+    if not (1 <= start_month <= 12 and 1 <= end_month <= 12):
+        raise BillingStorageError("Start and end months must be between 1 and 12.")
+    if start_month > end_month:
+        raise BillingStorageError("End month cannot be before start month.")
+
+    num_months = (end_month - start_month) + 1
+    total_amount = round(monthly_rent * num_months, 2)
+    code = cycle_code or get_cycle_code(start_month, end_month)
+
+    with closing(get_receipts_connection()) as connection:
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            gala = connection.execute(
+                "SELECT id, gala_number, tenant_name, phone_number, monthly_rent FROM galas WHERE id = ?",
+                (gala_id,),
+            ).fetchone()
+            if not gala:
+                raise BillingStorageError("Selected gala no longer exists.")
+
+            duplicate = connection.execute(
+                """
+                SELECT bill_no FROM bills
+                WHERE gala_id = ? AND year = ? AND start_month = ? AND end_month = ?
+                """,
+                (gala_id, year, start_month, end_month),
+            ).fetchone()
+            if duplicate:
+                period_str = format_period_label(start_month, end_month, year, mode=billing_type)
+                raise BillingDuplicateError(
+                    f"No bill created because a duplicate bill already exists for Gala {gala['gala_number']} ({period_str})."
+                )
+
+            count_row = connection.execute(
+                "SELECT COUNT(*) AS c FROM bills WHERE year = ? AND cycle = ?",
+                (year, code),
+            ).fetchone()
+            sequence = int(count_row["c"]) + 1
+
+            while True:
+                bill_no = f"BILL/{year}/{code}/{sequence:04d}"
+                exists = connection.execute("SELECT 1 FROM bills WHERE bill_no = ?", (bill_no,)).fetchone()
+                if not exists:
+                    break
+                sequence += 1
+
+            cursor = connection.execute(
+                """
+                INSERT INTO bills (
+                    bill_no, gala_id, start_month, end_month, year, cycle, amount, payment_status
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')
+                """,
+                (bill_no, gala_id, start_month, end_month, year, code, total_amount),
+            )
+            record = connection.execute(
+                """
+                SELECT bills.*, galas.gala_number, galas.tenant_name, galas.phone_number, galas.monthly_rent
+                FROM bills
+                JOIN galas ON galas.id = bills.gala_id
+                WHERE bills.id = ?
+                """,
+                (cursor.lastrowid,),
+            ).fetchone()
+            connection.commit()
+            return dict(record)
+        except BillingStorageError:
+            connection.rollback()
+            raise
+        except sqlite3.IntegrityError as exc:
+            connection.rollback()
+            raise BillingDuplicateError(
+                "No bill created because an identical gala billing period already exists."
+            ) from exc
+        except sqlite3.Error as exc:
+            connection.rollback()
+            raise BillingStorageError("The billing record could not be saved.") from exc
+
+
+def create_bills_for_cycles(
+    *,
+    gala_id: int,
+    year: int,
+    selected_quarters: list[str],
+    monthly_rent: float,
+) -> list[dict[str, Any]]:
+    """Create individual, independent bill records for each selected quarter cycle (e.g., Q1, Q2).
+    
+    Each quarter generates an independent bill record:
+    - 3 months
+    - Amount = Monthly Rent * 3
+    - Unique Bill Number (e.g. BILL/2026/Q1/0001, BILL/2026/Q2/0002)
+    """
+    from utils.bill_logic import QUARTER_LIST, QUARTERS_INFO
+
+    if not selected_quarters:
+        raise BillingStorageError("Please select at least one quarter cycle.")
+
+    valid_quarters = [q.upper().strip() for q in selected_quarters if q.upper().strip() in QUARTER_LIST]
+    if not valid_quarters:
+        raise BillingStorageError("Invalid quarter cycles selected.")
+
+    indices = sorted(QUARTER_LIST.index(q) for q in set(valid_quarters))
+    for i in range(len(indices) - 1):
+        if indices[i + 1] != indices[i] + 1:
+            raise BillingStorageError("Selected quarters must be consecutive (e.g., Q1+Q2 or Q2+Q3+Q4).")
+
+    ordered_quarters = [QUARTER_LIST[idx] for idx in indices]
+
+    # Pre-check duplicates so we fail atomically before creating partial records
+    with closing(get_receipts_connection()) as connection:
+        for q_code in ordered_quarters:
+            q_info = QUARTERS_INFO[q_code]
+            s_m, e_m = int(q_info["start"]), int(q_info["end"])
+            duplicate = connection.execute(
+                "SELECT bill_no FROM bills WHERE gala_id = ? AND year = ? AND start_month = ? AND end_month = ?",
+                (gala_id, year, s_m, e_m),
+            ).fetchone()
+            if duplicate:
+                gala = connection.execute("SELECT gala_number FROM galas WHERE id = ?", (gala_id,)).fetchone()
+                gala_num = gala["gala_number"] if gala else ""
+                raise BillingDuplicateError(
+                    f"No bills created because a duplicate bill already exists for Gala {gala_num} ({q_code} {year})."
+                )
+
+    created_records = []
+    for q_code in ordered_quarters:
+        q_info = QUARTERS_INFO[q_code]
+        s_m, e_m = int(q_info["start"]), int(q_info["end"])
+        record = create_bill(
+            gala_id=gala_id,
+            year=year,
+            start_month=s_m,
+            end_month=e_m,
+            monthly_rent=monthly_rent,
+            billing_type="quarter",
+            cycle_code=q_code,
+        )
+        created_records.append(record)
+
+    return created_records
 
 
 def create_cycle_bills(
@@ -254,7 +461,7 @@ def create_cycle_bills(
         try:
             connection.execute("BEGIN IMMEDIATE")
             gala_rows = connection.execute(
-                f"SELECT id, gala_number, tenant_name, phone_number FROM galas WHERE id IN ({placeholders})",
+                f"SELECT id, gala_number, tenant_name, phone_number, monthly_rent FROM galas WHERE id IN ({placeholders})",
                 unique_gala_ids,
             ).fetchall()
             if len(gala_rows) != len(unique_gala_ids):
@@ -318,13 +525,13 @@ def create_cycle_bills(
                         INSERT INTO bills (
                             bill_no, gala_id, start_month, end_month, year, cycle, amount, payment_status
                         )
-                        VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
+                        VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')
                         """,
                         (bill_no, gala["id"], start_month, end_month, year, cycle, amount),
                     )
                     record = connection.execute(
                         """
-                        SELECT bills.*, galas.gala_number, galas.tenant_name, galas.phone_number
+                        SELECT bills.*, galas.gala_number, galas.tenant_name, galas.phone_number, galas.monthly_rent
                         FROM bills
                         JOIN galas ON galas.id = bills.gala_id
                         WHERE bills.id = ?
@@ -353,7 +560,7 @@ def list_bills(limit: int = 100) -> list[dict[str, Any]]:
     with closing(get_receipts_connection()) as connection:
         rows = connection.execute(
             """
-            SELECT bills.*, galas.gala_number, galas.tenant_name, galas.phone_number
+            SELECT bills.*, galas.gala_number, galas.tenant_name, galas.phone_number, galas.monthly_rent
             FROM bills
             JOIN galas ON galas.id = bills.gala_id
             ORDER BY bills.year DESC, bills.start_month DESC, bills.id DESC
@@ -369,7 +576,7 @@ def get_bill_by_no(bill_no: str) -> dict[str, Any] | None:
     with closing(get_receipts_connection()) as connection:
         row = connection.execute(
             """
-            SELECT bills.*, galas.gala_number, galas.tenant_name, galas.phone_number
+            SELECT bills.*, galas.gala_number, galas.tenant_name, galas.phone_number, galas.monthly_rent
             FROM bills
             JOIN galas ON galas.id = bills.gala_id
             WHERE bills.bill_no = ?
@@ -379,26 +586,55 @@ def get_bill_by_no(bill_no: str) -> dict[str, Any] | None:
     return dict(row) if row else None
 
 
-def update_bill_payment_status(bill_no: str, payment_status: str) -> dict[str, Any] | None:
-    """Set a bill's payment state and return its refreshed details."""
-    if payment_status not in {"paid", "pending", "partial", "advance"}:
-        raise BillingStorageError(
-            "Payment status must be paid, pending, partial, or advance."
-        )
-
+def update_bill_whatsapp_status(bill_no: str, status: str) -> bool:
+    """Update delivery status ('Sent', 'Failed', 'Pending') for a bill in SQLite."""
     with closing(get_receipts_connection()) as connection:
         try:
             connection.execute("BEGIN IMMEDIATE")
             cursor = connection.execute(
-                "UPDATE bills SET payment_status = ? WHERE bill_no = ?",
-                (payment_status, bill_no),
+                "UPDATE bills SET whatsapp_status = ? WHERE bill_no = ?",
+                (status, bill_no),
+            )
+            updated = cursor.rowcount > 0
+            connection.commit()
+            return updated
+        except sqlite3.Error as exc:
+            connection.rollback()
+            raise BillingStorageError("Could not update WhatsApp delivery status.") from exc
+
+
+def update_bill_payment_status(
+    bill_no: str, amount_paid: float, payment_method: str) -> dict[str, Any] | None:
+    """Set a bill's payment state and return its refreshed details."""
+    with closing(get_receipts_connection()) as connection:
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            cursor = connection.execute("SELECT amount FROM bills WHERE bill_no = ?", (bill_no,))
+            row = cursor.fetchone()
+            if not row:
+                connection.rollback()
+                return None
+                
+            rent_amount = row["amount"]
+            pending_amount = max(0, rent_amount - amount_paid)
+            
+            if amount_paid >= rent_amount:
+                payment_status = "Full Paid"
+            elif amount_paid > 0:
+                payment_status = "Half Paid"
+            else:
+                payment_status = "Pending"
+                
+            cursor = connection.execute(
+                "UPDATE bills SET payment_status = ?, amount_paid = ?, pending_amount = ?, payment_method = ? WHERE bill_no = ?",
+                (payment_status, amount_paid, pending_amount, payment_method, bill_no),
             )
             if cursor.rowcount == 0:
                 connection.rollback()
                 return None
             row = connection.execute(
                 """
-                SELECT bills.*, galas.gala_number, galas.tenant_name, galas.phone_number
+                SELECT bills.*, galas.gala_number, galas.tenant_name, galas.phone_number, galas.monthly_rent
                 FROM bills
                 JOIN galas ON galas.id = bills.gala_id
                 WHERE bills.bill_no = ?

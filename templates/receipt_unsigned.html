@@ -2,119 +2,273 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <title>Rent Receipt - {{ receipt_no }}</title>
   <style>
-    @page { size: A4; margin: 0; }
-    * { box-sizing: border-box; }
+    @page {
+      size: A4 portrait;
+      margin: 8mm 12mm;
+    }
+    * {
+      box-sizing: border-box;
+    }
     body {
-      color: black;
-      font-family: "Times New Roman", serif;
-      font-size: 12px;
+      background: #ffffff;
+      color: #000000;
+      font-family: "Times New Roman", Times, Georgia, serif;
+      font-size: 11pt;
       line-height: 1.3;
       margin: 0;
-      padding: 8mm 0;
+      padding: 0;
     }
-    .receipt {
-      border: 1px solid black;
-      margin: 0 auto;
-      max-width: 390px;
-      padding: 5mm 6mm;
-      page-break-inside: avoid;
-      width: 390px;
+    .page-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      justify-content: space-between;
     }
-    .copy-label {
-      font-size: 9px;
-      letter-spacing: .3px;
-      margin: 0 0 2mm;
-      text-align: right;
+    .receipt-box {
+      border: 2px solid #000000;
+      border-radius: 4px;
+      padding: 12px 16px;
+      position: relative;
+      background: #ffffff;
+    }
+    .copy-tag {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 8.5pt;
+      font-weight: bold;
+      position: absolute;
+      right: 14px;
+      top: 12px;
       text-transform: uppercase;
+      letter-spacing: 1px;
     }
-    .receipt-header { text-align: center; }
-    .owner-name { font-size: 15px; font-weight: bold; letter-spacing: .4px; }
-    .proprietor { font-size: 10px; font-weight: bold; letter-spacing: 1px; margin-top: .5mm; }
-    .address { font-size: 10px; line-height: 1.25; margin-top: 1mm; }
-    .receipt-title { font-size: 14px; font-weight: bold; letter-spacing: .8px; margin: 2mm 0; }
-    .header-rule { border: 0; border-top: 1px solid black; margin: 2mm 0 3mm; }
-    table { border-collapse: collapse; }
-    .fields { width: 100%; }
-    .fields td { padding: 1.2mm 0; vertical-align: bottom; }
-    .fields .label { font-weight: bold; padding-right: 2mm; white-space: nowrap; width: 31%; }
-    .fields .value { border-bottom: 1px solid black; min-height: 5mm; }
-    .fields .right-label { font-weight: bold; padding-left: 3mm; padding-right: 1mm; white-space: nowrap; width: 13%; }
-    .sentence { font-size: 12px; line-height: 1.55; margin: 4mm 0 3mm; text-align: justify; }
-    .sentence strong { font-weight: bold; }
-    .footer { margin-top: 4mm; width: 100%; }
-    .footer td { padding: 0; vertical-align: bottom; width: 33.33%; }
-    .footer .footer-label { font-weight: bold; font-size: 10px; }
-    .footer-line { border-top: 1px solid black; height: 10mm; margin-right: 2mm; }
-    .signature-block { margin-right: 0; text-align: center; }
-    .rules { border-top: 1px solid black; font-size: 8px; line-height: 1.25; margin: 4mm 0 0; padding-top: 2mm; }
-    .rules-title { font-weight: bold; margin: 0 0 1mm; text-decoration: underline; }
-    .rules ol { margin: 0; padding-left: 4mm; }
-    .rules li { margin: 0; }
-    .cut-line { border: 0; border-top: 2px dashed black; margin: 20px 0; }
+    .header {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .owner-name {
+      font-size: 16pt;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      margin: 0;
+    }
+    .proprietor {
+      font-size: 9.5pt;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      margin-top: 1px;
+    }
+    .address {
+      font-size: 9.5pt;
+      margin-top: 2px;
+      line-height: 1.2;
+    }
+    .title-banner {
+      font-size: 13pt;
+      font-weight: bold;
+      letter-spacing: 1px;
+      margin-top: 6px;
+      display: inline-block;
+      border-bottom: 2px solid #000;
+      border-top: 2px solid #000;
+      padding: 2px 16px;
+    }
+    .fields-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 10px;
+    }
+    .fields-table td {
+      padding: 3px 0;
+      vertical-align: bottom;
+    }
+    .label {
+      font-weight: bold;
+      font-size: 10.5pt;
+      white-space: nowrap;
+      padding-right: 4px;
+    }
+    .value {
+      border-bottom: 1.5px dotted #000000;
+      font-weight: bold;
+      font-size: 11pt;
+      padding-left: 6px;
+      padding-right: 6px;
+    }
+    .sentence-block {
+      font-size: 10.5pt;
+      line-height: 1.5;
+      margin: 10px 0 12px 0;
+      text-align: justify;
+    }
+    .sentence-block strong {
+      font-weight: bold;
+      text-decoration: underline;
+    }
+    .bottom-section {
+      display: table;
+      width: 100%;
+      margin-top: 8px;
+    }
+    .footer-left {
+      display: table-cell;
+      width: 60%;
+      vertical-align: bottom;
+    }
+    .footer-right {
+      display: table-cell;
+      width: 40%;
+      vertical-align: bottom;
+      padding-left: 12px;
+    }
+    .sign-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .sign-table td {
+      vertical-align: bottom;
+      padding: 0 4px;
+    }
+    .sign-line {
+      border-top: 1.5px solid #000000;
+      margin-bottom: 3px;
+    }
+    .sign-label {
+      font-size: 8.5pt;
+      font-weight: bold;
+      text-align: center;
+    }
+    .rules-box {
+      border: 1px solid #000000;
+      border-radius: 3px;
+      padding: 6px 8px;
+      font-size: 8pt;
+      line-height: 1.25;
+      background: #fafafa;
+    }
+    .rules-title {
+      font-weight: bold;
+      text-decoration: underline;
+      margin: 0 0 3px 0;
+      font-size: 8.5pt;
+    }
+    .rules-box ol {
+      margin: 0;
+      padding-left: 14px;
+    }
+    .rules-box li {
+      margin-bottom: 1px;
+    }
+    .cut-line-container {
+      text-align: center;
+      margin: 14px 0;
+      position: relative;
+    }
+    .cut-line {
+      border: 0;
+      border-top: 2px dashed #000000;
+      margin: 0;
+    }
+    .cut-text {
+      background: #ffffff;
+      padding: 0 10px;
+      font-size: 8pt;
+      font-family: monospace;
+      position: relative;
+      top: -9px;
+    }
   </style>
 </head>
 <body>
-  {% set bill_no = receipt_no|default(receipt.bill_number, true) %}
-  {% set tenant_name = tenant_name|default(receipt.customer_name, true) %}
-  {% set amount = amount|default('%.2f'|format(receipt.amount), true) %}
-  {% set house_no = house_no|default(receipt.house_no|default(receipt.shop_name, true), true) %}
-  {% set receipt_date = date|default(receipt.date, true) %}
-
-  {% macro rent_receipt(copy_label) -%}
-  <section class="receipt">
-    <div class="copy-label">{{ copy_label }}</div>
-    <header class="receipt-header">
+  {% macro render_receipt(copy_title) %}
+  <div class="receipt-box">
+    <div class="copy-tag">{{ copy_title }}</div>
+    <div class="header">
       <div class="owner-name">M. KANDA KUMARAN</div>
       <div class="proprietor">PROPRIETOR</div>
-      <div class="address">Thiru Murugan Compound<br>Lake Road, Bhandup (W), Mumbai - 400078</div>
-      <div class="receipt-title">RENT RECEIPT</div>
-    </header>
-    <hr class="header-rule">
+      <div class="address">Thiru Murugan Compound, Lake Road, Bhandup (W), Mumbai - 400078</div>
+      <div><span class="title-banner">RENT RECEIPT</span></div>
+    </div>
 
-    <table class="fields">
+    <table class="fields-table">
       <tr>
-        <td class="label">Bill No.</td>
-        <td class="value">{{ bill_no }}</td>
-        <td class="right-label">Date</td>
-        <td class="value">{{ receipt_date }}</td>
+        <td class="label" style="width: 12%;">Bill No.:</td>
+        <td class="value" style="width: 38%;">{{ receipt_no }}</td>
+        <td class="label" style="width: 10%; text-align: right;">Date:</td>
+        <td class="value" style="width: 40%;">{{ date }}</td>
       </tr>
       <tr>
-        <td class="label">Tenant Name</td>
+        <td class="label">Tenant Name:</td>
         <td class="value" colspan="3">{{ tenant_name }}</td>
       </tr>
       <tr>
-        <td class="label">Rent of Gala/House No.</td>
-        <td class="value" colspan="3">{{ house_no }}</td>
+        <td class="label">Gala No.:</td>
+        <td class="value">{{ house_no }}</td>
+        <td class="label" style="text-align: right;">Monthly Rent:</td>
+        <td class="value">Rs. {{ monthly_rent }}</td>
       </tr>
       <tr>
-        <td class="label">Month</td>
-        <td class="value" colspan="3">{{ rent_month }}</td>
+        <td class="label">Billing Period:</td>
+        <td class="value">{{ rent_month }}</td>
+        <td class="label" style="text-align: right;">Months:</td>
+        <td class="value">{{ num_months }}</td>
+      </tr>
+      <tr>
+        <td class="label">Total Amount:</td>
+        <td class="value" colspan="3" style="font-size: 12pt;">Rs. {{ amount }}</td>
       </tr>
     </table>
 
-    <p class="sentence">Received from <strong>{{ tenant_name }}</strong> a sum of <strong>Rs. {{ amount }}</strong> for the rent of Gala No. <strong>{{ house_no }}</strong> for the month of <strong>{{ rent_month }}</strong>.</p>
-
-    <table class="footer">
-      <tr>
-        <td><div class="footer-line"></div><div class="footer-label">Received By</div></td>
-        <td><div class="footer-line"></div><div class="footer-label">Date</div></td>
-        <td class="signature-block"><div class="footer-line"></div><div class="footer-label">Signature</div></td>
-      </tr>
-    </table>
-
-    <div class="rules">
-      <p class="rules-title">Rules</p>
-      <ol>
-        <li>This receipt is valid only for the amount and month stated above.</li>
-        <li>Please preserve this receipt for your records.</li>
-      </ol>
+    <div class="sentence-block">
+      Received from <strong>{{ tenant_name }}</strong> a sum of <strong>Rs. {{ amount }}</strong> (Monthly Rent: Rs. {{ monthly_rent }} × {{ num_months }} Month(s)) for the rent of Gala No. <strong>{{ house_no }}</strong> for the period <strong>{{ rent_month }}</strong>.
     </div>
-  </section>
-  {%- endmacro %}
 
-  {{ rent_receipt('Owner Copy') }}
-  <hr class="cut-line">
-  {{ rent_receipt('Tenant Copy') }}
+    <div class="bottom-section">
+      <div class="footer-left">
+        <table class="sign-table">
+          <tr>
+            <td style="width: 32%;">
+              <div style="height: 38px;"></div>
+              <div class="sign-line"></div>
+              <div class="sign-label">Received By</div>
+            </td>
+            <td style="width: 32%;">
+              <div style="height: 38px;"></div>
+              <div class="sign-line"></div>
+              <div class="sign-label">Date</div>
+            </td>
+            <td style="width: 36%;">
+              <div style="height: 38px;"></div>
+              <div class="sign-line"></div>
+              <div class="sign-label">Signature</div>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div class="footer-right">
+        <div class="rules-box">
+          <div class="rules-title">Rules & Conditions:</div>
+          <ol>
+            <li>This receipt is valid only for the amount & period stated above.</li>
+            <li>Please preserve this receipt for your records.</li>
+            <li>Subject to Mumbai Jurisdiction.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endmacro %}
+
+  <div class="page-container">
+    {{ render_receipt('Owner Copy') }}
+    
+    <div class="cut-line-container">
+      <hr class="cut-line">
+      <span class="cut-text">✂  Cut / Tear Here</span>
+    </div>
+
+    {{ render_receipt('Tenant Copy') }}
+  </div>
 </body>
 </html>

@@ -1,770 +1,495 @@
-"""Flask application for multi-shop billing and receipt generation."""
+"""Recipto – Rent Receipt & Billing Management System."""
 
 from __future__ import annotations
 
+import calendar
+import io
 import os
-import sqlite3
-import tempfile
+import re
+import threading
 import zipfile
-from datetime import date, datetime
-from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
-from io import BytesIO
+from datetime import datetime
 from pathlib import Path
-from urllib.parse import quote
 
 from flask import (
     Flask,
+    Response,
     flash,
+    jsonify,
+    make_response,
     redirect,
     render_template,
     request,
-    send_file,
-    send_from_directory,
     url_for,
 )
-from werkzeug.exceptions import NotFound
-from werkzeug.utils import secure_filename
 
 from models.db import (
     BillingDuplicateError,
     BillingStorageError,
     ReceiptStorageError,
-    create_cycle_bills,
-    create_numbered_receipt,
-    create_receipt,
+    create_bill,
+    create_bills_for_cycles,
     create_or_update_gala,
     get_bill_by_no,
-    get_numbered_receipt,
     init_billing_store,
-    init_db,
     init_receipt_store,
     list_bills,
     list_galas,
-    list_numbered_receipts,
-    preview_receipt_number,
     update_bill_payment_status,
+    update_bill_whatsapp_status,
 )
-from utils.bill_logic import get_cycle
-from utils.pdf_generator import PdfGenerationError, generate_pdf, generate_pdf_bytes
-
-
-# Keep project paths independent of the directory from which Flask is launched.
-PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
-GENERATED_RECEIPTS_DIR = os.path.join(PROJECT_ROOT, "generated_receipts")
-DEFAULT_SHOPS = "Main Shop,North Branch,South Branch"
-CYCLE_OPTIONS = (
-    ("C1", "C1: January - March"),
-    ("C2", "C2: April - June"),
-    ("C3", "C3: July - September"),
-    ("C4", "C4: October - December"),
+from utils.bill_logic import (
+    MONTH_OPTIONS,
+    QUARTERS_INFO,
+    calculate_months_count,
+    format_period_label,
+    get_cycle,
+    get_cycle_code,
+    get_cycle_months,
+    parse_quarter_selection,
+)
+from utils.pdf_generator import PdfGenerationError, generate_pdf_bytes
+from utils.whatsapp_automation import (
+    build_whatsapp_deeplink,
+    send_bulk_messages,
+    send_whatsapp_message,
 )
 
+PROJECT_ROOT = Path(__file__).resolve().parent
 
-def get_shop_choices() -> tuple[str, ...]:
-    """Read configurable shop choices from RECEIPT_SHOPS or use safe defaults."""
-    configured_shops = os.getenv("RECEIPT_SHOPS", DEFAULT_SHOPS)
-    shops = tuple(shop.strip() for shop in configured_shops.split(",") if shop.strip())
-    return shops or ("Main Shop",)
+app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "recipto-dev-secret-change-in-production")
 
 
-def receipt_for_template(stored_receipt: dict[str, object]) -> tuple[dict[str, object], datetime]:
-    """Convert a structured stored receipt into the fields expected by existing templates."""
-    receipt_month = datetime(int(stored_receipt["year"]), int(stored_receipt["month"]), 1)
-    created_at = str(stored_receipt.get("created_at", ""))
-    receipt_date = created_at[:10] or receipt_month.date().isoformat()
-    return (
-        {
-            "bill_number": stored_receipt["receipt_no"],
-            "customer_name": stored_receipt["tenant_name"],
-            "shop_name": stored_receipt["house_no"],
-            "amount": stored_receipt["amount"],
-            "date": receipt_date,
-        },
-        receipt_month,
-    )
+def _enrich_bill(bill: dict) -> dict:
+    start = bill.get("start_month", 1)
+    end = bill.get("end_month", 1)
+    year = bill.get("year", datetime.now().year)
+    cycle = bill.get("cycle", "")
+    mode = "custom" if cycle.startswith("M") or "Custom" in cycle else "quarter"
+    try:
+        num_months = calculate_months_count(start, end)
+        period = format_period_label(start, end, year, mode=mode)
+    except ValueError:
+        num_months = 1
+        period = str(cycle)
+
+    bill["num_months"] = num_months
+    bill["period_label"] = period
+
+    phone = bill.get("phone_number", "")
+    tenant_name = bill.get("tenant_name", "Tenant")
+    amount = bill.get("amount", 0.0) or 0.0
+    amount_paid = bill.get("amount_paid", 0.0) or 0.0
+    pending_raw = bill.get("pending_amount")
+    pending = pending_raw if pending_raw is not None else max(0.0, amount - amount_paid)
+    bill["pending_amount"] = pending
+    bill["whatsapp_status"] = bill.get("whatsapp_status", "Pending") or "Pending"
+    
+    if pending > 0:
+        bill["whatsapp_url"] = build_whatsapp_deeplink(phone, bill)
+    else:
+        bill["whatsapp_url"] = None
+
+    return bill
 
 
-def index_template_context(form_values: object | None = None, error: str | None = None) -> dict[str, object]:
-    """Return common context for the receipt form, including batch-month choices."""
-    current_time = datetime.now()
-    context: dict[str, object] = {
-        "form_values": form_values or {},
-        "current_month": f"{current_time.month:02d}",
-        "current_year": current_time.year,
-        "month_options": [
-            (f"{month:02d}", datetime(current_time.year, month, 1).strftime("%B"))
-            for month in range(1, 13)
-        ],
-    }
-    if error:
-        context["error"] = error
-    return context
+init_receipt_store()
+init_billing_store()
 
 
-def bill_period_label(bill: dict[str, object]) -> str:
-    """Format a bill's stored month range for the management UI and WhatsApp text."""
-    start_month = int(bill["start_month"])
-    end_month = int(bill["end_month"])
-    start_label = datetime(int(bill["year"]), start_month, 1).strftime("%b")
-    end_label = datetime(int(bill["year"]), end_month, 1).strftime("%b")
-    return f"{start_label} - {end_label} {bill['year']}"
+@app.route("/")
+def home():
+    return redirect(url_for("generate_bill_form"))
 
 
-def whatsapp_bill_url(bill: dict[str, object]) -> str | None:
-    """Build a user-clicked WhatsApp message link without sending data automatically."""
-    phone_digits = "".join(character for character in str(bill["phone_number"]) if character.isdigit())
-    if len(phone_digits) == 10:
-        phone_digits = f"91{phone_digits}"
-    elif len(phone_digits) == 11 and phone_digits.startswith("0"):
-        phone_digits = f"91{phone_digits[1:]}"
-
-    if not (phone_digits.startswith("91") and len(phone_digits) == 12):
-        return None
-
-    message = (
-        f"Hello {bill['tenant_name']},\n\n"
-        f"Your bill for {bill_period_label(bill)} has been generated.\n"
-        f"Bill No: {bill['bill_no']}\n"
-        f"Gala: {bill['gala_number']}\n"
-        f"Amount: Rs. {float(bill['amount']):.2f}\n"
-        f"Payment status: {str(bill['payment_status']).title()}"
-    )
-    return f"https://wa.me/{phone_digits}?text={quote(message)}"
-
-
-def billing_view_context(*, searched_bill: dict[str, object] | None = None, search_error: str | None = None) -> dict[str, object]:
-    """Provide the simple management dashboard with presentation-only bill details."""
-    bills = list_bills()
-    presented_bills: list[dict[str, object]] = []
-    for bill in bills:
-        view_bill = dict(bill)
-        view_bill["period_label"] = bill_period_label(view_bill)
-        view_bill["whatsapp_url"] = whatsapp_bill_url(view_bill)
-        presented_bills.append(view_bill)
-
-    presented_search = None
-    if searched_bill:
-        presented_search = dict(searched_bill)
-        presented_search["period_label"] = bill_period_label(presented_search)
-        presented_search["whatsapp_url"] = whatsapp_bill_url(presented_search)
-
-    current_time = datetime.now()
-    return {
-        "bills": presented_bills,
-        "cycle_options": CYCLE_OPTIONS,
-        "current_cycle": get_cycle(current_time.month),
-        "current_year": current_time.year,
-        "galas": list_galas(),
-        "search_error": search_error,
-        "searched_bill": presented_search,
-    }
-
-
-def create_app() -> Flask:
-    """Create and configure the Flask application."""
-    app = Flask(__name__)
-    app.config.update(
-        SECRET_KEY=os.getenv("FLASK_SECRET_KEY", "change-this-secret-in-production"),
-        SHOP_CHOICES=get_shop_choices(),
-        GENERATED_RECEIPTS_DIR=GENERATED_RECEIPTS_DIR,
-    )
-
-    # Ensure application storage exists before requests are accepted.
-    os.makedirs(GENERATED_RECEIPTS_DIR, exist_ok=True)
-    init_db()
-    init_receipt_store()
-    init_billing_store()
-
-    @app.get("/")
-    def receipt_form():
-        """Display the receipt preview form, optionally prefilled for editing."""
-        return render_template(
+@app.route("/receipts")
+def generate_bill_form():
+    now = datetime.now()
+    galas = list_galas()
+    return render_template(
         "index.html",
-            **index_template_context(request.args),
-        )
+        galas=galas,
+        quarters_info=QUARTERS_INFO,
+        month_options=MONTH_OPTIONS,
+        current_month=now.month,
+        current_year=now.year,
+        error=None,
+    )
 
-    @app.post("/preview")
-    def preview_receipt():
-        """Render a receipt as HTML without saving it or generating a PDF."""
-        submitted = {
-            "tenant_name": request.form.get("tenant_name", "").strip(),
-            "amount": request.form.get("amount", "").strip(),
-            "house_no": request.form.get("house_no", "").strip(),
-            "receipt_type": request.form.get("receipt_type", "").strip().lower(),
-        }
-        error, receipt_data = validate_pdf_submission(submitted)
-        if error:
-            return render_template("index.html", **index_template_context(submitted, error)), 400
 
-        current_time = datetime.now()
+@app.post("/receipts/download")
+def generate_bill_download():
+    gala_id_raw = request.form.get("gala_id", "").strip()
+    billing_type = request.form.get("billing_type", "quarter").strip()
+    year_raw = request.form.get("year", str(datetime.now().year)).strip()
+
+    if not gala_id_raw or not year_raw:
+        flash("Missing required fields.", "error")
+        return redirect(url_for("generate_bill_form"))
+
+    try:
+        gala_id = int(gala_id_raw)
+        year = int(year_raw)
+    except ValueError:
+        flash("Invalid input format.", "error")
+        return redirect(url_for("generate_bill_form"))
+
+    galas = list_galas()
+    selected_gala = next((g for g in galas if g["id"] == gala_id), None)
+    if not selected_gala:
+        flash("Selected Gala not found.", "error")
+        return redirect(url_for("generate_bill_form"))
+
+    monthly_rent = selected_gala["monthly_rent"]
+
+    created_bills = []
+    if billing_type == "quarter":
+        selected_quarters = request.form.getlist("quarters")
+        if not selected_quarters and request.form.get("start_cycle"):
+            start_c = request.form.get("start_cycle")
+            end_c = request.form.get("end_cycle", start_c)
+            selected_quarters = [start_c]
+            if start_c != end_c and end_c:
+                selected_quarters.append(end_c)
+
         try:
-            receipt_no = preview_receipt_number(current_time)
-        except (sqlite3.Error, ReceiptStorageError):
-            return (
-                render_template(
-                    "index.html",
-                    **index_template_context(
-                        submitted,
-                        "The next receipt number could not be prepared. Please try again.",
-                    ),
-                ),
-                500,
+            created_bills = create_bills_for_cycles(
+                gala_id=gala_id,
+                year=year,
+                selected_quarters=selected_quarters,
+                monthly_rent=monthly_rent,
             )
+        except (BillingDuplicateError, BillingStorageError) as exc:
+            flash(str(exc), "error")
+            return redirect(url_for("generate_bill_form"))
+    else:
+        start_month_raw = request.form.get("start_month", "1").strip()
+        end_month_raw = request.form.get("end_month", "1").strip()
+        try:
+            start_month = int(start_month_raw)
+            end_month = int(end_month_raw)
+        except ValueError:
+            flash("Invalid month values.", "error")
+            return redirect(url_for("generate_bill_form"))
 
-        receipt = {
-            "bill_number": receipt_no,
-            "customer_name": receipt_data["tenant_name"],
-            "shop_name": receipt_data["house_no"],
-            "amount": receipt_data["amount"],
-            "date": current_time.date().isoformat(),
-        }
-        template_name = (
-            "receipt_signed.html"
-            if receipt_data["receipt_type"] == "signed"
-            else "receipt_unsigned.html"
-        )
+        if not (1 <= start_month <= 12 and 1 <= end_month <= 12):
+            flash("Start and end months must be between 1 and 12.", "error")
+            return redirect(url_for("generate_bill_form"))
+
+        if start_month > end_month:
+            flash("End month cannot be after start month.", "error")
+            return redirect(url_for("generate_bill_form"))
+
+        cycle_code = get_cycle_code(start_month, end_month)
+        try:
+            record = create_bill(
+                gala_id=gala_id,
+                year=year,
+                start_month=start_month,
+                end_month=end_month,
+                monthly_rent=monthly_rent,
+                billing_type="custom",
+                cycle_code=cycle_code,
+            )
+            created_bills = [record]
+        except (BillingDuplicateError, BillingStorageError) as exc:
+            flash(str(exc), "error")
+            return redirect(url_for("generate_bill_form"))
+
+    if not created_bills:
+        flash("No bills were created.", "error")
+        return redirect(url_for("generate_bill_form"))
+
+    enriched_bills = [_enrich_bill(b) for b in created_bills]
+
+    # Automatically trigger WhatsApp Web automation in background thread
+    threading.Thread(
+        target=send_bulk_messages,
+        args=(enriched_bills,),
+        kwargs={"is_reminder": False},
+        daemon=True,
+    ).start()
+
+    sig_file = PROJECT_ROOT / "static" / "signature.png"
+    signature_path = sig_file.as_uri() if sig_file.is_file() else None
+    template_name = "receipt_signed.html"
+
+    pdf_files = []
+    for record in created_bills:
+        start_m = record["start_month"]
+        end_m = record["end_month"]
+        b_year = record["year"]
+        num_months = calculate_months_count(start_m, end_m)
+        rent_month = format_period_label(start_m, end_m, b_year, mode=billing_type)
+        total_amount = record["amount"]
+
         receipt_html = render_template(
             template_name,
-            receipt=receipt,
-            receipt_no=receipt_no,
-            generated_at=current_time.strftime("%d %b %Y, %I:%M %p"),
-            rent_month=current_time.strftime("%B %Y"),
-            signature_path=url_for("static", filename="signature.png"),
+            receipt_no=record["bill_no"],
+            tenant_name=selected_gala["tenant_name"],
+            monthly_rent=f"{monthly_rent:.2f}",
+            num_months=num_months,
+            amount=f"{total_amount:.2f}",
+            house_no=selected_gala["gala_number"],
+            rent_month=rent_month,
+            date=datetime.now().strftime("%d/%m/%Y"),
+            signature_path=signature_path,
         )
-        return render_template(
-            "preview.html",
-            form_data=submitted,
-            receipt_no=receipt_no,
-            rent_month=current_time.strftime("%B %Y"),
-            receipt_html=receipt_html,
-        )
-
-    @app.post("/generate-batch")
-    def generate_batch_receipts():
-        """Generate one stored receipt PDF for every month in a selected same-year range."""
-        submitted = {
-            "tenant_name": request.form.get("tenant_name", "").strip(),
-            "amount": request.form.get("amount", "").strip(),
-            "house_no": request.form.get("house_no", "").strip(),
-            "receipt_type": request.form.get("receipt_type", "").strip().lower(),
-            "start_month": request.form.get("start_month", "").strip(),
-            "end_month": request.form.get("end_month", "").strip(),
-            "year": request.form.get("year", "").strip(),
-        }
-        error, batch_data = validate_batch_submission(submitted)
-        if error:
-            return render_template("index.html", **index_template_context(submitted, error)), 400
-
-        template_name = (
-            "receipt_signed.html"
-            if batch_data["receipt_type"] == "signed"
-            else "receipt_unsigned.html"
-        )
-        safe_tenant_name = secure_filename(batch_data["tenant_name"]) or "tenant"
-        zip_buffer = BytesIO()
 
         try:
-            with tempfile.TemporaryDirectory(prefix="rent_receipts_") as temporary_directory:
-                with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as archive:
-                    for month in range(batch_data["start_month"], batch_data["end_month"] + 1):
-                        receipt_time = datetime(batch_data["year"], month, 1)
-                        stored_receipt = create_numbered_receipt(
-                            tenant_name=batch_data["tenant_name"],
-                            amount=batch_data["amount"],
-                            house_no=batch_data["house_no"],
-                            receipt_type=batch_data["receipt_type"],
-                            reference_time=receipt_time,
-                        )
-                        receipt, receipt_month = receipt_for_template(stored_receipt)
-                        html = render_template(
-                            template_name,
-                            receipt=receipt,
-                            receipt_no=stored_receipt["receipt_no"],
-                            generated_at=datetime.now().strftime("%d %b %Y, %I:%M %p"),
-                            rent_month=receipt_month.strftime("%B %Y"),
-                            signature_path=Path(
-                                os.path.join(PROJECT_ROOT, "static", "signature.png")
-                            ).as_uri(),
-                        )
-                        pdf_bytes = generate_pdf_bytes(html_content=html)
-                        pdf_filename = (
-                            f"receipt_{safe_tenant_name}_{stored_receipt['receipt_no'].replace('/', '_')}.pdf"
-                        )
-                        temporary_pdf_path = os.path.join(temporary_directory, pdf_filename)
-                        with open(temporary_pdf_path, "wb") as temporary_pdf_file:
-                            temporary_pdf_file.write(pdf_bytes)
-                        archive.write(temporary_pdf_path, arcname=pdf_filename)
-        except ReceiptStorageError as exc:
-            return {"error": str(exc)}, 500
+            pdf_bytes = generate_pdf_bytes(html_content=receipt_html)
         except PdfGenerationError as exc:
-            return {"error": str(exc)}, 500
-        except OSError:
-            return {"error": "The batch PDF archive could not be created."}, 500
+            flash(f"PDF generation failed: {exc}", "error")
+            return redirect(url_for("generate_bill_form"))
 
-        zip_buffer.seek(0)
-        archive_filename = f"receipts_{safe_tenant_name}_{batch_data['year']}.zip"
-        return send_file(
-            zip_buffer,
-            as_attachment=True,
-            download_name=archive_filename,
-            mimetype="application/zip",
-        )
+        safe_filename = f"{re.sub(r'[^\w\-]', '_', record['bill_no'])}.pdf"
+        pdf_files.append((safe_filename, pdf_bytes))
 
-    @app.post("/generate")
-    def generate_receipt():
-        """Validate input, persist a receipt, and produce its PDF document."""
-        submitted = {
-            "customer_name": request.form.get("customer_name", "").strip(),
-            "shop_name": request.form.get("shop_name", "").strip(),
-            "amount": request.form.get("amount", "").strip(),
-            "date": request.form.get("date", "").strip(),
-            "receipt_type": request.form.get("receipt_type", "unsigned").strip().lower(),
-        }
-
-        error, receipt_data = validate_submission(submitted, app.config["SHOP_CHOICES"])
-        if error:
-            return (
-                render_template(
-                    "form.html",
-                    shops=app.config["SHOP_CHOICES"],
-                    error=error,
-                    submitted=submitted,
-                ),
-                400,
-            )
-
-        # Save first so every issued bill number has an auditable database record.
-        try:
-            receipt = create_receipt(**receipt_data)
-        except sqlite3.Error:
-            return (
-                render_template(
-                    "form.html",
-                    shops=app.config["SHOP_CHOICES"],
-                    error="The receipt could not be saved. Please try again.",
-                    submitted=submitted,
-                ),
-                500,
-            )
-        template_name = (
-            "receipt_signed.html"
-            if submitted["receipt_type"] == "signed"
-            else "receipt_unsigned.html"
-        )
-        current_rent_month = datetime.now().strftime("%B %Y")
-        html = render_template(
-            template_name,
-            receipt=receipt,
-            generated_at=datetime.now().strftime("%d %b %Y, %I:%M %p"),
-            rent_month=current_rent_month,
-            signature_path=Path(os.path.join(PROJECT_ROOT, "static", "signature.png")).as_uri(),
-        )
-
-        try:
-            pdf_path = generate_pdf(
-                html_content=html,
-                bill_number=receipt["bill_number"],
-                output_dir=app.config["GENERATED_RECEIPTS_DIR"],
-            )
-        except PdfGenerationError as exc:
-            return (
-                render_template(
-                    "form.html",
-                    shops=app.config["SHOP_CHOICES"],
-                    error=(
-                        f"Receipt #{receipt['bill_number']} was saved, but its PDF could not "
-                        f"be generated. {exc}"
-                    ),
-                    submitted=submitted,
-                ),
-                500,
-            )
-
-        return render_template(
-            "form.html",
-            shops=app.config["SHOP_CHOICES"],
-            success_message=(
-                f"Receipt #{receipt['bill_number']} generated successfully. PDF saved to: {pdf_path}"
-            ),
-            download_url=url_for(
-                "download_receipt", receipt_identifier=os.path.basename(pdf_path)
-            ),
-        )
-
-    @app.post("/generate-pdf")
-    def generate_pdf_download():
-        """Render a rent receipt and return it immediately as a PDF download."""
-        requested_receipt_no = request.form.get("receipt_no", "").strip()
-        if requested_receipt_no:
-            try:
-                stored_receipt = get_numbered_receipt(requested_receipt_no)
-            except sqlite3.Error:
-                return {"error": "The receipt database could not be read."}, 500
-            if stored_receipt is None:
-                return {"error": "Receipt not found."}, 404
-        else:
-            submitted = {
-                "tenant_name": request.form.get("tenant_name", "").strip(),
-                "amount": request.form.get("amount", "").strip(),
-                "house_no": request.form.get("house_no", "").strip(),
-                "receipt_type": request.form.get("receipt_type", "").strip().lower(),
-            }
-            error, receipt_data = validate_pdf_submission(submitted)
-            if error:
-                return {"error": error}, 400
-
-            # Save the receipt before generating its PDF so the structured number is persistent.
-            try:
-                stored_receipt = create_numbered_receipt(
-                    tenant_name=receipt_data["tenant_name"],
-                    amount=receipt_data["amount"],
-                    house_no=receipt_data["house_no"],
-                    receipt_type=receipt_data["receipt_type"],
-                    reference_time=datetime.now(),
-                )
-            except ReceiptStorageError as exc:
-                return {"error": str(exc)}, 500
-
-        receipt, receipt_month = receipt_for_template(stored_receipt)
-        template_name = (
-            "receipt_signed.html"
-            if stored_receipt["receipt_type"] == "signed"
-            else "receipt_unsigned.html"
-        )
-        generated_at = datetime.now()
-        html = render_template(
-            template_name,
-            receipt=receipt,
-            receipt_no=stored_receipt["receipt_no"],
-            generated_at=generated_at.strftime("%d %b %Y, %I:%M %p"),
-            rent_month=receipt_month.strftime("%B %Y"),
-            signature_path=Path(os.path.join(PROJECT_ROOT, "static", "signature.png")).as_uri(),
-        )
-
-        try:
-            pdf_bytes = generate_pdf_bytes(html_content=html)
-        except PdfGenerationError as exc:
-            return {"error": str(exc)}, 500
-
-        safe_tenant_name = secure_filename(receipt["customer_name"]) or "tenant"
-        filename = f"receipt_{safe_tenant_name}_{receipt_month.strftime('%B_%Y')}.pdf"
-        return send_file(
-            BytesIO(pdf_bytes),
-            as_attachment=True,
-            download_name=filename,
-            mimetype="application/pdf",
-        )
-
-    @app.get("/history")
-    def receipt_history():
-        """Display the browser-driven history view backed by the receipts API."""
-        return render_template("history.html")
-
-    @app.get("/receipts")
-    def list_receipts():
-        """Return all structured receipts in newest-first order."""
-        try:
-            return {"receipts": list_numbered_receipts()}
-        except sqlite3.Error:
-            return {"error": "The receipt database could not be read."}, 500
-
-    @app.get("/receipts/<path:receipt_identifier>")
-    def download_receipt(receipt_identifier: str):
-        """Download a legacy PDF or return a structured receipt by its full number."""
-        if receipt_identifier.lower().endswith(".pdf"):
-            try:
-                return send_from_directory(
-                    app.config["GENERATED_RECEIPTS_DIR"],
-                    receipt_identifier,
-                    as_attachment=True,
-                )
-            except NotFound:
-                return {"error": "Receipt PDF not found."}, 404
-
-        try:
-            receipt = get_numbered_receipt(receipt_identifier)
-        except sqlite3.Error:
-            return {"error": "The receipt database could not be read."}, 500
-        if receipt is None:
-            return {"error": "Receipt not found."}, 404
-        return receipt
-
-    @app.get("/billing")
-    def billing_dashboard():
-        """Display gala setup, cycle generation, search, and payment tracking."""
-        requested_bill_no = request.args.get("bill_no", "").strip()
-        try:
-            searched_bill = get_bill_by_no(requested_bill_no) if requested_bill_no else None
-            search_error = (
-                "No bill was found with that bill number." if requested_bill_no and not searched_bill else None
-            )
-            context = billing_view_context(
-                searched_bill=searched_bill,
-                search_error=search_error,
-            )
-        except sqlite3.Error:
-            return {"error": "The billing database could not be read."}, 500
-        return render_template("billing.html", **context)
-
-    @app.post("/billing/galas")
-    def save_gala():
-        """Create a gala or refresh its tenant and phone number."""
-        submitted = {
-            "gala_number": request.form.get("gala_number", "").strip(),
-            "tenant_name": request.form.get("tenant_name", "").strip(),
-            "phone_number": request.form.get("phone_number", "").strip(),
-        }
-        error, gala_data = validate_gala_submission(submitted)
-        if error:
-            flash(error, "error")
-            return redirect(url_for("billing_dashboard"))
-
-        try:
-            gala = create_or_update_gala(**gala_data)
-        except BillingStorageError as exc:
-            flash(str(exc), "error")
-        else:
-            flash(f"Gala {gala['gala_number']} saved for {gala['tenant_name']}.", "success")
-        return redirect(url_for("billing_dashboard"))
-
-    @app.post("/billing/generate")
-    def generate_cycle_bills():
-        """Create all selected three-month bills in one atomic transaction."""
-        submitted = {
-            "gala_selection": request.form.get("gala_selection", "").strip(),
-            "start_cycle": request.form.get("start_cycle", "").strip(),
-            "end_cycle": request.form.get("end_cycle", "").strip(),
-            "year": request.form.get("year", "").strip(),
-            "amount": request.form.get("amount", "").strip(),
-        }
-        error, bill_data = validate_cycle_bill_submission(submitted)
-        if error:
-            flash(error, "error")
-            return redirect(url_for("billing_dashboard"))
-
-        try:
-            available_galas = list_galas()
-            if bill_data["gala_selection"] == "all":
-                gala_ids = [int(gala["id"]) for gala in available_galas]
-            else:
-                gala_ids = [int(bill_data["gala_selection"])]
-            created_bills = create_cycle_bills(
-                gala_ids=gala_ids,
-                year=bill_data["year"],
-                start_cycle=bill_data["start_cycle"],
-                end_cycle=bill_data["end_cycle"],
-                amount=bill_data["amount"],
-            )
-        except BillingDuplicateError as exc:
-            flash(str(exc), "duplicate")
-        except (BillingStorageError, sqlite3.Error) as exc:
-            flash(str(exc) or "The bills could not be generated.", "error")
-        else:
-            flash(f"Created {len(created_bills)} pending bill(s).", "success")
-        return redirect(url_for("billing_dashboard"))
-
-    @app.post("/billing/bills/<path:bill_no>/payment")
-    def update_bill_payment(bill_no: str):
-        """Update a bill's payment status without altering its amount or period."""
-        payment_status = request.form.get("payment_status", "").strip().lower()
-        try:
-            bill = update_bill_payment_status(bill_no, payment_status)
-        except BillingStorageError as exc:
-            flash(str(exc), "error")
-        else:
-            if bill is None:
-                flash("Bill not found.", "error")
-            else:
-                flash(f"{bill['bill_no']} marked as {bill['payment_status']}.", "success")
-        return redirect(url_for("billing_dashboard", bill_no=bill_no))
-
-    @app.get("/bills/<path:bill_no>")
-    def get_bill(bill_no: str):
-        """Return a bill by its full number for lightweight integrations and support."""
-        try:
-            bill = get_bill_by_no(bill_no)
-        except sqlite3.Error:
-            return {"error": "The billing database could not be read."}, 500
-        if bill is None:
-            return {"error": "Bill not found."}, 404
-        return bill
-
-    return app
-
-
-def validate_submission(
-    submitted: dict[str, str], shop_choices: tuple[str, ...]
-) -> tuple[str | None, dict[str, object] | None]:
-    """Validate form fields and normalize values for database storage."""
-    if not submitted["customer_name"]:
-        return "Customer name is required.", None
-    if submitted["shop_name"] not in shop_choices:
-        return "Please select a valid shop.", None
-    if submitted["receipt_type"] not in {"signed", "unsigned"}:
-        return "Please select a valid receipt type.", None
-
-    try:
-        amount = Decimal(submitted["amount"])
-    except (InvalidOperation, ValueError):
-        return "Amount must be a valid number.", None
-
-    if amount <= 0:
-        return "Amount must be greater than zero.", None
-    amount = amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-
-    if submitted["date"]:
-        try:
-            receipt_date = date.fromisoformat(submitted["date"]).isoformat()
-        except ValueError:
-            return "Date must use the YYYY-MM-DD format.", None
+    if len(pdf_files) == 1:
+        filename, pdf_bytes = pdf_files[0]
+        response = make_response(pdf_bytes)
+        response.headers["Content-Type"] = "application/pdf"
+        response.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
     else:
-        # Preserve the exact issue time when the user does not provide a date.
-        receipt_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # Package multiple generated bill PDFs into a zip archive
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+            for filename, pdf_bytes in pdf_files:
+                zf.writestr(filename, pdf_bytes)
+        zip_buffer.seek(0)
+        zip_name = f"bills_{year}_{selected_gala['gala_number']}.zip"
+        response = make_response(zip_buffer.getvalue())
+        response.headers["Content-Type"] = "application/zip"
+        response.headers["Content-Disposition"] = f'attachment; filename="{zip_name}"'
+        return response
 
-    return None, {
-        "customer_name": submitted["customer_name"],
-        "shop_name": submitted["shop_name"],
-        "amount": float(amount),
-        "receipt_date": receipt_date,
-    }
+
+@app.route("/receipts/history")
+def duplicate_bill():
+    now = datetime.now()
+    galas = list_galas()
+    
+    searched_bill = None
+    search_error = None
+    gala_number_query = request.args.get("gala_number", "").strip()
+    billing_type_query = request.args.get("billing_type", "quarter").strip()
+    year_query = request.args.get("year", "").strip()
+    
+    if gala_number_query and year_query:
+        bills = list_bills(limit=1000)
+        found = None
+        
+        target_start = None
+        target_end = None
+        target_cycle = None
+
+        if billing_type_query == "quarter":
+            selected_q = request.args.getlist("quarters")
+            if not selected_q and request.args.get("cycle"):
+                selected_q = [request.args.get("cycle")]
+            if selected_q:
+                try:
+                    start_m, end_m, cycle_c = parse_quarter_selection(selected_q)
+                    target_start = start_m
+                    target_end = end_m
+                    target_cycle = cycle_c
+                except ValueError:
+                    pass
+        else:
+            s_raw = request.args.get("start_month", "").strip()
+            e_raw = request.args.get("end_month", "").strip()
+            if s_raw.isdigit() and e_raw.isdigit():
+                target_start = int(s_raw)
+                target_end = int(e_raw)
+
+        for b in bills:
+            match_gala = str(b["gala_number"]) == gala_number_query
+            match_year = str(b["year"]) == year_query
+            match_period = False
+
+            if target_start is not None and target_end is not None:
+                match_period = (b["start_month"] == target_start and b["end_month"] == target_end)
+            elif target_cycle:
+                match_period = (b["cycle"] == target_cycle)
+            else:
+                match_period = True
+
+            if match_gala and match_year and match_period:
+                found = b
+                break
+        
+        if found:
+            searched_bill = _enrich_bill(found)
+        else:
+            search_error = "No bill found matching the selected Gala, Period, and Year."
+
+    return render_template(
+        "history.html",
+        galas=galas,
+        quarters_info=QUARTERS_INFO,
+        month_options=MONTH_OPTIONS,
+        current_month=now.month,
+        current_year=now.year,
+        searched_bill=searched_bill,
+        search_error=search_error,
+    )
 
 
-def validate_pdf_submission(submitted: dict[str, str]) -> tuple[str | None, dict[str, object] | None]:
-    """Validate the compact form payload accepted by the PDF download endpoint."""
-    if not submitted["tenant_name"]:
-        return "Tenant name is required.", None
-    if not submitted["house_no"]:
-        return "House or Gala number is required.", None
-    if submitted["receipt_type"] not in {"signed", "unsigned"}:
-        return "Receipt type must be signed or unsigned.", None
+@app.post("/billing/download_existing/<path:bill_no>")
+def download_existing_bill(bill_no: str):
+    bill = get_bill_by_no(bill_no)
+    if not bill:
+        flash("Bill not found.", "error")
+        return redirect(url_for("duplicate_bill"))
+    
+    start_m = bill.get("start_month", 1)
+    end_m = bill.get("end_month", 1)
+    year = bill.get("year", datetime.now().year)
+    cycle = bill.get("cycle", "")
+    mode = "custom" if cycle.startswith("M") or "Custom" in cycle else "quarter"
+
+    monthly_rent = bill.get("monthly_rent", 0.0)
+    total_amount = bill.get("amount", 0.0)
+    num_months = calculate_months_count(start_m, end_m)
+    rent_month = format_period_label(start_m, end_m, year, mode=mode)
+
+    template_name = "receipt_signed.html"
+    sig_file = PROJECT_ROOT / "static" / "signature.png"
+    signature_path = sig_file.as_uri() if sig_file.is_file() else None
+
+    gen_date = bill["created_at"].split()[0]
+    date_parts = gen_date.split("-")
+    if len(date_parts) == 3:
+        gen_date = f"{date_parts[2]}/{date_parts[1]}/{date_parts[0]}"
+    
+    receipt_html = render_template(
+        template_name,
+        receipt_no=bill["bill_no"],
+        tenant_name=bill["tenant_name"],
+        monthly_rent=f"{monthly_rent:.2f}",
+        num_months=num_months,
+        amount=f"{total_amount:.2f}",
+        house_no=bill["gala_number"],
+        rent_month=rent_month,
+        date=gen_date,
+        signature_path=signature_path,
+    )
 
     try:
-        amount = Decimal(submitted["amount"])
-    except (InvalidOperation, ValueError):
-        return "Amount must be a valid number.", None
+        pdf_bytes = generate_pdf_bytes(html_content=receipt_html)
+    except PdfGenerationError as exc:
+        flash(f"PDF generation failed: {exc}", "error")
+        return redirect(url_for("duplicate_bill"))
 
-    if amount <= 0:
-        return "Amount must be greater than zero.", None
-
-    normalized_amount = amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-    return None, {
-        "tenant_name": submitted["tenant_name"],
-        "house_no": submitted["house_no"],
-        "amount": float(normalized_amount),
-        "receipt_type": submitted["receipt_type"],
-    }
+    safe_name = re.sub(r"[^\w\-]", "_", bill["bill_no"])
+    response = make_response(pdf_bytes)
+    response.headers["Content-Type"] = "application/pdf"
+    response.headers["Content-Disposition"] = f'attachment; filename="{safe_name}.pdf"'
+    return response
 
 
-def validate_batch_submission(
-    submitted: dict[str, str]
-) -> tuple[str | None, dict[str, object] | None]:
-    """Validate core receipt fields plus a same-year inclusive month range."""
-    error, receipt_data = validate_pdf_submission(submitted)
-    if error:
-        return error, None
+@app.route("/api/galas")
+def api_list_galas():
+    return jsonify({"galas": list_galas()})
+
+
+@app.route("/billing")
+def billing_dashboard():
+    galas = list_galas()
+    bills_raw = list_bills()
+    bills = [_enrich_bill(b) for b in bills_raw]
+    now = datetime.now()
+
+    return render_template(
+        "billing.html",
+        galas=galas,
+        bills=bills,
+        quarters_info=QUARTERS_INFO,
+        month_options=MONTH_OPTIONS,
+        current_month=now.month,
+        current_year=now.year,
+        searched_bill=None,
+        search_error=None,
+    )
+
+
+@app.post("/billing/galas")
+def save_gala():
+    gala_number = request.form.get("gala_number", "").strip()
+    tenant_name = request.form.get("tenant_name", "").strip()
+    phone_number = request.form.get("phone_number", "").strip()
+    monthly_rent_raw = request.form.get("monthly_rent", "0").strip()
+
+    if not gala_number or not tenant_name:
+        flash("Gala number and tenant name are required.", "error")
+        return redirect(url_for("billing_dashboard"))
 
     try:
-        start_month = int(submitted["start_month"])
-        end_month = int(submitted["end_month"])
-        year = int(submitted["year"])
+        monthly_rent = float(monthly_rent_raw)
     except ValueError:
-        return "Start month, end month, and year are required.", None
-
-    if not 1 <= start_month <= 12 or not 1 <= end_month <= 12:
-        return "Months must be between January and December.", None
-    if start_month > end_month:
-        return "End month must be the same as or after the start month.", None
-    if not 2000 <= year <= 9999:
-        return "Please enter a valid four-digit year.", None
-
-    return None, {
-        **receipt_data,
-        "start_month": start_month,
-        "end_month": end_month,
-        "year": year,
-    }
-
-
-def validate_gala_submission(
-    submitted: dict[str, str]
-) -> tuple[str | None, dict[str, str] | None]:
-    """Validate the small gala directory form before persistence."""
-    gala_number = " ".join(submitted["gala_number"].split()).upper()
-    tenant_name = " ".join(submitted["tenant_name"].split())
-    phone_number = " ".join(submitted["phone_number"].split())
-    phone_digits = "".join(character for character in phone_number if character.isdigit())
-
-    if not gala_number:
-        return "Gala number is required.", None
-    if len(gala_number) > 50:
-        return "Gala number must be 50 characters or fewer.", None
-    if not tenant_name:
-        return "Tenant name is required.", None
-    if len(tenant_name) > 120:
-        return "Tenant name must be 120 characters or fewer.", None
-    if not phone_number:
-        return "Phone number is required for WhatsApp notifications.", None
-    if not (
-        len(phone_digits) == 10
-        or (len(phone_digits) == 11 and phone_digits.startswith("0"))
-        or (len(phone_digits) == 12 and phone_digits.startswith("91"))
-    ):
-        return "Enter a valid 10-digit Indian phone number.", None
-
-    return None, {
-        "gala_number": gala_number,
-        "tenant_name": tenant_name,
-        "phone_number": phone_number,
-    }
-
-
-def validate_cycle_bill_submission(
-    submitted: dict[str, str]
-) -> tuple[str | None, dict[str, object] | None]:
-    """Validate a same-year inclusive range of three-month billing cycles."""
-    valid_cycles = tuple(cycle for cycle, _ in CYCLE_OPTIONS)
-    start_cycle = submitted["start_cycle"]
-    end_cycle = submitted["end_cycle"]
-    gala_selection = submitted["gala_selection"]
-
-    if start_cycle not in valid_cycles or end_cycle not in valid_cycles:
-        return "Choose valid start and end billing cycles.", None
-    if valid_cycles.index(start_cycle) > valid_cycles.index(end_cycle):
-        return "End cycle must be the same as or after the start cycle.", None
-    if gala_selection != "all":
-        try:
-            if int(gala_selection) <= 0:
-                raise ValueError
-        except ValueError:
-            return "Choose a valid gala or all galas.", None
+        flash("Monthly Rent must be a number.", "error")
+        return redirect(url_for("billing_dashboard"))
 
     try:
-        year = int(submitted["year"])
+        create_or_update_gala(
+            gala_number=gala_number,
+            tenant_name=tenant_name,
+            phone_number=phone_number,
+            monthly_rent=monthly_rent,
+        )
+        flash(f"Gala {gala_number} saved successfully.", "success")
+    except BillingStorageError as exc:
+        flash(str(exc), "error")
+
+    return redirect(url_for("billing_dashboard"))
+
+
+@app.post("/billing/payment/<path:bill_no>")
+def update_bill_payment(bill_no: str):
+    amount_paid_raw = request.form.get("amount_paid", "0").strip()
+    payment_method = request.form.get("payment_method", "").strip()
+
+    try:
+        amount_paid = float(amount_paid_raw)
     except ValueError:
-        return "Enter a valid four-digit year.", None
-    if not 2000 <= year <= 9999:
-        return "Enter a valid four-digit year.", None
+        flash("Amount paid must be a number.", "error")
+        return redirect(url_for("billing_dashboard"))
 
     try:
-        amount = Decimal(submitted["amount"])
-    except (InvalidOperation, ValueError):
-        return "Amount must be a valid number.", None
-    if amount <= 0:
-        return "Amount must be greater than zero.", None
+        result = update_bill_payment_status(bill_no, amount_paid, payment_method)
+        if result:
+            flash(f"Payment for {bill_no} updated successfully.", "success")
+        else:
+            flash(f"Bill {bill_no} not found.", "error")
+    except BillingStorageError as exc:
+        flash(str(exc), "error")
 
-    normalized_amount = amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-    return None, {
-        "gala_selection": gala_selection,
-        "start_cycle": start_cycle,
-        "end_cycle": end_cycle,
-        "year": year,
-        "amount": float(normalized_amount),
-    }
+    return redirect(url_for("billing_dashboard"))
 
 
-app = create_app()
+@app.post("/billing/send_reminder/<path:bill_no>")
+def send_payment_reminder(bill_no: str):
+    bill = get_bill_by_no(bill_no)
+    if not bill:
+        flash("Bill not found.", "error")
+        return redirect(url_for("billing_dashboard"))
+
+    enriched = _enrich_bill(bill)
+    phone = enriched.get("phone_number", "")
+    tenant = enriched.get("tenant_name", "Tenant")
+
+    threading.Thread(
+        target=send_whatsapp_message,
+        args=(phone, tenant, enriched),
+        kwargs={"is_reminder": True},
+        daemon=True,
+    ).start()
+
+    flash(f"WhatsApp Web payment reminder launched for {bill_no}.", "success")
+    return redirect(url_for("billing_dashboard"))
 
 
 if __name__ == "__main__":
-    # Bind publicly for Render while retaining a local default of port 5000.
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", "5000")), debug=False)
+    app.run(debug=True)

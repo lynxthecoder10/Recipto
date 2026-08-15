@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#2563EB">
-  <title>Recipto - Generate Receipt</title>
+  <title>Recipto - Generate Bill</title>
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,6 +32,7 @@
     .brand-mark { align-items: center; background: var(--primary); border-radius: 9px; color: #fff; display: inline-flex; font-family: Poppins, Arial, sans-serif; font-size: .95rem; height: 32px; justify-content: center; width: 32px; }
     .history-link { color: var(--primary); font-size: .9rem; font-weight: 700; text-decoration: none; }
     .history-link:hover { color: var(--primary-hover); text-decoration: underline; }
+    .history-link.disabled { color: var(--muted); cursor: not-allowed; text-decoration: none; }
     .theme-toggle { align-items: center; background: var(--card); border: 1px solid var(--border); border-radius: 9px; color: var(--text); cursor: pointer; display: inline-flex; font-size: 1rem; height: 36px; justify-content: center; min-height: 36px; padding: 0; transition: background .18s ease, border-color .18s ease, transform .18s ease; width: 36px; }
     .theme-toggle:hover { background: var(--surface); border-color: var(--primary); transform: translateY(-1px); }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 16px 36px var(--shadow); padding: 32px; transition: background .2s ease, border-color .2s ease; }
@@ -49,81 +50,125 @@
     button:disabled { cursor: wait; opacity: .72; transform: none; }
     .notice { background: #FEF2F2; border: 1px solid #FECACA; border-radius: 9px; color: #B91C1C; margin-top: 20px; padding: 12px 14px; }
     .helper { color: var(--muted); font-size: .86rem; line-height: 1.45; margin: -8px 0 0; }
-    .batch { border-top: 1px solid var(--border); display: grid; gap: 14px; margin-top: 4px; padding-top: 20px; }
-    .batch h2 { font-size: 1rem; margin: 0; }
-    .month-grid, .actions { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
-    .batch-button { background: var(--accent); border-color: var(--accent); }
-    .batch-button:hover { background: var(--accent-hover); box-shadow: 0 8px 16px rgba(34, 197, 94, .22); }
-    @media (max-width: 520px) { body { padding: 14px; } .card { border-radius: 14px; padding: 24px 20px; } .month-grid, .actions { grid-template-columns: 1fr; } }
+    .read-only-info { background: var(--surface); border: 1px solid var(--primary); border-radius: 9px; padding: 16px; margin-top: 10px; display: none; }
+    .read-only-info p { margin: 6px 0; font-size: 0.95rem; color: var(--text); }
+    .read-only-info strong { color: var(--primary); }
+    .cycle-grid { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+    @media (max-width: 520px) { body { padding: 14px; } .card { border-radius: 14px; padding: 24px 20px; } .cycle-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
   <main>
     <nav class="navbar" aria-label="Primary navigation">
-      <a class="brand" href="{{ url_for('receipt_form') }}" aria-label="Recipto home"><span class="brand-mark">R</span>Recipto</a>
+      <a class="brand" href="{{ url_for('generate_bill_form') }}" aria-label="Recipto home"><span class="brand-mark">R</span>Recipto</a>
       <div class="nav-actions">
         <a class="history-link" href="{{ url_for('billing_dashboard') }}">Billing</a>
-        <a class="history-link" href="{{ url_for('receipt_history') }}">Receipt History</a>
+        <a class="history-link" href="{{ url_for('duplicate_bill') }}">Duplicate Bill</a>
+        <span class="history-link disabled" title="Coming Soon">Payment Status</span>
         <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark theme" title="Switch theme"><span aria-hidden="true">🌙</span></button>
       </div>
     </nav>
     <section class="card">
-      <h1>Generate a rent receipt</h1>
-      <p class="tagline">Simple Receipts. Smart Records.</p>
-      <p class="subtitle">Preview a professional receipt before creating its downloadable PDF.</p>
+      <h1>Generate Bill</h1>
+      <p class="tagline">Database-Driven Rental Billing.</p>
+      <p class="subtitle">Select a Gala to automatically fetch tenant details and generate a PDF bill.</p>
 
       {% if error %}<div class="notice" role="alert">{{ error }}</div>{% endif %}
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="notice" role="alert" style="{% if category == 'success' %}background:#F0FDF4;border-color:#BBF7D0;color:#166534;{% endif %}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
 
-      <form id="receipt-form" action="{{ url_for('preview_receipt') }}" method="post" novalidate>
+      <form id="receipt-form" action="{{ url_for('generate_bill_download') }}" method="post">
         <label>
-          Tenant Name
-          <input name="tenant_name" maxlength="120" required autocomplete="name" value="{{ form_values.get('tenant_name', '') }}">
-        </label>
-        <label>
-          Amount
-          <input name="amount" type="number" min="0.01" step="0.01" required placeholder="0.00" value="{{ form_values.get('amount', '') }}">
-        </label>
-        <label>
-          House / Gala No.
-          <input name="house_no" maxlength="120" required value="{{ form_values.get('house_no', '') }}">
-        </label>
-        <label>
-          Receipt Type
-          <select name="receipt_type" required>
-            <option value="signed" {% if form_values.get('receipt_type', 'signed') == 'signed' %}selected{% endif %}>Signed</option>
-            <option value="unsigned" {% if form_values.get('receipt_type') == 'unsigned' %}selected{% endif %}>Unsigned</option>
+          Gala Number
+          <select name="gala_id" id="gala_id" required>
+            <option value="" disabled selected>Select a Gala...</option>
+            {% for gala in galas %}
+              <option value="{{ gala.id }}">{{ gala.gala_number }} - {{ gala.tenant_name }}</option>
+            {% endfor %}
           </select>
         </label>
-        <div class="batch">
-          <h2>Batch Months</h2>
-          <div class="month-grid">
+        
+        <div class="read-only-info" id="gala-info">
+            <p><strong>Tenant Name:</strong> <span id="info-tenant">-</span></p>
+            <p><strong>Monthly Rent:</strong> Rs. <span id="info-rent">-</span></p>
+            <p><strong>WhatsApp:</strong> <span id="info-phone">-</span></p>
+        </div>
+
+        <div>
+          <label style="margin-bottom: 8px;">Billing Type</label>
+          <div style="display: flex; gap: 24px; background: var(--input); border: 1px solid var(--border); border-radius: 9px; padding: 12px 14px;">
+            <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; margin: 0;">
+              <input type="radio" name="billing_type" value="quarter" id="type_quarter" checked style="width: auto; min-height: auto;">
+              Quarter Cycles (Default)
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; margin: 0;">
+              <input type="radio" name="billing_type" value="custom" id="type_custom" style="width: auto; min-height: auto;">
+              Custom Month Range
+            </label>
+          </div>
+        </div>
+
+        <!-- Quarter Cycles Mode Container -->
+        <div id="quarter-section">
+          <label style="margin-bottom: 8px;">Select Billing Cycles</label>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+            {% for q_code, q_info in quarters_info.items() %}
+            <label style="display: flex; align-items: center; gap: 8px; background: var(--input); border: 1px solid var(--border); border-radius: 9px; padding: 10px 12px; cursor: pointer; font-weight: 500;">
+              <input type="checkbox" name="quarters" value="{{ q_code }}" class="quarter-check" {% if q_code == 'Q1' %}checked{% endif %} style="width: auto; min-height: auto;">
+              <span>{{ q_info.label }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Custom Month Range Mode Container -->
+        <div id="custom-section" style="display: none;">
+          <div class="cycle-grid">
             <label>
               Start Month
-              <select name="start_month">
-                {% for value, label in month_options %}
-                  <option value="{{ value }}" {% if form_values.get('start_month', current_month) == value %}selected{% endif %}>{{ label }}</option>
+              <select name="start_month" id="start_month">
+                {% for val, label in month_options %}
+                  <option value="{{ val }}" {% if current_month == val %}selected{% endif %}>{{ label }}</option>
                 {% endfor %}
               </select>
             </label>
             <label>
               End Month
-              <select name="end_month">
-                {% for value, label in month_options %}
-                  <option value="{{ value }}" {% if form_values.get('end_month', current_month) == value %}selected{% endif %}>{{ label }}</option>
+              <select name="end_month" id="end_month">
+                {% for val, label in month_options %}
+                  <option value="{{ val }}" {% if current_month == val %}selected{% endif %}>{{ label }}</option>
                 {% endfor %}
               </select>
             </label>
           </div>
-          <label>
-            Year
-            <input name="year" type="number" min="2000" max="9999" value="{{ form_values.get('year', current_year) }}">
-          </label>
         </div>
-        <p class="helper">Previewing does not create a record. Downloading saves one receipt; batch generation creates one PDF per selected month.</p>
-        <div class="actions">
-          <button type="submit">Generate Receipt</button>
-          <button class="batch-button" type="submit" formaction="{{ url_for('generate_batch_receipts') }}">Generate Batch ZIP</button>
+
+        <label>
+          Year
+          <input name="year" id="year_input" type="number" min="2000" max="9999" value="{{ current_year }}" required>
+        </label>
+
+        <!-- Live Billing Summary Card -->
+        <div id="summary-card" style="background: var(--surface); border: 1px solid var(--primary); border-radius: 12px; padding: 18px; display: none;">
+          <h3 style="margin: 0 0 10px; font-size: 1rem; color: var(--primary); font-family: Poppins, Arial, sans-serif;">Live Billing Summary</h3>
+          <div style="display: grid; gap: 8px; font-size: 0.92rem;">
+            <div><strong>Monthly Rent:</strong> Rs. <span id="summary-rent">0.00</span></div>
+            <div><strong>Billing Period:</strong> <span id="summary-period">-</span></div>
+            <div><strong>Number of Months:</strong> <span id="summary-months">1</span></div>
+            <div style="border-top: 1px solid var(--border); margin-top: 6px; padding-top: 8px; font-size: 1.1rem; font-weight: 700; color: var(--text);">
+              Total Amount: <span style="color: var(--primary);">Rs. <span id="summary-total">0.00</span></span>
+            </div>
+          </div>
+          <div id="summary-error" style="color: #DC2626; font-size: 0.86rem; font-weight: 700; margin-top: 8px; display: none;"></div>
         </div>
+
+        <p class="helper">Generating a bill will store it securely in the database and download a PDF copy.</p>
+        <button type="submit" id="submit-btn">Generate Bill</button>
       </form>
     </section>
   </main>
@@ -145,11 +190,157 @@
       updateThemeToggle();
     });
 
+    let galasData = [];
+    fetch('/api/galas')
+        .then(r => r.json())
+        .then(data => { 
+            galasData = data.galas;
+            updateBillingSummary();
+        })
+        .catch(e => console.error("Could not load galas API", e));
+
+    const galaSelect = document.getElementById('gala_id');
+    const galaInfo = document.getElementById('gala-info');
+    const typeQuarter = document.getElementById('type_quarter');
+    const typeCustom = document.getElementById('type_custom');
+    const quarterSection = document.getElementById('quarter-section');
+    const customSection = document.getElementById('custom-section');
+    const quarterChecks = document.querySelectorAll('.quarter-check');
+    const startMonthSelect = document.getElementById('start_month');
+    const endMonthSelect = document.getElementById('end_month');
+    const yearInput = document.getElementById('year_input');
+    const summaryCard = document.getElementById('summary-card');
+    const summaryRent = document.getElementById('summary-rent');
+    const summaryPeriod = document.getElementById('summary-period');
+    const summaryMonths = document.getElementById('summary-months');
+    const summaryTotal = document.getElementById('summary-total');
+    const summaryError = document.getElementById('summary-error');
+    const submitBtn = document.getElementById('submit-btn');
+
+    const quarterRanges = {
+      "Q1": { start: 1, end: 3, label: "Jan – Mar" },
+      "Q2": { start: 4, end: 6, label: "Apr – Jun" },
+      "Q3": { start: 7, end: 9, label: "Jul – Sep" },
+      "Q4": { start: 10, end: 12, label: "Oct – Dec" }
+    };
+    const quarterOrder = ["Q1", "Q2", "Q3", "Q4"];
+
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    const monthAbbrs = [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    ];
+
+    function toggleMode() {
+        if (typeQuarter.checked) {
+            quarterSection.style.display = 'block';
+            customSection.style.display = 'none';
+        } else {
+            quarterSection.style.display = 'none';
+            customSection.style.display = 'block';
+        }
+        updateBillingSummary();
+    }
+
+    typeQuarter.addEventListener('change', toggleMode);
+    typeCustom.addEventListener('change', toggleMode);
+
+    function updateBillingSummary() {
+        const selectedId = galaSelect.value;
+        const gala = galasData.find(g => g.id.toString() === selectedId);
+        
+        if (gala) {
+            document.getElementById('info-tenant').textContent = gala.tenant_name;
+            document.getElementById('info-rent').textContent = gala.monthly_rent.toFixed(2);
+            document.getElementById('info-phone').textContent = gala.phone_number || '(none)';
+            galaInfo.style.display = 'block';
+
+            const yr = yearInput.value || new Date().getFullYear();
+            let startM = 0, endM = 0, periodStr = "", isValid = true, errorMsg = "";
+
+            if (typeQuarter.checked) {
+                const selectedQ = Array.from(quarterChecks)
+                    .filter(cb => cb.checked)
+                    .map(cb => cb.value);
+
+                if (selectedQ.length === 0) {
+                    isValid = false;
+                    errorMsg = "⚠️ Please select at least one quarter cycle.";
+                } else {
+                    const indices = selectedQ.map(q => quarterOrder.indexOf(q)).sort((a, b) => a - b);
+                    const isConsecutive = indices.every((val, idx) => idx === 0 || val === indices[idx - 1] + 1);
+
+                    if (!isConsecutive) {
+                        isValid = false;
+                        errorMsg = "⚠️ Selected quarters must be consecutive (e.g., Q1+Q2 or Q2+Q3+Q4).";
+                    } else {
+                        const startQ = quarterOrder[indices[0]];
+                        const endQ = quarterOrder[indices[indices.length - 1]];
+                        startM = quarterRanges[startQ].start;
+                        endM = quarterRanges[endQ].end;
+
+                        const sAbbr = monthAbbrs[startM - 1];
+                        const eAbbr = monthAbbrs[endM - 1];
+                        periodStr = (startM === endM) ? `${sAbbr} ${yr}` : `${sAbbr} – ${eAbbr} ${yr}`;
+                    }
+                }
+            } else {
+                startM = parseInt(startMonthSelect.value, 10);
+                endM = parseInt(endMonthSelect.value, 10);
+
+                if (!startM || !endM || endM < startM) {
+                    isValid = false;
+                    errorMsg = "⚠️ End month cannot be before Start month.";
+                } else {
+                    const sName = monthNames[startM - 1];
+                    const eName = monthNames[endM - 1];
+                    periodStr = (startM === endM) ? `${sName} ${yr}` : `${sName} – ${eName} ${yr}`;
+                }
+            }
+
+            if (!isValid) {
+                summaryCard.style.display = 'block';
+                summaryError.textContent = errorMsg;
+                summaryError.style.display = 'block';
+                submitBtn.disabled = true;
+            } else {
+                summaryError.style.display = 'none';
+                submitBtn.disabled = false;
+                const numMonths = (endM - startM) + 1;
+                const totalAmt = gala.monthly_rent * numMonths;
+
+                summaryRent.textContent = gala.monthly_rent.toFixed(2);
+                summaryPeriod.textContent = periodStr;
+                summaryMonths.textContent = numMonths;
+                summaryTotal.textContent = totalAmt.toFixed(2);
+                summaryCard.style.display = 'block';
+            }
+        }
+    }
+
+    galaSelect.addEventListener('change', updateBillingSummary);
+    quarterChecks.forEach(cb => cb.addEventListener('change', updateBillingSummary));
+    startMonthSelect.addEventListener('change', updateBillingSummary);
+    endMonthSelect.addEventListener('change', updateBillingSummary);
+    yearInput.addEventListener('input', updateBillingSummary);
+
     document.getElementById('receipt-form').addEventListener('submit', event => {
-      const button = event.submitter;
-      if (!button) return;
-      button.disabled = true;
-      button.textContent = button.classList.contains('batch-button') ? 'Preparing ZIP...' : 'Opening Preview...';
+      if (!galaSelect.value) {
+          event.preventDefault();
+          alert("Please select a Gala.");
+          return;
+      }
+      setTimeout(() => {
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Generating...';
+          setTimeout(() => {
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Generate Bill';
+          }, 3000);
+      }, 10);
     });
   </script>
 </body>

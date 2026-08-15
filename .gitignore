@@ -1,17 +1,25 @@
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
 
-# databases
+# Virtual environments
+venv/
+.venv/
+env/
+
+# VS Code
+.vscode/
+
+# Scratch / temp
+scratch/
+
+# Database
 *.db
+*.sqlite
 *.sqlite3
 
-# generated files
-generated_receipts/
+# Logs
+*.log
+
+# PDFs
 *.pdf
-*.zip
-
-# wkhtmltopdf binaries
-wkhtmltopdf/
-
-# env
-.env

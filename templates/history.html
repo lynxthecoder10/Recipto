@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#2563EB">
-  <title>Recipto - Receipt History</title>
+  <title>Recipto - Duplicate Bill</title>
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,55 +21,186 @@
     })();
   </script>
   <style>
-    :root { --bg: #F8FAFC; --card: #FFFFFF; --text: #1E293B; --border: #E2E8F0; --primary: #2563EB; --primary-hover: #1D4ED8; --muted: #64748B; --surface: #EFF6FF; --table-heading: #1E3A8A; --shadow: rgba(30, 41, 59, .10); color-scheme: light; font-family: Inter, Arial, sans-serif; }
-    [data-theme="dark"] { --bg: #0F172A; --card: #1E293B; --text: #F8FAFC; --border: #334155; --primary: #60A5FA; --primary-hover: #93C5FD; --muted: #CBD5E1; --surface: #172554; --table-heading: #BFDBFE; --shadow: rgba(2, 6, 23, .42); color-scheme: dark; }
+    :root { --bg: #F8FAFC; --card: #FFFFFF; --text: #1E293B; --border: #E2E8F0; --primary: #2563EB; --primary-hover: #1D4ED8; --muted: #64748B; --surface: #EFF6FF; --input: #FFFFFF; --table-heading: #1E3A8A; --shadow: rgba(30, 41, 59, .10); color-scheme: light; font-family: Inter, Arial, sans-serif; }
+    [data-theme="dark"] { --bg: #0F172A; --card: #1E293B; --text: #F8FAFC; --border: #334155; --primary: #60A5FA; --primary-hover: #93C5FD; --muted: #CBD5E1; --surface: #172554; --input: #0F172A; --table-heading: #BFDBFE; --shadow: rgba(2, 6, 23, .42); color-scheme: dark; }
     * { box-sizing: border-box; }
-    body { background: var(--bg); color: var(--text); margin: 0; padding: 24px; transition: background .2s ease, color .2s ease; }
-    main { margin: 0 auto; max-width: 600px; }
+    body { background: var(--bg); color: var(--text); margin: 0; padding: 24px; display: flex; justify-content: center; transition: background .2s ease, color .2s ease; }
+    main { margin: 0 auto; max-width: 600px; width: 100%; }
     .navbar { align-items: center; display: flex; justify-content: space-between; margin-bottom: 18px; }
     .nav-actions { align-items: center; display: flex; gap: 12px; }
     .brand { align-items: center; color: var(--text); display: inline-flex; font-family: Poppins, Arial, sans-serif; font-size: 1.25rem; font-weight: 700; gap: 9px; text-decoration: none; }
     .brand-mark { align-items: center; background: var(--primary); border-radius: 9px; color: #fff; display: inline-flex; font-size: .95rem; height: 32px; justify-content: center; width: 32px; }
     .back { color: var(--primary); font-size: .9rem; font-weight: 700; text-decoration: none; }
+    .history-link { color: var(--primary); font-size: .9rem; font-weight: 700; text-decoration: none; }
+    .history-link:hover { color: var(--primary-hover); text-decoration: underline; }
+    .history-link.disabled { color: var(--muted); cursor: not-allowed; text-decoration: none; }
     .theme-toggle { align-items: center; background: var(--card); border: 1px solid var(--border); border-radius: 9px; color: var(--text); cursor: pointer; display: inline-flex; font-size: 1rem; height: 36px; justify-content: center; padding: 0; transition: background .18s ease, border-color .18s ease, transform .18s ease; width: 36px; }
     .theme-toggle:hover { background: var(--surface); border-color: var(--primary); transform: translateY(-1px); }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 16px 36px var(--shadow); padding: 24px; transition: background .2s ease, border-color .2s ease; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 16px 36px var(--shadow); padding: 24px; transition: background .2s ease, border-color .2s ease; margin-bottom: 24px; }
     h1 { font-family: Poppins, Arial, sans-serif; font-size: 1.45rem; letter-spacing: -.025em; margin: 0; }
     .tagline { color: var(--primary); font-size: .88rem; font-weight: 700; margin: 6px 0 0; }
     .subtitle { color: var(--muted); line-height: 1.5; margin: 8px 0 20px; }
-    .table-wrap { border: 1px solid var(--border); border-radius: 11px; overflow-x: auto; }
-    table { border-collapse: collapse; min-width: 700px; width: 100%; }
+    form { display: grid; gap: 18px; }
+    label { color: var(--text); display: grid; font-size: .92rem; font-weight: 700; gap: 7px; }
+    input, select, button { border-radius: 9px; font: inherit; min-height: 46px; padding: 11px 12px; width: 100%; }
+    input, select { background: var(--input); border: 1px solid var(--border); color: var(--text); }
+    input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, .20); outline: 0; }
+    button { background: var(--primary); border: 1px solid var(--primary); color: #fff; cursor: pointer; font-weight: 700; transition: background .18s ease, box-shadow .18s ease, transform .18s ease; }
+    button:hover { background: var(--primary-hover); box-shadow: 0 8px 16px rgba(37, 99, 235, .22); transform: translateY(-1px); }
+    .notice { background: #FEF2F2; border: 1px solid #FECACA; border-radius: 9px; color: #B91C1C; margin-top: 20px; padding: 12px 14px; }
+    .table-wrap { border: 1px solid var(--border); border-radius: 11px; overflow-x: auto; margin-top: 20px; }
+    table { border-collapse: collapse; min-width: 100%; width: 100%; }
     th, td { border-bottom: 1px solid var(--border); padding: 13px 14px; text-align: left; }
     tr:last-child td { border-bottom: 0; }
     th { background: var(--surface); color: var(--table-heading); font-size: .74rem; letter-spacing: .05em; text-transform: uppercase; }
     td { color: var(--text); font-size: .88rem; }
     .download { background: var(--primary); border: 0; border-radius: 7px; color: #fff; cursor: pointer; font: inherit; font-size: .82rem; font-weight: 700; padding: 8px 10px; transition: background .18s ease, transform .18s ease; white-space: nowrap; }
     .download:hover { background: var(--primary-hover); transform: translateY(-1px); }
-    .status { color: var(--muted); padding: 28px 16px; text-align: center; }
     @media (max-width: 520px) { body { padding: 14px; } .card { border-radius: 14px; padding: 20px; } }
   </style>
 </head>
 <body>
   <main>
     <nav class="navbar" aria-label="Primary navigation">
-      <a class="brand" href="{{ url_for('receipt_form') }}"><span class="brand-mark">R</span>Recipto</a>
+      <a class="brand" href="{{ url_for('generate_bill_form') }}"><span class="brand-mark">R</span>Recipto</a>
       <div class="nav-actions">
-        <a class="back" href="{{ url_for('billing_dashboard') }}">Billing</a>
-        <a class="back" href="{{ url_for('receipt_form') }}">Create Receipt</a>
+        <a class="history-link" href="{{ url_for('billing_dashboard') }}">Billing</a>
+        <a class="history-link" href="{{ url_for('generate_bill_form') }}">Generate Bill</a>
+        <span class="history-link disabled" title="Coming Soon">Payment Status</span>
         <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark theme" title="Switch theme"><span aria-hidden="true">🌙</span></button>
       </div>
     </nav>
     <section class="card">
-      <h1>Receipt History</h1>
-      <p class="tagline">Simple Receipts. Smart Records.</p>
-      <p class="subtitle">All generated receipts, ready to download again when needed.</p>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Receipt No.</th><th>Tenant</th><th>Amount</th><th>Month / Year</th><th>Action</th></tr></thead>
-          <tbody id="history-rows"><tr><td class="status" colspan="5">Loading receipts...</td></tr></tbody>
-        </table>
-      </div>
+      <h1>Duplicate Bill</h1>
+      <p class="tagline">Retrieve an existing bill.</p>
+      <p class="subtitle">Search the database to download a previously generated PDF bill.</p>
+
+      {% if search_error %}<div class="notice" role="alert">{{ search_error }}</div>{% endif %}
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="notice" role="alert" style="{% if category == 'success' %}background:#F0FDF4;border-color:#BBF7D0;color:#166534;{% endif %}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="get" action="{{ url_for('duplicate_bill') }}">
+        <label>
+          Gala Number
+          <select name="gala_number" required>
+            <option value="" disabled selected>Select a Gala...</option>
+            {% for gala in galas %}
+              <option value="{{ gala.gala_number }}" {% if request.args.get('gala_number') == gala.gala_number %}selected{% endif %}>{{ gala.gala_number }} - {{ gala.tenant_name }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <div>
+          <label style="margin-bottom: 8px;">Billing Type</label>
+          <div style="display: flex; gap: 24px; background: var(--input); border: 1px solid var(--border); border-radius: 9px; padding: 12px 14px;">
+            <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; margin: 0;">
+              <input type="radio" name="billing_type" value="quarter" id="hist_type_quarter" {% if request.args.get('billing_type', 'quarter') == 'quarter' %}checked{% endif %} style="width: auto; min-height: auto;">
+              Quarter Cycles
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; margin: 0;">
+              <input type="radio" name="billing_type" value="custom" id="hist_type_custom" {% if request.args.get('billing_type') == 'custom' %}checked{% endif %} style="width: auto; min-height: auto;">
+              Custom Month Range
+            </label>
+          </div>
+        </div>
+
+        <div id="hist-quarter-section" style="{% if request.args.get('billing_type') == 'custom' %}display: none;{% endif %}">
+          <label style="margin-bottom: 8px;">Select Quarter Cycle(s)</label>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+            {% for q_code, q_info in quarters_info.items() %}
+            <label style="display: flex; align-items: center; gap: 8px; background: var(--input); border: 1px solid var(--border); border-radius: 9px; padding: 10px 12px; cursor: pointer; font-weight: 500;">
+              <input type="checkbox" name="quarters" value="{{ q_code }}" {% if q_code in request.args.getlist('quarters') or (not request.args.getlist('quarters') and q_code == 'Q1') %}checked{% endif %} style="width: auto; min-height: auto;">
+              <span>{{ q_info.label }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div id="hist-custom-section" style="{% if request.args.get('billing_type') != 'custom' %}display: none;{% endif %}">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <label>
+              Start Month
+              <select name="start_month">
+                {% for val, label in month_options %}
+                  <option value="{{ val }}" {% if request.args.get('start_month') == val|string or current_month == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </label>
+            <label>
+              End Month
+              <select name="end_month">
+                {% for val, label in month_options %}
+                  <option value="{{ val }}" {% if request.args.get('end_month') == val|string or current_month == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <label>
+          Year
+          <input name="year" type="number" min="2000" max="9999" value="{{ request.args.get('year', current_year) }}" required>
+        </label>
+        <button type="submit">Search Database</button>
+      </form>
+      <script>
+        const histTypeQ = document.getElementById('hist_type_quarter');
+        const histTypeC = document.getElementById('hist_type_custom');
+        const histQSec = document.getElementById('hist-quarter-section');
+        const histCSec = document.getElementById('hist-custom-section');
+
+        function toggleHistMode() {
+            if (histTypeQ.checked) {
+                histQSec.style.display = 'block';
+                histCSec.style.display = 'none';
+            } else {
+                histQSec.style.display = 'none';
+                histCSec.style.display = 'block';
+            }
+        }
+        if (histTypeQ && histTypeC) {
+            histTypeQ.addEventListener('change', toggleHistMode);
+            histTypeC.addEventListener('change', toggleHistMode);
+        }
+      </script>
     </section>
+
+    {% if searched_bill %}
+    <section class="card">
+        <h2>Search Result</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Bill No.</th>
+                        <th>Period</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>{{ searched_bill.bill_no }}</strong></td>
+                        <td>{{ searched_bill.period_label }}<br><span style="color:var(--muted); font-size:0.8rem;">{{ searched_bill.num_months }} month(s)</span></td>
+                        <td><strong>Rs. {{ '%.2f'|format(searched_bill.amount) }}</strong></td>
+                        <td style="text-transform: capitalize;"><span class="status {{ searched_bill.payment_status }}">{{ searched_bill.payment_status }}</span></td>
+                        <td>
+                            <form method="post" action="{{ url_for('download_existing_bill', bill_no=searched_bill.bill_no) }}">
+                                <button type="submit" class="download">Download PDF</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% endif %}
   </main>
   <script>
     const themeToggle = document.querySelector('[data-theme-toggle]');
@@ -88,50 +219,6 @@
       try { localStorage.setItem('recipto-theme', nextTheme); } catch (_) {}
       updateThemeToggle();
     });
-
-    const rows = document.getElementById('history-rows');
-    const apiUrl = {{ url_for('list_receipts')|tojson }};
-
-    function addCell(row, value) {
-      const cell = document.createElement('td');
-      cell.textContent = value;
-      row.appendChild(cell);
-    }
-
-    fetch(apiUrl)
-      .then(response => response.ok ? response.json() : Promise.reject())
-      .then(data => {
-        rows.replaceChildren();
-        if (!data.receipts || data.receipts.length === 0) {
-          rows.innerHTML = '<tr><td class="status" colspan="5">No receipts have been generated yet.</td></tr>';
-          return;
-        }
-        data.receipts.forEach(receipt => {
-          const row = document.createElement('tr');
-          addCell(row, receipt.receipt_no);
-          addCell(row, receipt.tenant_name);
-          addCell(row, `Rs ${Number(receipt.amount).toFixed(2)}`);
-          addCell(row, `${receipt.month} / ${receipt.year}`);
-          const action = document.createElement('td');
-          const form = document.createElement('form');
-          form.method = 'post';
-          form.action = {{ url_for('generate_pdf_download')|tojson }};
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = 'receipt_no';
-          input.value = receipt.receipt_no;
-          const button = document.createElement('button');
-          button.className = 'download';
-          button.type = 'submit';
-          button.textContent = 'Download PDF';
-          form.addEventListener('submit', () => { button.disabled = true; button.textContent = 'Preparing...'; });
-          form.append(input, button);
-          action.appendChild(form);
-          row.appendChild(action);
-          rows.appendChild(row);
-        });
-      })
-      .catch(() => { rows.innerHTML = '<tr><td class="status" colspan="5">Unable to load receipt history.</td></tr>'; });
   </script>
 </body>
 </html>
