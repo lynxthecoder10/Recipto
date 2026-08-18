@@ -71,12 +71,12 @@ def generate_bill_message(bill: dict[str, Any], is_reminder: bool = False) -> st
 
 
 def build_whatsapp_deeplink(phone: str, bill: dict[str, Any], is_reminder: bool = False) -> str | None:
-    """Generate wa.me web URL for manual web link fallback."""
+    """Generate WhatsApp Web URL (browser-only, never desktop app)."""
     digits = sanitize_phone_number(phone)
     if not digits:
         return None
     msg = generate_bill_message(bill, is_reminder=is_reminder)
-    return f"https://wa.me/{digits}?text={urllib.parse.quote(msg)}"
+    return f"https://web.whatsapp.com/send?phone={digits}&text={urllib.parse.quote(msg)}"
 
 
 def send_whatsapp_message(
