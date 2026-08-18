@@ -201,9 +201,9 @@
               {% endif %}
             </td>
             <td>
-              {% if bill.whatsapp_status == 'sent' %}
+              {% if bill.whatsapp_status|lower == 'sent' %}
                 <span class="badge badge-sent"><i data-lucide="check-check" style="width: 12px; height: 12px;"></i> Sent</span>
-              {% elif bill.whatsapp_status == 'pending' %}
+              {% elif bill.whatsapp_status|lower == 'pending' %}
                 <span class="badge badge-pending"><i data-lucide="clock" style="width: 12px; height: 12px;"></i> Pending</span>
               {% else %}
                 <span class="badge badge-failed"><i data-lucide="x-circle" style="width: 12px; height: 12px;"></i> Failed</span>

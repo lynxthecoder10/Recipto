@@ -87,9 +87,9 @@ def _enrich_bill(bill: dict) -> dict:
     bill["whatsapp_status"] = bill.get("whatsapp_status", "Pending") or "Pending"
     
     if pending > 0:
-        bill["whatsapp_url"] = build_whatsapp_deeplink(phone, bill)
+        bill["whatsapp_url"] = build_whatsapp_deeplink(phone, bill, is_reminder=True)
     else:
-        bill["whatsapp_url"] = None
+        bill["whatsapp_url"] = build_whatsapp_deeplink(phone, bill, is_reminder=False)
 
     return bill
 

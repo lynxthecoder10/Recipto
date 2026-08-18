@@ -70,12 +70,12 @@ def generate_bill_message(bill: dict[str, Any], is_reminder: bool = False) -> st
     return msg
 
 
-def build_whatsapp_deeplink(phone: str, bill: dict[str, Any]) -> str | None:
+def build_whatsapp_deeplink(phone: str, bill: dict[str, Any], is_reminder: bool = False) -> str | None:
     """Generate wa.me web URL for manual web link fallback."""
     digits = sanitize_phone_number(phone)
     if not digits:
         return None
-    msg = generate_bill_message(bill, is_reminder=False)
+    msg = generate_bill_message(bill, is_reminder=is_reminder)
     return f"https://wa.me/{digits}?text={urllib.parse.quote(msg)}"
 
 
@@ -101,15 +101,16 @@ def send_whatsapp_message(
         return False
 
     message_text = generate_bill_message(bill, is_reminder=is_reminder)
+    encoded_text = urllib.parse.quote(message_text)
 
     try:
         print(f"\n=======================================================")
         print(f"[WhatsApp Automation] STARTING AUTOMATION FOR BILL: {bill_no}")
         print(f"[WhatsApp Automation] Target Phone: {digits} ({tenant_name})")
-        print(f"[WhatsApp Automation] Step 1: Launching WhatsApp Web browser URL...")
+        print(f"[WhatsApp Automation] Step 1: Launching WhatsApp Web browser URL with pre-filled message...")
         
-        # Build WhatsApp Web send URL
-        url = f"https://web.whatsapp.com/send?phone={digits}"
+        # Build WhatsApp Web send URL with pre-filled text
+        url = f"https://web.whatsapp.com/send?phone={digits}&text={encoded_text}"
         webbrowser.open(url)
 
         print(f"[WhatsApp Automation] Step 2: Waiting {config.WHATSAPP_LOAD_TIME}s for WhatsApp Web page load...")

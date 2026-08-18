@@ -134,9 +134,9 @@
               {% endif %}
             </td>
             <td>
-              {% if bill.whatsapp_status == 'sent' %}
+              {% if bill.whatsapp_status|lower == 'sent' %}
                 <span class="badge badge-sent"><i data-lucide="check-check" style="width: 12px; height: 12px;"></i> Sent</span>
-              {% elif bill.whatsapp_status == 'pending' %}
+              {% elif bill.whatsapp_status|lower == 'pending' %}
                 <span class="badge badge-pending"><i data-lucide="clock" style="width: 12px; height: 12px;"></i> Pending</span>
               {% else %}
                 <span class="badge badge-failed"><i data-lucide="x-circle" style="width: 12px; height: 12px;"></i> Failed</span>
@@ -158,12 +158,17 @@
                   </button>
                 </form>
 
-                <!-- WhatsApp Reminder Trigger -->
-                <form action="{{ url_for('send_payment_reminder', bill_no=bill.bill_no) }}" method="POST" class="m-0">
-                  <button type="submit" class="btn btn-whatsapp btn-sm" title="Send WhatsApp Web payment reminder" {% if bill.payment_status == 'paid' %}disabled{% endif %}>
-                    <i data-lucide="message-square" style="width: 14px; height: 14px;"></i>
-                  </button>
-                </form>
+                <!-- WhatsApp Reminder Trigger (Dual Action: 1-Click Browser Pre-filled Link + Server Automation) -->
+                {% if bill.whatsapp_url and bill.payment_status != 'paid' %}
+                <a href="{{ bill.whatsapp_url }}" target="_blank" class="btn btn-whatsapp btn-sm" title="Send WhatsApp payment reminder" onclick="fetch('{{ url_for('send_payment_reminder', bill_no=bill.bill_no) }}', {method: 'POST'})">
+                  <i data-lucide="message-square" style="width: 14px; height: 14px;"></i>
+                  <span>WhatsApp</span>
+                </a>
+                {% else %}
+                <button type="button" class="btn btn-whatsapp btn-sm opacity-50" disabled title="No active dues">
+                  <i data-lucide="message-square" style="width: 14px; height: 14px;"></i>
+                </button>
+                {% endif %}
               </div>
             </td>
           </tr>

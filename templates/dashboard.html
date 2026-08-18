@@ -276,12 +276,19 @@
                 <div class="small text-danger fw-semibold tabular-nums">Due: ₹{{ '{:,.2f}'.format(bill.pending_amount) }} ({{ bill.period_label }})</div>
               </div>
             </div>
+            {% if bill.whatsapp_url %}
+            <a href="{{ bill.whatsapp_url }}" target="_blank" class="btn btn-whatsapp btn-sm flex-shrink-0" title="Send WhatsApp payment reminder" onclick="fetch('{{ url_for('send_payment_reminder', bill_no=bill.bill_no) }}', {method: 'POST'})">
+              <i data-lucide="message-square" style="width: 14px; height: 14px;"></i>
+              <span class="d-none d-sm-inline">Remind</span>
+            </a>
+            {% else %}
             <form action="{{ url_for('send_payment_reminder', bill_no=bill.bill_no) }}" method="POST" class="m-0 flex-shrink-0">
               <button type="submit" class="btn btn-whatsapp btn-sm" title="Send WhatsApp payment reminder">
                 <i data-lucide="message-square" style="width: 14px; height: 14px;"></i>
                 <span class="d-none d-sm-inline">Remind</span>
               </button>
             </form>
+            {% endif %}
           </li>
           {% endfor %}
         </ul>
