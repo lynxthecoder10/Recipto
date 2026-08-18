@@ -67,29 +67,29 @@
   --whatsapp-hover: #1DA851;
   --whatsapp-subtle: rgba(37, 211, 102, 0.12);
 
-  /* Light Theme: Tinted Soft Blau-Grana Canvas & Surfaces (NOT plain white) */
-  --bg-app: #EEF3FB;
-  --bg-surface: #F8FAFD;
+  /* Light Theme: Premium Warm Off-White & Beige Canvas, Ivory Surfaces & Warm Muted Stone */
+  --bg-app: #F6F4EE;
+  --bg-surface: #FFFFFF;
   --bg-surface-elevated: #FFFFFF;
-  --bg-surface-subtle: #E2ECF8;
-  --bg-surface-grana: #FDF0F3;
-  --bg-hover: #E7EFF9;
-  --bg-active: #D8E5F6;
+  --bg-surface-subtle: #ECE7DD;
+  --bg-surface-grana: #FAF0F3;
+  --bg-hover: #E7E1D4;
+  --bg-active: #DDD5C5;
 
-  /* Floating Glass Tokens (Light Mode) */
-  --glass-bg: rgba(244, 248, 254, 0.88);
-  --glass-border: rgba(0, 77, 152, 0.18);
+  /* Floating Glass Tokens (Warm Alabaster Light Mode) */
+  --glass-bg: rgba(246, 244, 238, 0.90);
+  --glass-border: rgba(180, 165, 140, 0.38);
   --glass-blur: blur(18px) saturate(180%);
 
-  /* Light Theme Borders & Text (Tinted Navy & Slate) */
-  --border-subtle: #D2DFEE;
-  --border-medium: #B8CCE4;
-  --border-strong: #7E9DCB;
+  /* Light Theme Borders & Text (Warm Stone & Espresso Slate) */
+  --border-subtle: #E2DDD1;
+  --border-medium: #CEC6B6;
+  --border-strong: #A89D89;
   --border-focus: #004D98;
 
-  --text-main: #07132B;
-  --text-muted: #3B4E68;
-  --text-tertiary: #6E84A3;
+  --text-main: #1A1815;
+  --text-muted: #544E43;
+  --text-tertiary: #7F7767;
   --text-inverse: #FFFFFF;
 
   /* Spacing */
@@ -109,15 +109,15 @@
   --radius-2xl: 24px;
   --radius-full: 9999px;
 
-  /* Shadows with Blaugrana Ambient Lighting */
-  --shadow-xs: 0 1px 2px 0 rgba(0, 77, 152, 0.05);
-  --shadow-sm: 0 1px 3px 0 rgba(0, 77, 152, 0.08), 0 1px 2px -1px rgba(165, 0, 68, 0.04);
-  --shadow-md: 0 4px 16px -2px rgba(0, 77, 152, 0.10), 0 2px 6px -2px rgba(165, 0, 68, 0.06);
-  --shadow-lg: 0 16px 36px -4px rgba(0, 77, 152, 0.14), 0 6px 14px -2px rgba(165, 0, 68, 0.08);
-  --shadow-drawer: 0 24px 60px -12px rgba(7, 19, 43, 0.3), 0 0 0 1px rgba(0, 77, 152, 0.18);
-  --shadow-card: 0 2px 6px 0 rgba(0, 77, 152, 0.06), 0 0 0 1px rgba(0, 77, 152, 0.04);
-  --shadow-card-hover: 0 12px 28px -4px rgba(0, 77, 152, 0.15), 0 4px 10px -2px rgba(165, 0, 68, 0.08);
-  --shadow-palette: 0 24px 64px rgba(7, 19, 43, 0.45), 0 0 0 1px rgba(0, 77, 152, 0.25);
+  /* Shadows with Warm Ambient Lighting & Depth */
+  --shadow-xs: 0 1px 2px 0 rgba(28, 25, 23, 0.04);
+  --shadow-sm: 0 1px 3px 0 rgba(28, 25, 23, 0.06), 0 1px 2px -1px rgba(0, 77, 152, 0.04);
+  --shadow-md: 0 4px 16px -2px rgba(28, 25, 23, 0.08), 0 2px 6px -2px rgba(165, 0, 68, 0.04);
+  --shadow-lg: 0 16px 36px -4px rgba(28, 25, 23, 0.12), 0 6px 14px -2px rgba(0, 77, 152, 0.06);
+  --shadow-drawer: 0 24px 60px -12px rgba(28, 25, 23, 0.25), 0 0 0 1px rgba(180, 165, 140, 0.35);
+  --shadow-card: 0 2px 6px 0 rgba(28, 25, 23, 0.04), 0 0 0 1px rgba(28, 25, 23, 0.02);
+  --shadow-card-hover: 0 12px 28px -4px rgba(28, 25, 23, 0.12), 0 4px 10px -2px rgba(0, 77, 152, 0.08);
+  --shadow-palette: 0 24px 64px rgba(28, 25, 23, 0.35), 0 0 0 1px rgba(180, 165, 140, 0.4);
 
   --edge-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.95);
 
@@ -228,10 +228,12 @@ body {
   margin: 0;
   padding: 0;
   background-color: var(--bg-app);
-  /* Light mode ambient mesh gradient: delicate blue + rose glow */
+  /* Light mode: Warm luxury off-white / beige ambient canvas with subtle Blaugrana & Gold glows */
   background-image: 
-    radial-gradient(circle at 10% 8%, rgba(0, 77, 152, 0.08) 0%, transparent 45%),
-    radial-gradient(circle at 90% 92%, rgba(165, 0, 68, 0.06) 0%, transparent 45%);
+    radial-gradient(circle at 10% 8%, rgba(0, 77, 152, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 90% 12%, rgba(237, 187, 0, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 92% 92%, rgba(165, 0, 68, 0.04) 0%, transparent 40%),
+    radial-gradient(circle at 12% 88%, rgba(215, 200, 175, 0.22) 0%, transparent 45%);
   background-attachment: fixed;
   color: var(--text-main);
   font-family: var(--font-sans);
@@ -889,28 +891,28 @@ a:hover {
 
 /* Light mode specific tinted backgrounds for stat cards */
 .stat-card.primary {
-  background: linear-gradient(180deg, #F3F7FD 0%, #EBF2FC 100%);
-  border-color: rgba(0, 77, 152, 0.22);
+  background: linear-gradient(180deg, #FFFFFF 0%, #F1F5FD 100%);
+  border-color: rgba(0, 77, 152, 0.18);
 }
 .stat-card.danger {
-  background: linear-gradient(180deg, #FDF3F5 0%, #FAEAEE 100%);
-  border-color: rgba(165, 0, 68, 0.22);
+  background: linear-gradient(180deg, #FFFFFF 0%, #FAF0F3 100%);
+  border-color: rgba(165, 0, 68, 0.18);
 }
 .stat-card.info {
-  background: linear-gradient(180deg, #F0F8FF 0%, #E5F3FD 100%);
-  border-color: rgba(2, 132, 199, 0.22);
+  background: linear-gradient(180deg, #FFFFFF 0%, #F0F7FD 100%);
+  border-color: rgba(2, 132, 199, 0.18);
 }
 .stat-card.purple {
-  background: linear-gradient(180deg, #F7F3FD 0%, #EFEAFB 100%);
-  border-color: rgba(124, 58, 237, 0.22);
+  background: linear-gradient(180deg, #FFFFFF 0%, #F6F1FD 100%);
+  border-color: rgba(124, 58, 237, 0.18);
 }
 .stat-card.success {
-  background: linear-gradient(180deg, #F0FDF8 0%, #E4FAF1 100%);
-  border-color: rgba(16, 185, 129, 0.22);
+  background: linear-gradient(180deg, #FFFFFF 0%, #F1FAF5 100%);
+  border-color: rgba(16, 185, 129, 0.18);
 }
 .stat-card.warning {
-  background: linear-gradient(180deg, #FEFBF1 0%, #FCF5E0 100%);
-  border-color: rgba(245, 158, 11, 0.22);
+  background: linear-gradient(180deg, #FFFFFF 0%, #FDF9EE 100%);
+  border-color: rgba(245, 158, 11, 0.18);
 }
 
 [data-bs-theme="dark"] .stat-card.primary,
