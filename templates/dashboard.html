@@ -1,0 +1,313 @@
+{% extends 'base.html' %}
+{% set active_page = 'dashboard' %}
+
+{% block title %}Dashboard – Recipto Rent Receipt System{% endblock %}
+
+{% block content %}
+<!-- Studio Hero Overview Header with Blaugrana Ambient Accent -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4 pb-2">
+  <div>
+    <div class="d-flex align-items-center gap-2 mb-1">
+      <span class="badge" style="background: var(--gradient-blaugrana); color: #ffffff; box-shadow: 0 2px 8px rgba(165, 0, 68, 0.3);">
+        <span class="spinner-grow spinner-grow-sm me-1" style="width: 6px; height: 6px; color: #EDBB00;" role="status"></span> Live Portfolio
+      </span>
+      <span class="text-muted small">&bull; Property Operations</span>
+    </div>
+    <h1 class="h2 fw-bold mb-1" id="greetingHeader">Dashboard Overview</h1>
+    <p class="text-muted mb-0">Track real-time rent cycles, active leases, payment status, and PDF dispatches.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('billing_page') }}" class="btn btn-primary">
+      <i data-lucide="plus"></i>
+      <span>Generate Bill</span>
+    </a>
+    <a href="{{ url_for('galas_page') }}" class="btn btn-light border">
+      <i data-lucide="building"></i>
+      <span>Add Gala</span>
+    </a>
+  </div>
+</div>
+
+<!-- 6 Studio-Grade KPI Stat Cards with Blaugrana Signature Accents -->
+<div class="row g-3 mb-4">
+  <!-- Total Galas -->
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="stat-card primary">
+      <div class="stat-card-top">
+        <span class="stat-title">Total Galas</span>
+        <div class="stat-icon-wrapper stat-icon-primary">
+          <i data-lucide="building-2"></i>
+        </div>
+      </div>
+      <div class="stat-value tabular-nums">{{ total_galas }}</div>
+      <div class="stat-description">
+        <i data-lucide="door-open" class="text-primary" style="width: 14px; height: 14px;"></i> Units managed
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Tenants -->
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="stat-card info">
+      <div class="stat-card-top">
+        <span class="stat-title">Active Leases</span>
+        <div class="stat-icon-wrapper stat-icon-info">
+          <i data-lucide="users"></i>
+        </div>
+      </div>
+      <div class="stat-value tabular-nums">{{ active_tenants }}</div>
+      <div class="stat-description">
+        <i data-lucide="user-check" class="text-info" style="width: 14px; height: 14px;"></i> Occupied units
+      </div>
+    </div>
+  </div>
+
+  <!-- Bills Generated -->
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="stat-card purple">
+      <div class="stat-card-top">
+        <span class="stat-title">Bills Issued</span>
+        <div class="stat-icon-wrapper stat-icon-purple">
+          <i data-lucide="receipt"></i>
+        </div>
+      </div>
+      <div class="stat-value tabular-nums">{{ total_bills }}</div>
+      <div class="stat-description">
+        <i data-lucide="file-text" style="width: 14px; height: 14px; color: var(--fcb-grana-bright);"></i> Total cycles
+      </div>
+    </div>
+  </div>
+
+  <!-- Settled Bills -->
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="stat-card success">
+      <div class="stat-card-top">
+        <span class="stat-title">Settled Bills</span>
+        <div class="stat-icon-wrapper stat-icon-success">
+          <i data-lucide="check-circle-2"></i>
+        </div>
+      </div>
+      <div class="stat-value text-success tabular-nums">{{ paid_bills }}</div>
+      <div class="stat-description text-success">
+        <i data-lucide="shield-check" style="width: 14px; height: 14px;"></i> 100% collected
+      </div>
+    </div>
+  </div>
+
+  <!-- Pending Payments -->
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="stat-card warning">
+      <div class="stat-card-top">
+        <span class="stat-title">Pending Bills</span>
+        <div class="stat-icon-wrapper stat-icon-warning">
+          <i data-lucide="clock"></i>
+        </div>
+      </div>
+      <div class="stat-value text-warning tabular-nums">{{ pending_bills }}</div>
+      <div class="stat-description text-warning">
+        <i data-lucide="hourglass" style="width: 14px; height: 14px;"></i> Awaiting payment
+      </div>
+    </div>
+  </div>
+
+  <!-- Outstanding Amount (Garnet Grana Accent) -->
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="stat-card danger">
+      <div class="stat-card-top">
+        <span class="stat-title">Outstanding</span>
+        <div class="stat-icon-wrapper stat-icon-danger">
+          <i data-lucide="wallet"></i>
+        </div>
+      </div>
+      <div class="stat-value text-danger tabular-nums" style="font-size: 1.45rem;">₹{{ '{:,.0f}'.format(pending_amount) }}</div>
+      <div class="stat-description text-danger">
+        <i data-lucide="alert-circle" style="width: 14px; height: 14px;"></i> Total receivable
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Action Shortcuts -->
+<div class="mb-5">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="h5 fw-bold mb-0 d-flex align-items-center gap-2">
+      <i data-lucide="zap" class="text-primary"></i>
+      <span>Quick Actions</span>
+    </h2>
+  </div>
+  <div class="row g-3">
+    <div class="col-sm-6 col-xl-3">
+      <a href="{{ url_for('galas_page') }}" class="quick-action-card">
+        <div class="quick-action-icon stat-icon-primary">
+          <i data-lucide="building-2"></i>
+        </div>
+        <div>
+          <h3 class="quick-action-title">Gala Management</h3>
+          <p class="quick-action-desc">Add units &amp; configure monthly rates</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+      <a href="{{ url_for('billing_page') }}" class="quick-action-card">
+        <div class="quick-action-icon stat-icon-success">
+          <i data-lucide="receipt"></i>
+        </div>
+        <div>
+          <h3 class="quick-action-title">Generate Bills</h3>
+          <p class="quick-action-desc">Produce quarterly or custom rent PDFs</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+      <a href="{{ url_for('payments_page') }}" class="quick-action-card">
+        <div class="quick-action-icon stat-icon-warning">
+          <i data-lucide="credit-card"></i>
+        </div>
+        <div>
+          <h3 class="quick-action-title">Verify Payments</h3>
+          <p class="quick-action-desc">Record dues &amp; send WhatsApp reminders</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+      <a href="{{ url_for('history_page') }}" class="quick-action-card">
+        <div class="quick-action-icon stat-icon-danger">
+          <i data-lucide="history"></i>
+        </div>
+        <div>
+          <h3 class="quick-action-title">Bill History</h3>
+          <p class="quick-action-desc">Search archive &amp; re-download duplicates</p>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Operational Workspace Grid -->
+<div class="row g-4">
+  <!-- Recent Generated Bills Ledger -->
+  <div class="col-lg-7">
+    <div class="card h-100">
+      <div class="card-header">
+        <div class="d-flex align-items-center gap-2">
+          <i data-lucide="receipt" class="text-primary"></i>
+          <span>Recent Generated Bills</span>
+        </div>
+        <a href="{{ url_for('history_page') }}" class="btn btn-sm btn-light border">View Archive</a>
+      </div>
+      <div class="card-body p-0">
+        {% if recent_bills %}
+        <div class="table-responsive">
+          <table class="table table-hover mb-0 align-middle">
+            <thead>
+              <tr>
+                <th class="ps-3">Bill Number</th>
+                <th>Gala / Tenant</th>
+                <th>Period</th>
+                <th>Amount</th>
+                <th class="pe-3">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for bill in recent_bills %}
+              <tr>
+                <td class="ps-3">
+                  <span class="fw-bold text-main font-monospace">#{{ bill.bill_no }}</span>
+                </td>
+                <td>
+                  <div class="fw-semibold text-main">Gala {{ bill.gala_number }}</div>
+                  <div class="small text-muted">{{ bill.tenant_name }}</div>
+                </td>
+                <td>
+                  <div>{{ bill.period_label }}</div>
+                  <div class="small text-muted">{{ bill.year }}</div>
+                </td>
+                <td class="fw-bold text-main tabular-nums">₹{{ '{:,.2f}'.format(bill.amount) }}</td>
+                <td class="pe-3">
+                  {% if bill.payment_status == 'paid' %}
+                    <span class="badge badge-paid"><i data-lucide="check-circle-2" style="width: 12px; height: 12px;"></i> Paid</span>
+                  {% elif bill.payment_status == 'pending' %}
+                    <span class="badge badge-pending"><i data-lucide="clock" style="width: 12px; height: 12px;"></i> Pending</span>
+                  {% else %}
+                    <span class="badge badge-partial"><i data-lucide="minus-circle" style="width: 12px; height: 12px;"></i> Partial</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <div class="empty-state-icon"><i data-lucide="receipt"></i></div>
+          <h3 class="empty-state-title">No bills issued yet</h3>
+          <p class="empty-state-text">Start by generating your first quarterly or monthly bill.</p>
+          <a href="{{ url_for('billing_page') }}" class="btn btn-primary btn-sm">Generate Bill</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Pending Reminders Widget -->
+  <div class="col-lg-5">
+    <div class="card h-100">
+      <div class="card-header">
+        <div class="d-flex align-items-center gap-2">
+          <i data-lucide="bell" class="text-warning"></i>
+          <span>Pending Rent Dues &amp; Reminders</span>
+        </div>
+        <a href="{{ url_for('payments_page') }}" class="btn btn-sm btn-light border">Manage Ledger</a>
+      </div>
+      <div class="card-body p-0">
+        {% if pending_reminders %}
+        <ul class="list-group list-group-flush">
+          {% for bill in pending_reminders %}
+          <li class="list-group-item bg-transparent px-3 py-3 border-subtle d-flex align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3 min-w-0">
+              <div class="stat-icon-wrapper stat-icon-danger flex-shrink-0" style="width: 36px; height: 36px;">
+                <i data-lucide="alert-triangle"></i>
+              </div>
+              <div class="text-truncate">
+                <div class="fw-semibold text-truncate text-main">Gala {{ bill.gala_number }} &ndash; {{ bill.tenant_name }}</div>
+                <div class="small text-danger fw-semibold tabular-nums">Due: ₹{{ '{:,.2f}'.format(bill.pending_amount) }} ({{ bill.period_label }})</div>
+              </div>
+            </div>
+            <form action="{{ url_for('send_payment_reminder', bill_no=bill.bill_no) }}" method="POST" class="m-0 flex-shrink-0">
+              <button type="submit" class="btn btn-whatsapp btn-sm" title="Send WhatsApp payment reminder">
+                <i data-lucide="message-square" style="width: 14px; height: 14px;"></i>
+                <span class="d-none d-sm-inline">Remind</span>
+              </button>
+            </form>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <div class="empty-state">
+          <div class="empty-state-icon"><i data-lucide="check-check" class="text-success"></i></div>
+          <h3 class="empty-state-title">Zero outstanding reminders</h3>
+          <p class="empty-state-text">All tenant invoices have been settled on time.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function() {
+    const header = document.getElementById('greetingHeader');
+    if (!header) return;
+    const hour = new Date().getHours();
+    let greet = 'Good morning';
+    if (hour >= 12 && hour < 17) greet = 'Good afternoon';
+    else if (hour >= 17) greet = 'Good evening';
+    header.textContent = `${greet}, Property Manager 👋`;
+  })();
+</script>
+{% endblock %}

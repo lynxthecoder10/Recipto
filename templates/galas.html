@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% set active_page = 'galas' %}
+
+{% block title %}Gala Management – Recipto{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4 pb-2">
+  <div>
+    <div class="d-flex align-items-center gap-2 mb-1">
+      <span class="badge bg-primary-subtle text-primary border border-primary-subtle py-1 px-2">
+        <i data-lucide="building-2" style="width: 14px; height: 14px;"></i> Inventory &amp; Leases
+      </span>
+      <span class="text-muted small">&bull; Property Units</span>
+    </div>
+    <h1 class="h2 fw-bold mb-1">Gala Management</h1>
+    <p class="text-muted mb-0">Register rental units, manage tenant profiles, and configure baseline monthly rates</p>
+  </div>
+  <div>
+    <span class="badge badge-sent py-2 px-3 fs-6">
+      <i data-lucide="building" style="width: 14px; height: 14px;"></i>
+      <span>{{ galas|length }} Registered Units</span>
+    </span>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Unit Registration Studio Card -->
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header">
+        <div class="d-flex align-items-center gap-2">
+          <i data-lucide="plus-circle" class="text-primary"></i>
+          <span>Add / Update Gala Unit</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <form action="{{ url_for('save_gala') }}" method="POST" id="galaForm">
+          <div class="mb-3">
+            <label for="gala_number" class="form-label">Gala Number <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text"><i data-lucide="hash"></i></span>
+              <input type="text" class="form-control" id="gala_number" name="gala_number" placeholder="e.g. G-101 or 12" required>
+            </div>
+            <small class="text-muted" style="font-size: 0.75rem;">Unique property or unit identifier.</small>
+          </div>
+
+          <div class="mb-3">
+            <label for="tenant_name" class="form-label">Tenant Full Name <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text"><i data-lucide="user"></i></span>
+              <input type="text" class="form-control" id="tenant_name" name="tenant_name" placeholder="Full legal name of tenant" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="phone_number" class="form-label">WhatsApp Mobile Number</label>
+            <div class="input-group">
+              <span class="input-group-text"><i data-lucide="phone" class="text-success"></i></span>
+              <input type="tel" class="form-control" id="phone_number" name="phone_number" placeholder="10-digit mobile number">
+            </div>
+            <small class="text-muted" style="font-size: 0.75rem;">Used for automatic rent receipt delivery.</small>
+          </div>
+
+          <div class="mb-4">
+            <label for="monthly_rent" class="form-label">Monthly Rent Amount (₹) <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text">₹</span>
+              <input type="number" class="form-control" id="monthly_rent" name="monthly_rent" min="0" step="0.01" placeholder="0.00" required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 py-2">
+            <i data-lucide="check-circle-2"></i>
+            <span>Save Unit Information</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gala Directory Data Grid Card -->
+  <div class="col-lg-8">
+    <div class="card h-100">
+      <div class="card-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3">
+        <div class="d-flex align-items-center gap-2">
+          <i data-lucide="building-2" class="text-primary"></i>
+          <span>Property Directory</span>
+        </div>
+        <div class="d-flex align-items-center gap-2 w-100 w-sm-auto">
+          <div class="input-group input-group-sm" style="max-width: 240px;">
+            <span class="input-group-text"><i data-lucide="search"></i></span>
+            <input type="text" class="form-control" placeholder="Filter units or tenants..." data-table-filter="galasTable" aria-label="Filter galas">
+          </div>
+        </div>
+      </div>
+      <div class="card-body p-0">
+        {% if galas %}
+        <div class="table-responsive">
+          <table class="table table-hover mb-0 align-middle" id="galasTable">
+            <thead>
+              <tr>
+                <th style="width: 60px;" class="ps-3">#</th>
+                <th>Unit No.</th>
+                <th>Tenant Name</th>
+                <th>WhatsApp Contact</th>
+                <th class="text-end pe-3">Monthly Rent</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for gala in galas %}
+              <tr>
+                <td class="ps-3 text-muted">{{ loop.index }}</td>
+                <td>
+                  <span class="badge bg-subtle text-primary border border-subtle fw-semibold px-2 py-1">
+                    Gala {{ gala.gala_number }}
+                  </span>
+                </td>
+                <td class="fw-semibold text-main">{{ gala.tenant_name }}</td>
+                <td>
+                  {% if gala.phone_number %}
+                    <a href="https://wa.me/91{{ gala.phone_number }}" target="_blank" class="text-decoration-none text-muted d-inline-flex align-items-center gap-1">
+                      <i data-lucide="phone" class="text-success" style="width: 13px; height: 13px;"></i>
+                      <span>{{ gala.phone_number }}</span>
+                    </a>
+                  {% else %}
+                    <span class="text-muted small">&mdash;</span>
+                  {% endif %}
+                </td>
+                <td class="text-end pe-3 fw-bold text-main tabular-nums">
+                  ₹{{ '{:,.2f}'.format(gala.monthly_rent) }}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <div id="galasTable-empty" class="p-4 text-center text-muted" style="display: none;">
+            <i data-lucide="search" class="text-tertiary d-block mx-auto mb-2" style="width: 28px; height: 28px;"></i>
+            <span>No matching gala properties found.</span>
+          </div>
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <div class="empty-state-icon"><i data-lucide="building"></i></div>
+          <h3 class="empty-state-title">No properties registered yet</h3>
+          <p class="empty-state-text">Use the form on the left to register your first gala unit and tenant details.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

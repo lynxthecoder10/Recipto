@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#004D98">
+  <title>{% block title %}Recipto – Rent Receipt Management System{% endblock %}</title>
+  
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+  
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Recipto Handcrafted SaaS Design System (Barcelona Blaugrana Tinted) with Cache-Busting -->
+  <link href="{{ url_for('static', filename='css/style.css') }}?v=20260817d" rel="stylesheet">
+  
+  <script>
+    (function () {
+      try {
+        const pref = localStorage.getItem('recipto-theme-pref') || 'system';
+        const isDark = pref === 'dark' || (pref === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.setAttribute('data-bs-theme', isDark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme-pref', pref);
+      } catch (_) {}
+    })();
+  </script>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- Backdrop Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Real Command Palette Floating Modal (Raycast / Linear Spotlight) -->
+<div class="command-palette-backdrop" id="commandPaletteBackdrop" role="dialog" aria-modal="true" aria-label="Command Palette">
+  <div class="command-palette">
+    <div class="command-search-box">
+      <i data-lucide="search" class="text-muted"></i>
+      <input type="text" class="command-search-input" id="commandSearchInput" placeholder="Type a command or search..." autocomplete="off" spellcheck="false">
+      <kbd class="text-muted small">Esc</kbd>
+    </div>
+    <div class="command-list" id="commandList">
+      <div class="command-group-title">Navigation</div>
+      <a href="{{ url_for('dashboard') }}" class="command-item">
+        <div class="command-item-left">
+          <i data-lucide="layout-grid"></i>
+          <span>Go to Dashboard</span>
+        </div>
+        <div class="command-item-shortcut">
+          <kbd>G</kbd><kbd>D</kbd>
+        </div>
+      </a>
+      <a href="{{ url_for('galas_page') }}" class="command-item">
+        <div class="command-item-left">
+          <i data-lucide="building-2"></i>
+          <span>Go to Gala Management</span>
+        </div>
+        <div class="command-item-shortcut">
+          <kbd>G</kbd><kbd>G</kbd>
+        </div>
+      </a>
+      <a href="{{ url_for('billing_page') }}" class="command-item">
+        <div class="command-item-left">
+          <i data-lucide="receipt"></i>
+          <span>Go to Generate Bills</span>
+        </div>
+        <div class="command-item-shortcut">
+          <kbd>G</kbd><kbd>B</kbd>
+        </div>
+      </a>
+      <a href="{{ url_for('payments_page') }}" class="command-item">
+        <div class="command-item-left">
+          <i data-lucide="credit-card"></i>
+          <span>Go to Payment Verification</span>
+        </div>
+        <div class="command-item-shortcut">
+          <kbd>G</kbd><kbd>P</kbd>
+        </div>
+      </a>
+      <a href="{{ url_for('history_page') }}" class="command-item">
+        <div class="command-item-left">
+          <i data-lucide="history"></i>
+          <span>Go to Bill History &amp; Archive</span>
+        </div>
+        <div class="command-item-shortcut">
+          <kbd>G</kbd><kbd>H</kbd>
+        </div>
+      </a>
+      <a href="{{ url_for('reports_page') }}" class="command-item">
+        <div class="command-item-left">
+          <i data-lucide="bar-chart-3"></i>
+          <span>Go to Reports &amp; Analytics</span>
+        </div>
+        <div class="command-item-shortcut">
+          <kbd>G</kbd><kbd>R</kbd>
+        </div>
+      </a>
+      <a href="{{ url_for('settings_page') }}" class="command-item">
+        <div class="command-item-left">
+          <i data-lucide="settings"></i>
+          <span>Go to Settings &amp; Preferences</span>
+        </div>
+        <div class="command-item-shortcut">
+          <kbd>G</kbd><kbd>S</kbd>
+        </div>
+      </a>
+
+      <div class="command-group-title">Quick Actions</div>
+      <a href="{{ url_for('billing_page') }}" class="command-item">
+        <div class="command-item-left">
+          <i data-lucide="plus-circle" class="text-primary"></i>
+          <span>Generate New Rent Bill</span>
+        </div>
+      </a>
+      <a href="{{ url_for('galas_page') }}" class="command-item">
+        <div class="command-item-left">
+          <i data-lucide="building" class="text-primary"></i>
+          <span>Register New Gala Unit</span>
+        </div>
+      </a>
+      <button type="button" class="command-item w-100 text-start bg-transparent border-0" data-set-theme="light" onclick="window.closeCommandPalette();">
+        <div class="command-item-left">
+          <i data-lucide="sun" class="text-warning"></i>
+          <span>Switch to Light Theme</span>
+        </div>
+      </button>
+      <button type="button" class="command-item w-100 text-start bg-transparent border-0" data-set-theme="dark" onclick="window.closeCommandPalette();">
+        <div class="command-item-left">
+          <i data-lucide="moon" class="text-primary"></i>
+          <span>Switch to Dark Theme</span>
+        </div>
+      </button>
+    </div>
+    <div class="command-footer">
+      <span>Navigate with <kbd>↑</kbd> <kbd>↓</kbd> and <kbd>Enter</kbd></span>
+      <span>Shortcut: <kbd>⌘K</kbd> / <kbd>Ctrl+K</kbd></span>
+    </div>
+  </div>
+</div>
+
+<!-- Floating Glass Navigation Drawer (Arc / Raycast Style) -->
+<nav class="app-drawer" id="appDrawer" aria-label="Main Navigation">
+  <div class="drawer-header">
+    <a href="{{ url_for('dashboard') }}" class="topbar-brand">
+      <div class="topbar-brand-icon">R</div>
+      <span class="topbar-brand-name">Recipto</span>
+    </a>
+    <button class="btn btn-sm btn-light border-0" id="drawerCloseBtn" aria-label="Close navigation">
+      <i data-lucide="x"></i>
+    </button>
+  </div>
+
+  <div class="drawer-nav-body">
+    <div class="drawer-section-label">Operations</div>
+    <ul class="drawer-nav-list">
+      <li class="drawer-nav-item">
+        <a class="drawer-nav-link {% if active_page == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}" data-nav-key="1">
+          <div class="drawer-nav-link-content">
+            <i data-lucide="layout-grid"></i>
+            <span>Dashboard</span>
+          </div>
+          <kbd>G D</kbd>
+        </a>
+      </li>
+      <li class="drawer-nav-item">
+        <a class="drawer-nav-link {% if active_page == 'galas' %}active{% endif %}" href="{{ url_for('galas_page') }}" data-nav-key="2">
+          <div class="drawer-nav-link-content">
+            <i data-lucide="building-2"></i>
+            <span>Gala Management</span>
+          </div>
+          <kbd>G G</kbd>
+        </a>
+      </li>
+      <li class="drawer-nav-item">
+        <a class="drawer-nav-link {% if active_page == 'billing' %}active{% endif %}" href="{{ url_for('billing_page') }}" data-nav-key="3">
+          <div class="drawer-nav-link-content">
+            <i data-lucide="receipt"></i>
+            <span>Generate Bills</span>
+          </div>
+          <kbd>G B</kbd>
+        </a>
+      </li>
+      <li class="drawer-nav-item">
+        <a class="drawer-nav-link {% if active_page == 'payments' %}active{% endif %}" href="{{ url_for('payments_page') }}" data-nav-key="4">
+          <div class="drawer-nav-link-content">
+            <i data-lucide="credit-card"></i>
+            <span>Payment Verification</span>
+          </div>
+          <kbd>G P</kbd>
+        </a>
+      </li>
+      <li class="drawer-nav-item">
+        <a class="drawer-nav-link {% if active_page == 'history' %}active{% endif %}" href="{{ url_for('history_page') }}" data-nav-key="5">
+          <div class="drawer-nav-link-content">
+            <i data-lucide="history"></i>
+            <span>Bill History</span>
+          </div>
+          <kbd>G H</kbd>
+        </a>
+      </li>
+    </ul>
+
+    <div class="drawer-section-label">Management</div>
+    <ul class="drawer-nav-list">
+      <li class="drawer-nav-item">
+        <a class="drawer-nav-link {% if active_page == 'reports' %}active{% endif %}" href="{{ url_for('reports_page') }}">
+          <div class="drawer-nav-link-content">
+            <i data-lucide="bar-chart-3"></i>
+            <span>Reports &amp; Analytics</span>
+          </div>
+          <kbd>G R</kbd>
+        </a>
+      </li>
+      <li class="drawer-nav-item">
+        <a class="drawer-nav-link {% if active_page == 'settings' %}active{% endif %}" href="{{ url_for('settings_page') }}">
+          <div class="drawer-nav-link-content">
+            <i data-lucide="settings"></i>
+            <span>Settings &amp; Profile</span>
+          </div>
+          <kbd>G S</kbd>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="drawer-footer">
+    <div class="drawer-user-info">
+      <div class="topbar-avatar-btn" style="width: 32px; height: 32px; font-size: 0.8rem;">
+        <i data-lucide="user"></i>
+      </div>
+      <div>
+        <div class="fw-bold text-main small">Estate Manager</div>
+        <div class="text-muted" style="font-size: 0.725rem;">Administrator</div>
+      </div>
+    </div>
+    <span class="badge bg-subtle text-primary border border-subtle" style="font-size: 0.7rem;">PRO v2.4</span>
+  </div>
+</nav>
+
+<!-- Minimal Floating Glass Topbar (58px) with Blaugrana Accent -->
+<header class="app-topbar">
+  <div class="topbar-left">
+    <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="Toggle navigation" title="Toggle Menu (⌘M)">
+      <i data-lucide="menu"></i>
+    </button>
+
+    <a href="{{ url_for('dashboard') }}" class="topbar-brand">
+      <div class="topbar-brand-icon">R</div>
+      <span class="topbar-brand-name">Recipto</span>
+    </a>
+
+    <div class="topbar-divider d-none d-sm-block"></div>
+
+    <div class="topbar-page-title d-none d-sm-block">
+      {% if active_page == 'dashboard' %}Dashboard
+      {% elif active_page == 'galas' %}Gala Management
+      {% elif active_page == 'billing' %}Generate Bills
+      {% elif active_page == 'payments' %}Payment Verification
+      {% elif active_page == 'history' %}Bill History &amp; Archive
+      {% elif active_page == 'reports' %}Reports &amp; Analytics
+      {% elif active_page == 'settings' %}Settings &amp; Preferences
+      {% else %}Overview{% endif %}
+    </div>
+  </div>
+
+  <div class="topbar-right">
+    <!-- Command Palette Trigger Button -->
+    <button class="topbar-search-btn d-none d-md-inline-flex" type="button" onclick="window.openCommandPalette();" title="Command Palette (⌘K)">
+      <i data-lucide="search"></i>
+      <span>Commands</span>
+      <kbd>⌘K</kbd>
+    </button>
+
+    <!-- Theme Dropdown Toggle -->
+    <div class="dropdown">
+      <button class="theme-select-btn" type="button" id="themeDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false" title="Theme Selector">
+        <i data-lucide="sun" id="currentThemeIcon"></i>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end theme-menu" aria-labelledby="themeDropdownBtn">
+        <li>
+          <button class="dropdown-item" type="button" data-set-theme="light">
+            <i data-lucide="sun" class="text-warning"></i>
+            <span>Light</span>
+          </button>
+        </li>
+        <li>
+          <button class="dropdown-item" type="button" data-set-theme="dark">
+            <i data-lucide="moon" class="text-primary"></i>
+            <span>Dark</span>
+          </button>
+        </li>
+        <li>
+          <button class="dropdown-item" type="button" data-set-theme="system">
+            <i data-lucide="monitor" class="text-secondary"></i>
+            <span>System</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+
+    <!-- User Profile Shortcut -->
+    <a href="{{ url_for('settings_page') }}" class="topbar-avatar-btn" title="Settings &amp; Profile">
+      <i data-lucide="user"></i>
+    </a>
+  </div>
+</header>
+
+<!-- Floating Toast Notifications Container -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="toast-container-custom">
+      {% for category, message in messages %}
+        <div class="toast-custom border-{{ 'success' if category == 'success' else 'danger' if category == 'error' else 'warning' if category == 'warning' else 'info' }}">
+          <i data-lucide="{{ 'check-circle-2' if category == 'success' else 'alert-triangle' if category == 'warning' else 'alert-circle' }}" class="{{ 'text-success' if category == 'success' else 'text-warning' if category == 'warning' else 'text-danger' }}"></i>
+          <div class="flex-grow-1 fw-medium">{{ message }}</div>
+          <button type="button" class="btn-close ms-2" onclick="this.parentElement.remove();" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<!-- Main Full-Width Content Container (Max 1500px) -->
+<div class="app-content-wrapper">
+  <main class="app-content-container">
+    {% block content %}{% endblock %}
+  </main>
+</div>
+
+<!-- Lucide Icons CDN -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<!-- Bootstrap 5 Bundle JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Recipto Core JS with Cache-Busting -->
+<script src="{{ url_for('static', filename='js/app.js') }}?v=20260817d"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

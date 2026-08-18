@@ -1,229 +1,314 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#2563EB">
-  <title>Recipto - Billing Management</title>
-  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
-  <script>
-    (() => {
-      try {
-        const savedTheme = localStorage.getItem('recipto-theme');
-        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        document.documentElement.dataset.theme = savedTheme || systemTheme;
-      } catch (_) {
-        document.documentElement.dataset.theme = 'light';
-      }
-    })();
-  </script>
-  <style>
-    :root { --bg: #F8FAFC; --card: #FFFFFF; --text: #1E293B; --border: #E2E8F0; --primary: #2563EB; --primary-hover: #1D4ED8; --muted: #64748B; --surface: #EFF6FF; --success: #166534; --success-bg: #F0FDF4; --warning: #9A3412; --warning-bg: #FFF7ED; --shadow: rgba(30, 41, 59, .10); color-scheme: light; font-family: Inter, Arial, sans-serif; }
-    [data-theme="dark"] { --bg: #0F172A; --card: #1E293B; --text: #F8FAFC; --border: #334155; --primary: #60A5FA; --primary-hover: #93C5FD; --muted: #CBD5E1; --surface: #172554; --success: #86EFAC; --success-bg: #14532D; --warning: #FDBA74; --warning-bg: #431407; --shadow: rgba(2, 6, 23, .42); color-scheme: dark; }
-    * { box-sizing: border-box; }
-    body { background: var(--bg); color: var(--text); margin: 0; padding: 24px; transition: background .2s ease, color .2s ease; }
-    main { margin: 0 auto; max-width: 1080px; }
-    .navbar { align-items: center; display: flex; justify-content: space-between; margin-bottom: 18px; }
-    .brand { align-items: center; color: var(--text); display: inline-flex; font-family: Poppins, Arial, sans-serif; font-size: 1.25rem; font-weight: 700; gap: 9px; text-decoration: none; }
-    .brand-mark { align-items: center; background: var(--primary); border-radius: 9px; color: #fff; display: inline-flex; font-size: .95rem; height: 32px; justify-content: center; width: 32px; }
-    .nav-actions { align-items: center; display: flex; gap: 12px; }
-    .nav-link { color: var(--primary); font-size: .9rem; font-weight: 700; text-decoration: none; }
-    .nav-link:hover { color: var(--primary-hover); text-decoration: underline; }
-    .nav-link.disabled { color: var(--muted); cursor: not-allowed; text-decoration: none; }
-    .theme-toggle { align-items: center; background: var(--card); border: 1px solid var(--border); border-radius: 9px; color: var(--text); cursor: pointer; display: inline-flex; font-size: 1rem; height: 36px; justify-content: center; padding: 0; width: 36px; }
-    .theme-toggle:hover { background: var(--surface); border-color: var(--primary); }
-    .hero { margin-bottom: 20px; }
-    h1, h2 { font-family: Poppins, Arial, sans-serif; letter-spacing: -.025em; }
-    h1 { font-size: 1.65rem; margin: 0; }
-    h2 { font-size: 1.05rem; margin: 0; }
-    .tagline { color: var(--primary); font-size: .9rem; font-weight: 700; margin: 7px 0 0; }
-    .subtitle { color: var(--muted); line-height: 1.5; margin: 8px 0 0; }
-    .notice { border: 1px solid; border-radius: 10px; margin: 0 0 18px; padding: 12px 14px; }
-    .notice.success { background: var(--success-bg); border-color: var(--success); color: var(--success); }
-    .notice.error { background: var(--warning-bg); border-color: var(--warning); color: var(--warning); }
-    .notice.duplicate { background: #FEF2F2; border-color: #DC2626; color: #991B1B; font-weight: 700; }
-    .grid { display: grid; gap: 18px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 12px 28px var(--shadow); padding: 22px; }
-    .card-wide { margin-top: 18px; }
-    .card-header { align-items: baseline; display: flex; gap: 10px; justify-content: space-between; margin-bottom: 16px; }
-    .count, .helper { color: var(--muted); font-size: .82rem; }
-    form { display: grid; gap: 13px; }
-    .form-grid { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
-    .search-form { align-items: end; display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr) auto; }
-    label { color: var(--text); display: grid; font-size: .88rem; font-weight: 700; gap: 6px; }
-    input, select, button { border-radius: 8px; font: inherit; min-height: 42px; padding: 10px 11px; }
-    input, select { background: var(--card); border: 1px solid var(--border); color: var(--text); width: 100%; }
-    input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, .20); outline: 0; }
-    button, .button-link { background: var(--primary); border: 1px solid var(--primary); border-radius: 8px; color: #fff; cursor: pointer; font: inherit; font-size: .88rem; font-weight: 700; min-height: 42px; padding: 10px 13px; text-align: center; text-decoration: none; }
-    button:hover, .button-link:hover { background: var(--primary-hover); }
-    button:disabled { cursor: not-allowed; opacity: .55; }
-    .secondary { background: var(--card); border-color: var(--border); color: var(--primary); }
-    .secondary:hover { background: var(--surface); }
-    .search-result { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-top: 14px; padding: 14px; }
-    .search-result strong { font-family: Poppins, Arial, sans-serif; }
-    .details { color: var(--muted); font-size: .87rem; line-height: 1.55; margin: 6px 0 0; }
-    .result-actions { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-    .table-wrap { border: 1px solid var(--border); border-radius: 10px; overflow-x: auto; }
-    table { border-collapse: collapse; min-width: 850px; width: 100%; }
-    th, td { border-bottom: 1px solid var(--border); padding: 12px; text-align: left; vertical-align: middle; }
-    tr:last-child td { border-bottom: 0; }
-    th { background: var(--surface); color: var(--primary); font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; }
-    td { font-size: .86rem; }
-    .status { border-radius: 999px; display: inline-block; font-size: .75rem; font-weight: 700; padding: 4px 8px; text-transform: capitalize; }
-    .status.paid { background: var(--success-bg); color: var(--success); }
-    .status.pending { background: var(--warning-bg); color: var(--warning); }
-    .status.partial { background: #FEF3C7; color: #92400E; }
-    .status.advance { background: var(--surface); color: var(--primary); }
-    .compact-form { align-items: center; display: inline-flex; gap: 6px; }
-    .compact-form select { font-size: .78rem; min-height: 34px; padding: 6px; width: auto; }
-    .compact-form button, .whatsapp { font-size: .78rem; min-height: 34px; padding: 7px 9px; white-space: nowrap; }
-    .whatsapp { background: #15803D; border-radius: 7px; color: #fff; font-weight: 700; text-decoration: none; }
-    .whatsapp:hover { background: #166534; }
-    .empty { color: var(--muted); padding: 18px 0 0; text-align: center; }
-    @media (max-width: 720px) { body { padding: 14px; } .grid { grid-template-columns: 1fr; } .card { padding: 18px; } }
-    @media (max-width: 500px) { .navbar { align-items: flex-start; gap: 14px; } .nav-actions { align-items: flex-end; flex-direction: column; gap: 7px; } .form-grid { grid-template-columns: 1fr; } .search-form { grid-template-columns: 1fr; } }
-  </style>
-</head>
-<body>
-  <main>
-    <nav class="navbar" aria-label="Primary navigation">
-      <a class="brand" href="{{ url_for('generate_bill_form') }}"><span class="brand-mark">R</span>Recipto</a>
-      <div class="nav-actions">
-        <a class="nav-link" href="{{ url_for('billing_dashboard') }}">Billing</a>
-        <a class="nav-link" href="{{ url_for('duplicate_bill') }}">Duplicate Bill</a>
-        <span class="nav-link disabled" title="Coming Soon">Payment Status</span>
-        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark theme" title="Switch theme"><span aria-hidden="true">&#9790;</span></button>
-      </div>
-    </nav>
+{% extends 'base.html' %}
+{% set active_page = 'billing' %}
 
-    <header class="hero">
-      <h1>Billing Dashboard</h1>
-      <p class="tagline">Gala Directory & Payment Tracking.</p>
-      <p class="subtitle">Set up galas, track payments, and review existing bills.</p>
-    </header>
+{% block title %}Generate Bills – Recipto{% endblock %}
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% for category, message in messages %}
-        <div class="notice {{ category }}" role="status" style="{% if category == 'success' %}background:#F0FDF4;border-color:#BBF7D0;color:#166534;{% endif %}">{{ message }}</div>
-      {% endfor %}
-    {% endwith %}
-
-    <div class="grid">
-      <section class="card" style="grid-column: 1 / -1; max-width: 600px; justify-self: center; width: 100%;">
-        <div class="card-header"><h2>Gala Directory</h2><span class="count">{{ galas|length }} saved</span></div>
-        <form action="{{ url_for('save_gala') }}" method="post">
-          <label>Gala Number<input name="gala_number" maxlength="50" required placeholder="Example: G-101"></label>
-          <label>Tenant Name<input name="tenant_name" maxlength="120" required autocomplete="name"></label>
-          <label>WhatsApp Number<input name="phone_number" inputmode="tel" placeholder="9876543210 (Optional)"></label>
-          <label>Monthly Rent<input name="monthly_rent" type="number" min="0" step="0.01" required placeholder="0.00"></label>
-          <button type="submit">Save Gala</button>
-        </form>
-      </section>
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4 pb-2">
+  <div>
+    <div class="d-flex align-items-center gap-2 mb-1">
+      <span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2">
+        <i data-lucide="receipt" style="width: 14px; height: 14px;"></i> Invoice Engine
+      </span>
+      <span class="text-muted small">&bull; Billing Operations</span>
     </div>
+    <h1 class="h2 fw-bold mb-1">Generate Bills</h1>
+    <p class="text-muted mb-0">Create quarterly or custom period rent bills and automatically generate signed PDF receipts</p>
+  </div>
+</div>
 
-    <section class="card card-wide">
-      <div class="card-header"><h2>Find Bill</h2><span class="helper">Search by full bill number</span></div>
-      <form class="search-form" action="{{ url_for('billing_dashboard') }}" method="get">
-        <label>Bill Number<input name="bill_no" value="{{ request.args.get('bill_no', '') }}" placeholder="BILL/2026/C3/0001"></label>
-        <button type="submit">Search</button>
-      </form>
-      {% if search_error %}<div class="notice error" role="alert" style="margin-top:14px;">{{ search_error }}</div>{% endif %}
-      {% if searched_bill %}
-        <div class="search-result">
-          <strong>{{ searched_bill.bill_no }}</strong> <span class="status {{ searched_bill.payment_status }}">{{ searched_bill.payment_status }}</span>
-          <p class="details">Gala {{ searched_bill.gala_number }} - {{ searched_bill.tenant_name }}<br>{{ searched_bill.period_label }} - Rs. {{ '%.2f'|format(searched_bill.amount) }}</p>
-          <div class="result-actions">
-            <form class="compact-form" action="{{ url_for('update_bill_payment', bill_no=searched_bill.bill_no) }}" method="post">
-              <input type="number" name="amount_paid" placeholder="Amount Paid" min="0" step="0.01" style="width:100px; min-height:34px; padding:6px; font-size:0.78rem;" required>
-              <select name="payment_method" aria-label="Payment Method for {{ searched_bill.bill_no }}" required>
-                <option value="" disabled selected>Method</option>
-                <option value="Cash">Cash</option>
-                <option value="GPay">GPay</option>
-                <option value="Cheque">Cheque</option>
-              </select>
-              <button class="secondary" type="submit">Update</button>
-            </form>
-            {% if searched_bill.whatsapp_url %}<a class="whatsapp" href="{{ searched_bill.whatsapp_url }}" target="_blank" rel="noopener">WhatsApp Tenant</a>{% endif %}
+{% if error %}
+<div class="alert alert-danger mb-4 d-flex align-items-center gap-2">
+  <i data-lucide="alert-circle" class="text-danger"></i>
+  <div>{{ error }}</div>
+</div>
+{% endif %}
+
+<form id="receipt-form" method="POST" action="{{ url_for('generate_bill_download') }}">
+  <div class="row g-4">
+    <!-- Left Column: Step 1 (Gala) & Step 2 (Period) -->
+    <div class="col-lg-7">
+      <!-- Section 1: Property Target -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-primary rounded-circle" style="width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem;">1</span>
+            <span>Select Rental Property</span>
           </div>
         </div>
-      {% endif %}
-    </section>
-
-    <section class="card card-wide">
-      <div class="card-header"><h2>Recent Bills</h2><span class="helper">Latest 100 bills</span></div>
-      {% if bills %}
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Bill No.</th><th>Gala / Tenant</th><th>Cycle</th><th>Amount</th><th>Payment Status</th><th>WhatsApp Status</th><th>Actions</th></tr></thead>
-            <tbody>
-              {% for bill in bills %}
-                <tr>
-                  <td><strong>{{ bill.bill_no }}</strong></td>
-                  <td>Gala {{ bill.gala_number }}<br><span class="helper">{{ bill.tenant_name }}</span></td>
-                  <td>{{ bill.cycle }}<br><span class="helper">{{ bill.period_label }}</span></td>
-                  <td>Rs. {{ '%.2f'|format(bill.amount) }}</td>
-                  <td><span class="status {{ bill.payment_status }}">{{ bill.payment_status }}</span></td>
-                  <td><span class="status {{ bill.whatsapp_status }}">{{ bill.whatsapp_status }}</span></td>
-                  <td>
-                    <div style="display:flex; gap:6px; align-items:center;">
-                      <form class="compact-form" action="{{ url_for('update_bill_payment', bill_no=bill.bill_no) }}" method="post">
-                        <input type="number" name="amount_paid" placeholder="Paid" min="0" step="0.01" style="width:70px; min-height:34px; padding:6px; font-size:0.78rem;" required>
-                        <select name="payment_method" aria-label="Method for {{ bill.bill_no }}" required>
-                          <option value="" disabled selected>Method</option>
-                          <option value="Cash">Cash</option>
-                          <option value="GPay">GPay</option>
-                          <option value="Cheque">Cheque</option>
-                        </select>
-                        <button class="secondary" type="submit">Update</button>
-                      </form>
-                      <form action="{{ url_for('send_payment_reminder', bill_no=bill.bill_no) }}" method="post">
-                        <button type="submit" style="background:#25D366; color:#fff; border:none; padding:6px 10px; border-radius:4px; font-size:0.78rem; cursor:pointer;">Reminder</button>
-                      </form>
-                    </div>
-                  </td>
-                </tr>
+        <div class="card-body">
+          <div class="mb-3">
+            <label for="gala_id" class="form-label">Rental Unit &amp; Tenant <span class="text-danger">*</span></label>
+            <select name="gala_id" id="gala_id" class="form-select form-select-lg" required>
+              <option value="" disabled selected>Choose a Gala property...</option>
+              {% for gala in galas %}
+              <option value="{{ gala.id }}">Gala {{ gala.gala_number }} &ndash; {{ gala.tenant_name }} (₹{{ '{:,.0f}'.format(gala.monthly_rent) }}/mo)</option>
               {% endfor %}
-            </tbody>
-          </table>
+            </select>
+          </div>
+
+          <!-- Dynamic Gala Detail Preview Card -->
+          <div id="gala-info" class="card bg-subtle border border-subtle p-3 d-none">
+            <div class="row g-2 align-items-center">
+              <div class="col-sm-4">
+                <div class="text-muted small">Tenant Name</div>
+                <div class="fw-bold text-main" id="info-tenant">&mdash;</div>
+              </div>
+              <div class="col-sm-4">
+                <div class="text-muted small">Monthly Rent</div>
+                <div class="fw-bold text-main">₹<span id="info-rent">0.00</span></div>
+              </div>
+              <div class="col-sm-4">
+                <div class="text-muted small">WhatsApp Contact</div>
+                <div class="fw-bold text-success" id="info-phone">&mdash;</div>
+              </div>
+            </div>
+          </div>
         </div>
-      {% else %}
-        <p class="empty">No bills generated yet.</p>
-      {% endif %}
-    </section>
-  </main>
-  <script>
-    const themeToggle = document.querySelector('[data-theme-toggle]');
-    const themeIcon = themeToggle.querySelector('span');
-    const themeMeta = document.querySelector('meta[name="theme-color"]');
-    function updateThemeToggle() {
-      const isDark = document.documentElement.dataset.theme === 'dark';
-      themeIcon.textContent = isDark ? '\u2600' : '\u263E';
-      themeToggle.setAttribute('aria-label', isDark ? 'Switch to light theme' : 'Switch to dark theme');
-      themeMeta.content = isDark ? '#0F172A' : '#2563EB';
+      </div>
+
+      <!-- Section 2: Billing Options & Period Selection -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-primary rounded-circle" style="width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem;">2</span>
+            <span>Billing Period &amp; Cycle</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <!-- Segmented Billing Type Selector -->
+          <div class="mb-4">
+            <label class="form-label d-block">Billing Cycle Type</label>
+            <div class="btn-group w-100" role="group" aria-label="Billing type selection">
+              <input type="radio" class="btn-check" name="billing_type" value="quarter" id="type_quarter" checked>
+              <label class="btn btn-outline-primary py-2 d-flex align-items-center justify-content-center gap-2" for="type_quarter">
+                <i data-lucide="layout-grid" style="width: 15px; height: 15px;"></i>
+                <span>Quarter Cycles (Q1&ndash;Q4)</span>
+              </label>
+
+              <input type="radio" class="btn-check" name="billing_type" value="custom" id="type_custom">
+              <label class="btn btn-outline-primary py-2 d-flex align-items-center justify-content-center gap-2" for="type_custom">
+                <i data-lucide="calendar" style="width: 15px; height: 15px;"></i>
+                <span>Custom Month Range</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Quarter Cycles Checkbox Grid -->
+          <div id="quarter-section" class="mb-4">
+            <label class="form-label d-block">Select Quarters <span class="text-muted small fw-normal">(Multi-select packages bills into a ZIP)</span></label>
+            <div class="row g-2">
+              {% for q_code, q_info in quarters_info.items() %}
+              <div class="col-6 col-sm-3">
+                <div class="card border border-subtle h-100 p-2 text-center card-interactive" onclick="document.getElementById('q_{{ q_code }}').click();">
+                  <div class="form-check d-flex flex-column align-items-center mb-0" onclick="event.stopPropagation();">
+                    <input class="form-check-input quarter-check mb-1" type="checkbox" name="quarters" value="{{ q_code }}" id="q_{{ q_code }}" {% if q_code == 'Q1' %}checked{% endif %}>
+                    <label class="form-check-label fw-bold text-main" for="q_{{ q_code }}">{{ q_info.label }}</label>
+                    <small class="text-muted" style="font-size: 0.75rem;">{{ q_info.months }}</small>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Custom Month Range Selectors -->
+          <div id="custom-section" class="mb-4 d-none">
+            <div class="row g-3">
+              <div class="col-6">
+                <label for="start_month" class="form-label">Start Month</label>
+                <select name="start_month" id="start_month" class="form-select">
+                  {% for val, label in month_options %}
+                  <option value="{{ val }}" {% if val == current_month %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-6">
+                <label for="end_month" class="form-label">End Month</label>
+                <select name="end_month" id="end_month" class="form-select">
+                  {% for val, label in month_options %}
+                  <option value="{{ val }}" {% if val == current_month %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Year Input -->
+          <div>
+            <label for="year_input" class="form-label">Billing Year</label>
+            <div class="input-group" style="max-width: 220px;">
+              <span class="input-group-text"><i data-lucide="calendar"></i></span>
+              <input type="number" name="year" id="year_input" class="form-control" min="2000" max="2099" value="{{ current_year }}" required>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Step 3 (Summary & Actions) -->
+    <div class="col-lg-5">
+      <div class="card sticky-top" style="top: calc(var(--topbar-height) + 1.5rem);">
+        <div class="card-header">
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-primary rounded-circle" style="width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem;">3</span>
+            <span>Summary &amp; Generation</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="summary-card" class="d-none">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-subtle">
+              <span class="text-muted">Monthly Rate</span>
+              <span class="fw-semibold text-main tabular-nums">₹<span id="summary-rent">0.00</span></span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-subtle">
+              <span class="text-muted">Calculated Period</span>
+              <span class="fw-semibold text-main text-end" id="summary-period">&mdash;</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-subtle">
+              <span class="text-muted">Total Duration</span>
+              <span class="badge badge-sent" id="summary-months">0 months</span>
+            </div>
+
+            <!-- Total Calculation Display -->
+            <div class="p-3 bg-subtle rounded-3 mb-4 text-center">
+              <div class="text-muted small text-uppercase fw-semibold mb-1">Total Bill Amount</div>
+              <div class="fs-2 fw-bold text-primary tabular-nums">₹<span id="summary-total">0.00</span></div>
+            </div>
+
+            <div id="summary-error" class="alert alert-warning d-none py-2 px-3 small mb-3"></div>
+          </div>
+
+          <div id="no-gala-selected" class="text-center py-4 text-muted">
+            <i data-lucide="arrow-left-circle" class="text-tertiary d-block mx-auto mb-2" style="width: 32px; height: 32px;"></i>
+            <span>Select a Gala property on the left to compute bill calculations.</span>
+          </div>
+
+          <button type="submit" id="submit-btn" class="btn btn-primary btn-lg w-100 py-3" disabled>
+            <i data-lucide="download"></i>
+            <span>Generate &amp; Download Bill</span>
+          </button>
+
+          <p class="text-muted small text-center mt-3 mb-0 d-flex align-items-center justify-content-center gap-1">
+            <i data-lucide="shield-check" class="text-success" style="width: 14px; height: 14px;"></i>
+            <span>Stores in DB, signs PDF, and prepares WhatsApp dispatch.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let galasData = [];
+fetch('/api/galas')
+  .then(r => r.json())
+  .then(data => { 
+    galasData = data.galas;
+    updateBillingSummary();
+  })
+  .catch(e => console.error('Could not load galas API', e));
+
+const galaSelect = document.getElementById('gala_id');
+const galaInfo = document.getElementById('gala-info');
+const noGalaMsg = document.getElementById('no-gala-selected');
+const typeQuarter = document.getElementById('type_quarter');
+const typeCustom = document.getElementById('type_custom');
+const quarterSection = document.getElementById('quarter-section');
+const customSection = document.getElementById('custom-section');
+const quarterChecks = document.querySelectorAll('.quarter-check');
+const startMonthSelect = document.getElementById('start_month');
+const endMonthSelect = document.getElementById('end_month');
+const yearInput = document.getElementById('year_input');
+const summaryCard = document.getElementById('summary-card');
+const summaryRent = document.getElementById('summary-rent');
+const summaryPeriod = document.getElementById('summary-period');
+const summaryMonths = document.getElementById('summary-months');
+const summaryTotal = document.getElementById('summary-total');
+const summaryError = document.getElementById('summary-error');
+const submitBtn = document.getElementById('submit-btn');
+
+const monthAbbrs = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function toggleMode() {
+  if (typeQuarter.checked) {
+    quarterSection.classList.remove('d-none');
+    customSection.classList.add('d-none');
+  } else {
+    quarterSection.classList.add('d-none');
+    customSection.classList.remove('d-none');
+  }
+  updateBillingSummary();
+}
+typeQuarter.addEventListener('change', toggleMode);
+typeCustom.addEventListener('change', toggleMode);
+
+function updateBillingSummary() {
+  const selectedId = galaSelect.value;
+  const gala = galasData.find(g => g.id.toString() === selectedId);
+  
+  if (gala) {
+    document.getElementById('info-tenant').textContent = gala.tenant_name;
+    document.getElementById('info-rent').textContent = Number(gala.monthly_rent).toLocaleString('en-IN', {minimumFractionDigits: 2});
+    document.getElementById('info-phone').textContent = gala.phone_number || '(No WhatsApp)';
+    galaInfo.classList.remove('d-none');
+    if (noGalaMsg) noGalaMsg.classList.add('d-none');
+    summaryCard.classList.remove('d-none');
+
+    const yr = yearInput.value || new Date().getFullYear();
+    let totalMonths = 0;
+    let periodStr = '';
+    let isValid = true;
+    let errorMsg = '';
+
+    if (typeQuarter.checked) {
+      const selectedQ = Array.from(quarterChecks).filter(cb => cb.checked).map(cb => cb.value);
+      if (selectedQ.length === 0) {
+        isValid = false;
+        errorMsg = 'Please select at least one quarter cycle.';
+      } else {
+        totalMonths = selectedQ.length * 3;
+        periodStr = selectedQ.join(', ') + ' (' + yr + ')';
+      }
+    } else {
+      const s = parseInt(startMonthSelect.value);
+      const e = parseInt(endMonthSelect.value);
+      if (s > e) {
+        isValid = false;
+        errorMsg = 'End month cannot be earlier than start month.';
+      } else {
+        totalMonths = (e - s + 1);
+        periodStr = monthAbbrs[s - 1] + ' \u2013 ' + monthAbbrs[e - 1] + ' ' + yr;
+      }
     }
-    updateThemeToggle();
-    themeToggle.addEventListener('click', () => {
-      const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-      document.documentElement.dataset.theme = nextTheme;
-      try { localStorage.setItem('recipto-theme', nextTheme); } catch (_) {}
-      updateThemeToggle();
-    });
 
-    document.querySelectorAll('form[method="post"]').forEach(form => {
-      form.addEventListener('submit', event => {
-        const button = event.submitter || form.querySelector('button[type="submit"]');
-        if (!button) return;
-        button.disabled = true;
-        if (form.action.includes('/galas')) button.textContent = 'Saving...';
-        else if (form.action.includes('/generate')) button.textContent = 'Generating...';
-        else button.textContent = 'Updating...';
-      });
-    });
-  </script>
-</body>
-</html>
+    if (isValid && totalMonths > 0) {
+      const totalAmount = gala.monthly_rent * totalMonths;
+      summaryRent.textContent = Number(gala.monthly_rent).toLocaleString('en-IN', {minimumFractionDigits: 2});
+      summaryPeriod.textContent = periodStr;
+      summaryMonths.textContent = totalMonths + (totalMonths === 1 ? ' month' : ' months');
+      summaryTotal.textContent = Number(totalAmount).toLocaleString('en-IN', {minimumFractionDigits: 2});
+      summaryError.classList.add('d-none');
+      submitBtn.disabled = false;
+    } else {
+      summaryError.textContent = errorMsg;
+      summaryError.classList.remove('d-none');
+      submitBtn.disabled = true;
+    }
+  } else {
+    galaInfo.classList.add('d-none');
+    if (noGalaMsg) noGalaMsg.classList.remove('d-none');
+    summaryCard.classList.add('d-none');
+    submitBtn.disabled = true;
+  }
+}
 
-
+galaSelect.addEventListener('change', updateBillingSummary);
+quarterChecks.forEach(cb => cb.addEventListener('change', updateBillingSummary));
+startMonthSelect.addEventListener('change', updateBillingSummary);
+endMonthSelect.addEventListener('change', updateBillingSummary);
+yearInput.addEventListener('input', updateBillingSummary);
+</script>
+{% endblock %}
