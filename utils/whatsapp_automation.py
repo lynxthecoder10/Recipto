@@ -109,18 +109,22 @@ def send_whatsapp_message(
         print(f"[WhatsApp Automation] Target Phone: {digits} ({tenant_name})")
         print(f"[WhatsApp Automation] Step 1: Launching WhatsApp Web browser URL with pre-filled message...")
         
-        # Build WhatsApp Web send URL with pre-filled text
-        url = f"https://web.whatsapp.com/send?phone={digits}&text={encoded_text}"
+        # Build WhatsApp Web URL without pre-filled text for automation
+        url = f"https://web.whatsapp.com/send?phone={digits}"
         webbrowser.open(url)
 
         print(f"[WhatsApp Automation] Step 2: Waiting {config.WHATSAPP_LOAD_TIME}s for WhatsApp Web page load...")
         time.sleep(config.WHATSAPP_LOAD_TIME)
 
-        print(f"[WhatsApp Automation] Step 3: Copying message text to clipboard & pasting via Ctrl+V...")
-        pyperclip.copy(message_text)
-        pyautogui.hotkey("ctrl", "v")
+        # Type the message directly into WhatsApp Web
+        print(f"[WhatsApp Automation] Step 3: Typing message via pyautogui...")
+        # Brief pause to ensure input box is focused
+        time.sleep(1)
+        pyautogui.typewrite(message_text, interval=0.02)
+        # Wait a moment after typing before sending
         time.sleep(config.BEFORE_ENTER)
-
+        # Ensure the chat input is ready before sending
+        time.sleep(config.BEFORE_ENTER)
         print(f"[WhatsApp Automation] Step 4: Pressing Enter to send message...")
         pyautogui.press("enter")
         time.sleep(config.AFTER_SEND)
