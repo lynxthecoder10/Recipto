@@ -1,0 +1,35 @@
+{
+  "title": "Guild.ai",
+  "protocol": "tool_guild://",
+  "prefix": "guild",
+  "plans": null,
+  "capabilities": 68608,
+  "classType": [
+    "data",
+    "tool"
+  ],
+  "actions": 0,
+  "description": "Run Guild.ai agents from a RocketRide pipeline or an agent.\nAs a pipeline step, lane input is sent to a configured Guild agent as a session and its answer flows downstream; as a tool, an agent can start Guild sessions and inspect their status and transcript.\nGuild is the control plane for AI agents — RocketRide prepares the data, a governed Guild agent performs the action.",
+  "lanes": {
+    "documents": [
+      "documents",
+      "text",
+      "table"
+    ],
+    "questions": [
+      "answers",
+      "text",
+      "table"
+    ],
+    "text": [
+      "text",
+      "answers",
+      "table"
+    ]
+  },
+  "tile": [
+    "Guild${parameters.tool_guild.agent ? ': ' + parameters.tool_guild.agent : ''}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/tool_guild",
+  "icon": "102"
+}

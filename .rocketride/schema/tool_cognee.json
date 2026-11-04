@@ -1,0 +1,18 @@
+{
+  "title": "Cognee",
+  "protocol": "tool_cognee://",
+  "prefix": "cognee",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "tool"
+  ],
+  "actions": 0,
+  "description": "Persistent semantic memory backed by a Cognee server, exposed as three agent tools. \nRemember plain text, recall memory results while requesting references, and check background processing. The knowledge graph captures semantic relationships; it is not an AST, import graph, or call graph.",
+  "lanes": {},
+  "tile": [
+    "Dataset: ${parameters.cognee.dataset}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/tool_cognee",
+  "icon": "89"
+}

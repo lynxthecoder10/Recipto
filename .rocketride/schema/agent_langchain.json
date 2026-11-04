@@ -1,0 +1,30 @@
+{
+  "title": "LangChain",
+  "protocol": "agent_langchain://",
+  "prefix": "agent",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "agent",
+    "tool"
+  ],
+  "actions": 0,
+  "description": "Single-agent execution using LangChain.\nCan be invoked as a tool (`<nodeId>.run_agent`) for hierarchical agent orchestration.",
+  "lanes": {
+    "questions": [
+      "answers"
+    ]
+  },
+  "invoke": {
+    "llm": {
+      "description": "LLM used by the agent",
+      "min": 1
+    },
+    "tool": {
+      "description": "Tools available to the agent (via control-plane invoke)",
+      "min": 0
+    }
+  },
+  "documentation": "https://docs.rocketride.org/nodes/agent_langchain",
+  "icon": "3"
+}

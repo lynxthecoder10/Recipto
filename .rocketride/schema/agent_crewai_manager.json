@@ -1,0 +1,34 @@
+{
+  "title": "CrewAI Manager",
+  "protocol": "agent_crewai_manager://",
+  "prefix": "agent",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "agent",
+    "tool"
+  ],
+  "actions": 0,
+  "description": "Multi-agent manager using CrewAI hierarchical process.\nFans out to connected CrewAI Subagent nodes, assembles a Crew, and synthesizes their outputs.\nCan be invoked as a tool (`<nodeId>.run_agent`) for nested orchestration.",
+  "lanes": {
+    "questions": [
+      "answers"
+    ]
+  },
+  "invoke": {
+    "crewai": {
+      "description": "Connected CrewAI Subagent nodes",
+      "min": 1
+    },
+    "llm": {
+      "description": "LLM used by the manager agent",
+      "min": 1
+    },
+    "tool": {
+      "description": "Cross-cutting tools available to the manager itself (via control-plane invoke)",
+      "min": 0
+    }
+  },
+  "documentation": "https://docs.rocketride.org/nodes/agent_crewai/crewai_manager",
+  "icon": "1"
+}

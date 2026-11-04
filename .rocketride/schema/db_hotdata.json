@@ -1,0 +1,30 @@
+{
+  "title": "Hotdata",
+  "protocol": "db_hotdata://",
+  "prefix": "hotdata",
+  "plans": null,
+  "capabilities": 1024,
+  "classType": [
+    "database",
+    "tool"
+  ],
+  "actions": 0,
+  "description": "Creates one ephemeral Hotdata database for each pipeline run, or attaches to an existing one so agents in separate runs can share it.\nLets agents inspect its live schema and execute read-only SQL; a database this node created is destroyed at teardown, an attached one is left in place.",
+  "lanes": {
+    "answers": [],
+    "questions": [
+      "table",
+      "text",
+      "answers"
+    ]
+  },
+  "invoke": {
+    "llm": {
+      "description": "LLM that writes SQL from a natural-language question; not needed for execute (raw SQL)",
+      "min": 0
+    }
+  },
+  "tile": [],
+  "documentation": "https://docs.rocketride.org/nodes/db_hotdata",
+  "icon": "19"
+}

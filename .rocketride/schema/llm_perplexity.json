@@ -1,0 +1,22 @@
+{
+  "title": "Perplexity",
+  "protocol": "llm_perplexity://",
+  "prefix": "llm",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "llm"
+  ],
+  "actions": 0,
+  "description": "A component that connects to Perplexity AI's Sonar models for advanced natural language \nprocessing with real-time web search capabilities. It supports tasks such as research, \nquestion answering, and chat-based interactions with access to current web information. \nConfigurable with API keys and multiple model options including reasoning and deep research \nmodels for comprehensive, fact-based responses.",
+  "lanes": {
+    "questions": [
+      "answers"
+    ]
+  },
+  "tile": [
+    "Model: ${parameters.llm_perplexity.profile}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/llm_perplexity",
+  "icon": "55"
+}

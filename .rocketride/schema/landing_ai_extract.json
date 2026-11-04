@@ -1,0 +1,20 @@
+{
+  "title": "Landing.ai Extract",
+  "protocol": "landing_ai_extract://",
+  "prefix": "landing_ai_extract",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "data"
+  ],
+  "actions": 0,
+  "description": "Extracts structured fields from parsed Markdown using Landing.ai ADE and a \nJSON Schema you upload. Runs downstream of Landing.ai Parse, consuming the \nMarkdown it produces and emitting the extracted key-value data.",
+  "lanes": {
+    "text": [
+      "answers",
+      "documents"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org/nodes/landing_ai/extract",
+  "icon": "45"
+}

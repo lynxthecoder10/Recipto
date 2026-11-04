@@ -1,0 +1,18 @@
+{
+  "title": "Python",
+  "protocol": "tool_python://",
+  "prefix": "python",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "tool"
+  ],
+  "actions": 0,
+  "description": "Executes Python code in a restricted in-process sandbox via exec().\nOnly whitelisted modules can be imported. Dangerous builtins are removed.\nBy default the code has no network, filesystem or subprocess access.\nFor web calls use the HTTP Request node (tool_http_request). For code that needs network access or extra packages use the Daytona node (tool_daytona).",
+  "lanes": {},
+  "tile": [
+    "Tool: python.execute"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/tool_python",
+  "icon": "112"
+}

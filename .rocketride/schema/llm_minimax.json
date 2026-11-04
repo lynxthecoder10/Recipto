@@ -1,0 +1,22 @@
+{
+  "title": "MiniMax",
+  "protocol": "llm_minimax://",
+  "prefix": "llm",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "llm"
+  ],
+  "actions": 0,
+  "description": "A component that connects to MiniMax's large language models for advanced \nnatural language processing. It enables capabilities like long-context reasoning, \nagentic workflows, multi-step tool use, and high-quality conversational generation. \nMiniMax offers an OpenAI-compatible API with strong performance across reasoning, \nwriting, and coding tasks. The component is suitable for integrating MiniMax models \ninto pipelines where extended context windows and efficient inference are important.",
+  "lanes": {
+    "questions": [
+      "answers"
+    ]
+  },
+  "tile": [
+    "Model: ${parameters.llm_minimax.profile}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/llm_minimax",
+  "icon": "53"
+}

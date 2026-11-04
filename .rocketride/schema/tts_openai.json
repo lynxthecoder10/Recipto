@@ -1,0 +1,28 @@
+{
+  "title": "Text To Speech (OpenAI)",
+  "protocol": "tts_openai://",
+  "prefix": "tts_openai",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "audio"
+  ],
+  "actions": 0,
+  "description": "Converts incoming text into speech using the OpenAI text-to-speech API.\nCalls the vendor API directly from the engine host over HTTPS and emits MP3 bytes on the audio lane.\nModel and voice lists are maintained manually; the API key falls back to the OPENAI_API_KEY environment variable when blank.",
+  "lanes": {
+    "answers": [
+      "audio"
+    ],
+    "documents": [
+      "audio"
+    ],
+    "questions": [
+      "audio"
+    ],
+    "text": [
+      "audio"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org/nodes/cloud_tts",
+  "icon": "32"
+}

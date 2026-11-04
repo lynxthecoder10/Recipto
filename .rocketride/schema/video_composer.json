@@ -1,0 +1,31 @@
+{
+  "title": "Video Composer",
+  "protocol": "video_composer://",
+  "prefix": "video_composer",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "video"
+  ],
+  "actions": 0,
+  "description": "Stitches a sequence of image frames into an MP4 video using FFmpeg. \nPlace after any image-producing filter to re-encode matched frames into \na playable video clip.",
+  "lanes": {
+    "image": [
+      "video"
+    ]
+  },
+  "input": [
+    {
+      "description": "Image frames to stitch into a video.",
+      "lane": "image",
+      "output": [
+        {
+          "description": "Encoded MP4 video from the input frames.",
+          "lane": "video"
+        }
+      ]
+    }
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/video_composer",
+  "icon": "121"
+}

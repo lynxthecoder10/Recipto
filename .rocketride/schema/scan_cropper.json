@@ -1,0 +1,39 @@
+{
+  "title": "Scan Cropper",
+  "protocol": "scan_cropper://",
+  "prefix": "scan_cropper",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "image"
+  ],
+  "actions": 0,
+  "description": "Splits a scan that holds several photos - a photo album page, or a handful of prints laid on the\nplaten - into one image per photo. It works out what the background is from the scan itself, so there\nis no white/dark/album mode to choose, straightens each photo, and cuts apart prints mounted edge to\nedge. Detection runs on a downscaled copy and the crops are taken at full resolution.",
+  "lanes": {
+    "image": [
+      "image",
+      "text"
+    ]
+  },
+  "input": [
+    {
+      "description": "A scanned page holding one or more photographs.",
+      "lane": "image",
+      "output": [
+        {
+          "description": "One JPEG per photo found, named <scan>.crop<N>.jpg in page reading order (top row left to right). A scan whose photos could not be found is forwarded unchanged rather than dropped.",
+          "lane": "image"
+        },
+        {
+          "description": "JSON detection record: {decoded, count, regions[]}, each region carrying cx/cy/w/h/angle, its share of the page, its distance from the nearest standard print ratio, whether it was cropped, and the filename it was emitted under.",
+          "lane": "text"
+        }
+      ]
+    }
+  ],
+  "tile": [
+    "Scan type: ${parameters.scan_cropper.profile}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/scan_cropper",
+  "icon": "41"
+}

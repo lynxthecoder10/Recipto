@@ -17,7 +17,7 @@
   </div>
 </div>
 
-{% set pending_bills = bills | selectattr('payment_status', 'equalto', 'pending') | list %}
+{% set pending_bills = bills | rejectattr('payment_status', 'equalto', 'paid') | list %}
 {% set paid_bills = bills | selectattr('payment_status', 'equalto', 'paid') | list %}
 {% set total_pending = pending_bills | map(attribute='pending_amount') | sum %}
 

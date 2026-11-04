@@ -1,0 +1,19 @@
+{
+  "title": "Fingerprinter",
+  "protocol": "hash://",
+  "prefix": "Hash",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "data"
+  ],
+  "actions": 0,
+  "description": "A processing component that generates a unique fingerprint (hash) of a \ndocument's content. It computes a deterministic hash based on the raw or \nnormalized text, enabling efficient deduplication, content tracking, and \nidentity verification. This component ensures that identical content, \nregardless of metadata, produces the same fingerprint for reliable comparison\nand indexing.",
+  "lanes": {
+    "tags": [
+      "tags"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org/nodes/core/hash",
+  "icon": "39"
+}

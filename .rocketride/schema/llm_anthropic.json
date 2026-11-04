@@ -1,0 +1,22 @@
+{
+  "title": "Anthropic",
+  "protocol": "llm_anthropic://",
+  "prefix": "llm",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "llm"
+  ],
+  "actions": 0,
+  "description": "A component that integrates with Anthropic's Claude models for natural \nlanguage understanding and generation. It enables tasks such as \nsummarization, question answering, content generation, and conversational \nAI. Configurable with model selection and prompt settings, the component \nprovides access to Claude's advanced language capabilities with a strong focus \non safety, alignment, and reliability. Ideal for enterprise-grade workflows requiring \ntrustworthy AI outputs.",
+  "lanes": {
+    "questions": [
+      "answers"
+    ]
+  },
+  "tile": [
+    "Model: ${parameters.llm_anthropic.profile}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/llm_anthropic",
+  "icon": "46"
+}

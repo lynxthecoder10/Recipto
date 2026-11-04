@@ -1,0 +1,40 @@
+{
+  "title": "Object Detection",
+  "protocol": "detect://",
+  "prefix": "detect",
+  "plans": null,
+  "capabilities": 71680,
+  "classType": [
+    "image"
+  ],
+  "actions": 0,
+  "description": "Per-frame object detection. RF-DETR (Apache-2.0, default) is a fast closed-set detector over 80 COCO classes (person, car, dog, etc.). MM-Grounding-DINO (Apache-2.0/BSD-3) is the open-vocab option: type a prompt to detect anything. \nImage in, bounding boxes + labels + centroids out. \nUse as a fast per-frame gate before heavier models. For pixel masks use Segmentation.",
+  "lanes": {
+    "image": [
+      "text",
+      "image"
+    ]
+  },
+  "input": [
+    {
+      "description": "AVI image stream to run detection on.",
+      "lane": "image",
+      "output": [
+        {
+          "description": "Annotated image as raw stream - pipe to any node accepting image input.",
+          "lane": "image"
+        },
+        {
+          "description": "JSON array of detections: [{label, score, box, centroid}].",
+          "lane": "text"
+        }
+      ]
+    }
+  ],
+  "tile": [
+    "Model: ${parameters.detect.profile}",
+    "Prompt: ${parameters.detect.prompt}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/detect",
+  "icon": "25"
+}

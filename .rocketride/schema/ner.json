@@ -1,0 +1,22 @@
+{
+  "title": "Named Entity Recognition",
+  "protocol": "ner://",
+  "prefix": "ner",
+  "plans": null,
+  "capabilities": 6144,
+  "classType": [
+    "text"
+  ],
+  "actions": 0,
+  "description": "A text processing component that identifies and extracts named entities from text using \nstate-of-the-art transformer models. It can detect and classify entities such as persons, \norganizations, locations, dates, and more. The extracted entities are added to document \nmetadata for enhanced search, filtering, and analysis capabilities.</br>\n</br>\nThe component supports multiple pre-trained models optimized for different languages and \nuse cases, from general-purpose entity recognition to specialized domains.",
+  "lanes": {
+    "documents": [
+      "documents"
+    ],
+    "text": [
+      "text"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org/nodes/ner",
+  "icon": "6"
+}

@@ -1,0 +1,22 @@
+{
+  "title": "Qwen",
+  "protocol": "llm_qwen://",
+  "prefix": "llm",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "llm"
+  ],
+  "actions": 0,
+  "description": "A component that connects to Alibaba Cloud's Qwen large language models via the \nDashScope API. It supports tasks such as text generation, summarization, question \nanswering, and chat-based interactions. With access to models like Qwen Max, Qwen Plus \nand Qwen Flash, this component enables high-quality, context-aware responses. Configurable \nwith API keys, it allows seamless integration into AI-driven workflows with scalable \nperformance.",
+  "lanes": {
+    "questions": [
+      "answers"
+    ]
+  },
+  "tile": [
+    "Model: ${parameters.llm_qwen.profile}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/llm_qwen",
+  "icon": "56"
+}

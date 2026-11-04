@@ -1,0 +1,18 @@
+{
+  "title": "Pipedrive",
+  "protocol": "tool_pipedrive://",
+  "prefix": "pipedrive",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "tool"
+  ],
+  "actions": 0,
+  "description": "Exposes the Pipedrive CRM REST API v1 as agent tools.\nCovers deals, persons, organizations, activities, pipelines, stages, notes, leads,\nproducts, files, users, teams, goals, projects, and every other v1 resource.",
+  "lanes": {},
+  "tile": [
+    "Pipedrive${parameters.pipedrive.companyDomain ? ': ' + parameters.pipedrive.companyDomain : ''}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/tool_pipedrive",
+  "icon": "111"
+}

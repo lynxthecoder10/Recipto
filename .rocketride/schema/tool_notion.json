@@ -1,0 +1,16 @@
+{
+  "title": "Notion",
+  "protocol": "tool_notion://",
+  "prefix": "notion",
+  "plans": null,
+  "capabilities": 68608,
+  "classType": [
+    "tool"
+  ],
+  "actions": 0,
+  "description": "Exposes a Notion workspace (search, pages, databases) as agent tools.\nSearch, read, and write Notion pages and databases using an internal integration secret — search by title, query database rows, read a page's body as plain text, and create/update/append pages.",
+  "lanes": {},
+  "tile": [],
+  "documentation": "https://docs.rocketride.org/nodes/tool_notion",
+  "icon": "107"
+}

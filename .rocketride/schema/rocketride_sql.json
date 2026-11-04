@@ -1,0 +1,29 @@
+{
+  "title": "RocketRide SQL",
+  "protocol": "rocketride_sql://",
+  "prefix": "rocketridesql",
+  "plans": null,
+  "capabilities": 1024,
+  "classType": [
+    "database",
+    "tool"
+  ],
+  "actions": 0,
+  "description": "A RocketRide-managed relational database. Stores structured table data \nin your own provisioned RocketRide cloud database with zero setup — no host, \nuser, or password to enter. The connection is resolved automatically from \nyour signed-in RocketRide identity. Supports the same natural-language query, \nschema reflection, and direct-execute surface as the generic PostgreSQL node.",
+  "lanes": {
+    "answers": [],
+    "questions": [
+      "table",
+      "text",
+      "answers"
+    ]
+  },
+  "invoke": {
+    "llm": {
+      "description": "LLM that writes SQL from a natural-language question; not needed for execute (raw SQL)",
+      "min": 0
+    }
+  },
+  "documentation": "https://docs.rocketride.org/nodes/rocketride_sql",
+  "icon": "5"
+}

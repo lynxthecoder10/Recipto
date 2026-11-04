@@ -1,0 +1,29 @@
+{
+  "title": "MySQL",
+  "protocol": "db_mysql://",
+  "prefix": "mysql",
+  "plans": null,
+  "capabilities": 1024,
+  "classType": [
+    "database",
+    "tool"
+  ],
+  "actions": 0,
+  "description": "A processing component that takes structured table data and inserts it \ninto a MySQL database. Designed for straightforward data ingestion, it \nsupports field mapping and basic configuration of connection credentials \nand target tables. Ideal for storing processed results or structured outputs, \nthis component ensures reliable insertion of records into relational storage.",
+  "lanes": {
+    "answers": [],
+    "questions": [
+      "table",
+      "text",
+      "answers"
+    ]
+  },
+  "invoke": {
+    "llm": {
+      "description": "LLM that writes SQL from a natural-language question; not needed for execute (raw SQL)",
+      "min": 0
+    }
+  },
+  "documentation": "https://docs.rocketride.org/nodes/db_mysql",
+  "icon": "21"
+}

@@ -1,0 +1,23 @@
+{
+  "title": "Thumbnail",
+  "protocol": "thumbnail://",
+  "prefix": "Thumbnail",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "image"
+  ],
+  "actions": 0,
+  "description": "A processing component that creates thumbnails from input images. It resizes \nand optimizes images for quick previews or compact storage, preserving aspect \nratio and visual clarity.",
+  "lanes": {
+    "documents": [
+      "documents"
+    ],
+    "image": [
+      "documents",
+      "image"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org/nodes/thumbnail",
+  "icon": "83"
+}

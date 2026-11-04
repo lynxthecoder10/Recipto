@@ -1,0 +1,16 @@
+{
+  "title": "Vertex AI Vector Search",
+  "protocol": "tool_vertex_search://",
+  "prefix": "vertex",
+  "plans": null,
+  "capabilities": 1024,
+  "classType": [
+    "tool"
+  ],
+  "actions": 0,
+  "description": "A processing component that interacts with Google Vertex AI Vector Search.",
+  "lanes": {},
+  "invoke": {},
+  "documentation": "https://docs.rocketride.org/nodes/tool_vertex_search",
+  "icon": "116"
+}

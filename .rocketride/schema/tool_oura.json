@@ -1,0 +1,18 @@
+{
+  "title": "Oura",
+  "protocol": "tool_oura://",
+  "prefix": "oura",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "tool"
+  ],
+  "actions": 0,
+  "description": "Exposes Oura Ring health data as read-only agent tools.\nCovers daily sleep, readiness, activity, stress, resilience, SpO2, heart rate,\nworkouts, sessions, tags, VO2 max, cardiovascular age, battery level, and personal info.",
+  "lanes": {},
+  "tile": [
+    "Oura Ring"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/tool_oura",
+  "icon": "109"
+}

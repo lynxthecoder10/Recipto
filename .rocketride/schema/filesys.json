@@ -1,0 +1,19 @@
+{
+  "title": "Local File System",
+  "protocol": "filesys://",
+  "prefix": "File System",
+  "plans": null,
+  "capabilities": 8195,
+  "classType": [
+    "source"
+  ],
+  "actions": 7,
+  "description": "A source component that reads data from the local file system. It \nenables ingestion of files and documents stored in directories for \nfurther processing within the pipeline. Configurable with path settings \nand file filters, the component supports flexible access to unstructured \ndata across various formats.",
+  "lanes": {
+    "_source": [
+      "tags"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org/nodes/core",
+  "icon": "35"
+}

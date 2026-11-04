@@ -1,0 +1,27 @@
+{
+  "title": "Weaviate",
+  "protocol": "weaviate://",
+  "prefix": "Weaviate Vector Store",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "store",
+    "tool"
+  ],
+  "actions": 0,
+  "description": "A component that stores vector embeddings in a Weaviate instance \nfor semantic search and retrieval. It supports structured metadata and schema \nconfiguration, enabling efficient storage, indexing, and querying \nof high-dimensional data. Ideal for AI pipelines involving similarity search, \nrecommendation systems, and knowledge management.",
+  "lanes": {
+    "documents": [],
+    "questions": [
+      "documents",
+      "answers",
+      "questions"
+    ]
+  },
+  "tile": [
+    "Host/Port: ${parameters.weaviate.${profile}.host}:${parameters.weaviate.${profile}.port}",
+    "Collection: ${parameters.weaviate.${profile}.collection}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/store_weaviate",
+  "icon": "122"
+}

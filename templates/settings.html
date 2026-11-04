@@ -17,6 +17,79 @@
   </div>
 </div>
 
+<div class="row g-4 mb-4">
+  <!-- Profile Management Card -->
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+          <i data-lucide="user-check" class="text-primary"></i>
+          <span>Owner Profile &amp; Identity</span>
+        </div>
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle small">
+          {{ (current_user.role or 'owner')|capitalize if current_user else 'Owner' }} of Industries
+        </span>
+      </div>
+      <div class="card-body">
+        <p class="text-muted small mb-3">Update your legal proprietor information. This details appear on billing records and receipts.</p>
+        <form method="POST" action="{{ url_for('update_profile') }}">
+          <div class="mb-3">
+            <label for="profile_name" class="form-label small fw-semibold">Proprietor Name</label>
+            <div class="input-group">
+              <span class="input-group-text"><i data-lucide="user" style="width: 16px; height: 16px;"></i></span>
+              <input type="text" class="form-control" id="profile_name" name="name" value="{{ current_user.name if current_user else '' }}" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="profile_email" class="form-label small fw-semibold">Email Address</label>
+            <div class="input-group">
+              <span class="input-group-text"><i data-lucide="mail" style="width: 16px; height: 16px;"></i></span>
+              <input type="email" class="form-control" id="profile_email" name="email" value="{{ current_user.email if current_user else '' }}" required>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm px-3">
+            <i data-lucide="save" style="width: 14px; height: 14px;"></i>
+            <span>Save Profile</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Security & Password Card -->
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i data-lucide="shield-check" class="text-primary"></i>
+        <span>Security &amp; Password</span>
+      </div>
+      <div class="card-body">
+        <p class="text-muted small mb-3">Ensure your account is protected with a strong, confidential password.</p>
+        <form method="POST" action="{{ url_for('change_password') }}">
+          <div class="mb-2">
+            <label for="current_password" class="form-label small fw-semibold">Current Password</label>
+            <input type="password" class="form-control form-control-sm" id="current_password" name="current_password" required>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label for="new_password" class="form-label small fw-semibold">New Password</label>
+              <input type="password" class="form-control form-control-sm" id="new_password" name="new_password" minlength="6" required>
+            </div>
+            <div class="col-6">
+              <label for="confirm_new_password" class="form-label small fw-semibold">Confirm Password</label>
+              <input type="password" class="form-control form-control-sm" id="confirm_new_password" name="confirm_new_password" minlength="6" required>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-outline-primary btn-sm px-3">
+            <i data-lucide="key" style="width: 14px; height: 14px;"></i>
+            <span>Update Password</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="row g-4">
   <!-- Appearance Studio Card -->
   <div class="col-lg-6">

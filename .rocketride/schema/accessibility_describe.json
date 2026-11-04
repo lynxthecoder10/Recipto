@@ -1,0 +1,22 @@
+{
+  "title": "Accessibility Describe",
+  "protocol": "accessibility_describe://",
+  "prefix": "accessibility_describe",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "image"
+  ],
+  "actions": 0,
+  "description": "An accessibility-focused image analysis node that generates scene descriptions \noptimized for blind and visually impaired users. Powered by Google Gemini Vision, \nit provides structured descriptions including spatial layout (clock positions), \nhazard detection, text reading (OCR), people detection, and navigation guidance. \nDesigned for real-time assistive technology applications like smart glasses.",
+  "lanes": {
+    "image": [
+      "text"
+    ]
+  },
+  "tile": [
+    "Model: ${parameters.accessibility_describe.profile}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/accessibility_describe",
+  "icon": "0"
+}

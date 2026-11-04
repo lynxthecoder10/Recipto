@@ -1,0 +1,15 @@
+{
+  "title": "LaserData Memory",
+  "protocol": "tool_laserdata_memory://",
+  "prefix": "laserdata",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "tool"
+  ],
+  "actions": 0,
+  "description": "Durable, shared agent memory exposed as tools, backed by LaserData (Apache Iggy) via the Laser SDK.\nExposes four agent tools: 'remember' stores a statement, 'recall' returns the most relevant items, 'improve' reinforces a memory with feedback, and 'forget' deletes one. Pick your deployment (local Apache Iggy or LaserData Cloud), set the connection string and a namespace, and it works; point several agents at the same namespace to share one durable memory.",
+  "lanes": {},
+  "documentation": "https://docs.rocketride.org/nodes/tool_laserdata_memory",
+  "icon": "104"
+}

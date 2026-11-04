@@ -1,0 +1,28 @@
+{
+  "title": "PostgreSQL (pgvector)",
+  "protocol": "postgres://",
+  "prefix": "PostgreSQL Vector Store",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "store",
+    "tool"
+  ],
+  "actions": 0,
+  "description": "A component that enhances PostgreSQL with vector similarity search \ncapabilities through the pgvector extension. It allows for storing and querying of \nhigh-dimensional vectors directly within your existing PostgreSQL database. \nThis component is ideal for building AI-powered applications that require semantic search, \nrecommendation engines, and other similarity-based features without the need \nfor a separate, specialized vector database.",
+  "lanes": {
+    "documents": [],
+    "questions": [
+      "documents",
+      "answers",
+      "questions"
+    ]
+  },
+  "tile": [
+    "Host/Port: ${parameters.postgres.${profile}.host}:${parameters.postgres.${profile}.port}",
+    "Database: ${parameters.postgres.${profile}.database}",
+    "Table: ${parameters.postgres.${profile}.collection}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/store_postgres",
+  "icon": "22"
+}

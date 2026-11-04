@@ -1,0 +1,20 @@
+{
+  "title": "Chat",
+  "protocol": "chat://",
+  "prefix": "Chat",
+  "plans": null,
+  "capabilities": 2560,
+  "classType": [
+    "source"
+  ],
+  "actions": 0,
+  "description": "A user interface component that provides a web-based chat experience. It \ncreates its own HTTP endpoint, configured by host and port, to serve a simple \nchat UI. Users can interact with the interface to submit questions, which \nare routed through the attached pipeline for processing. Designed for easy \nintegration, it enables the addition of conversational capabilities to any \npipeline workflow.",
+  "lanes": {
+    "_source": [
+      "questions"
+    ]
+  },
+  "tile": [],
+  "documentation": "https://docs.rocketride.org/nodes/webhook/chat",
+  "icon": "13"
+}

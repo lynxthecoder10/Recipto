@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#004D98">
+  <title>Create Owner Account &ndash; Recipto</title>
+  
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+  
+  <script>
+    (function () {
+      try {
+        const pref = localStorage.getItem('recipto-theme-pref') || 'system';
+        const isDark = pref === 'dark' || (pref === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.setAttribute('data-bs-theme', isDark ? 'dark' : 'light');
+      } catch (_) {}
+    })();
+  </script>
+</head>
+<body class="bg-subtle d-flex align-items-center justify-content-center min-vh-100 py-4">
+
+<div class="container" style="max-width: 480px;">
+  <!-- Monogram Brand Header -->
+  <div class="text-center mb-4">
+    <div class="topbar-brand-icon mx-auto mb-2" style="width: 44px; height: 44px; font-size: 1.3rem; border-radius: 12px;">R</div>
+    <h2 class="fw-bold mb-1">Recipto</h2>
+    <p class="text-muted small mb-0">Industrial Estate &amp; Gala Property Portal</p>
+  </div>
+
+  <!-- Registration Card -->
+  <div class="card shadow-sm border border-subtle">
+    <div class="card-body p-4">
+      <div class="mb-3">
+        <div class="d-flex align-items-center justify-content-between">
+          <h4 class="fw-bold mb-1">Register Account</h4>
+          <span class="badge bg-primary-subtle text-primary border border-primary-subtle small">Owner of Industries</span>
+        </div>
+        <p class="text-muted small">Create your estate owner profile to manage rental units and bills</p>
+      </div>
+
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ 'success' if category == 'success' else 'warning' if category == 'warning' else 'info' if category == 'info' else 'danger' }} d-flex align-items-center gap-2 py-2 px-3 small mb-3">
+              <i data-lucide="{{ 'check-circle' if category == 'success' else 'alert-triangle' if category == 'warning' else 'info' if category == 'info' else 'alert-circle' }}" style="width: 16px; height: 16px;"></i>
+              <span>{{ message }}</span>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST" action="{{ url_for('signup_page') }}" id="signupForm">
+        <div class="mb-3">
+          <label for="name" class="form-label small fw-semibold">Full Legal Name <span class="text-danger">*</span></label>
+          <div class="input-group">
+            <span class="input-group-text"><i data-lucide="user" style="width: 16px; height: 16px;"></i></span>
+            <input type="text" class="form-control" id="name" name="name" value="{{ name or '' }}" placeholder="e.g. M. Kanda Kumaran" required autofocus>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="email" class="form-label small fw-semibold">Email Address <span class="text-danger">*</span></label>
+          <div class="input-group">
+            <span class="input-group-text"><i data-lucide="mail" style="width: 16px; height: 16px;"></i></span>
+            <input type="email" class="form-control" id="email" name="email" value="{{ email or '' }}" placeholder="owner@company.com" required>
+          </div>
+          <small class="text-muted" style="font-size: 0.725rem;">Used for login and billing archive notifications.</small>
+        </div>
+
+        <input type="hidden" name="role" value="owner">
+
+        <div class="row g-2 mb-3">
+          <div class="col-sm-6">
+            <label for="password" class="form-label small fw-semibold">Password <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <input type="password" class="form-control" id="password" name="password" placeholder="Min. 6 chars" minlength="6" required>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <label for="confirm_password" class="form-label small fw-semibold">Confirm Password <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Repeat password" minlength="6" required>
+            </div>
+          </div>
+          <div id="pwdMismatchAlert" class="text-danger small mt-1 d-none">Passwords do not match.</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2 mt-4" id="submitBtn">
+          <i data-lucide="user-plus" style="width: 18px; height: 18px;"></i>
+          <span>Create Owner Account</span>
+        </button>
+      </form>
+    </div>
+
+    <div class="card-footer bg-subtle text-center py-3 border-top border-subtle">
+      <span class="text-muted small">Already have an account?</span>
+      <a href="{{ url_for('login_page') }}" class="fw-semibold text-primary text-decoration-none small ms-1">Sign In</a>
+    </div>
+  </div>
+
+  <div class="text-center mt-3">
+    <small class="text-muted">&copy; 2026 Recipto. Bhandup Industrial Estate.</small>
+  </div>
+</div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+  if (window.lucide) window.lucide.createIcons();
+
+  const pwd = document.getElementById('password');
+  const confirmPwd = document.getElementById('confirm_password');
+  const mismatchAlert = document.getElementById('pwdMismatchAlert');
+  const form = document.getElementById('signupForm');
+
+  function validatePasswords() {
+    if (confirmPwd.value && pwd.value !== confirmPwd.value) {
+      mismatchAlert.classList.remove('d-none');
+      confirmPwd.classList.add('is-invalid');
+      return false;
+    } else {
+      mismatchAlert.classList.add('d-none');
+      confirmPwd.classList.remove('is-invalid');
+      return true;
+    }
+  }
+
+  if (pwd && confirmPwd) {
+    pwd.addEventListener('input', validatePasswords);
+    confirmPwd.addEventListener('input', validatePasswords);
+  }
+
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      if (!validatePasswords()) {
+        e.preventDefault();
+      }
+    });
+  }
+</script>
+</body>
+</html>

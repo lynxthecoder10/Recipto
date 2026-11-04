@@ -1,0 +1,25 @@
+{
+  "title": "Ollama Vision",
+  "protocol": "image_vision_ollama://",
+  "prefix": "image_vision_ollama",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "image"
+  ],
+  "actions": 0,
+  "description": "A component that connects to locally-hosted open-source vision models through Ollama \nfor image analysis, description, and visual understanding tasks. Supports Llama 3.2 Vision, \nLLaVA, Moondream, MiniCPM-V, and other multimodal models. Runs entirely on-premise with no \nexternal API keys required, ideal for privacy-sensitive applications.",
+  "lanes": {
+    "documents": [
+      "documents"
+    ],
+    "image": [
+      "text"
+    ]
+  },
+  "tile": [
+    "Model: ${parameters.image_vision_ollama.profile}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/llm_vision_ollama",
+  "icon": "44"
+}

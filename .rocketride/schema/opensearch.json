@@ -1,0 +1,26 @@
+{
+  "title": "OpenSearch",
+  "protocol": "opensearch://",
+  "prefix": "OpenSearch Index",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "store"
+  ],
+  "actions": 0,
+  "description": "An OpenSearch node that supports classic BM25 search and vector search \nfor ingestion and retrieval workflows. Works with self-managed OpenSearch.",
+  "lanes": {
+    "documents": [],
+    "questions": [
+      "text",
+      "answers",
+      "documents"
+    ],
+    "text": []
+  },
+  "tile": [
+    "Host: ${parameters.opensearch.host}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/store_elasticsearch/opensearch",
+  "icon": "65"
+}

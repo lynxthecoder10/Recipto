@@ -1,0 +1,22 @@
+{
+  "title": "xAI",
+  "protocol": "llm_xai://",
+  "prefix": "llm",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "llm"
+  ],
+  "actions": 0,
+  "description": "A component that integrates with xAI's Grok language models for intelligent text generation \nand analysis. Designed for advanced natural language understanding, it supports a wide range \nof use cases including question answering, summarization, and conversational AI. With a focus \non reasoning and accuracy, this component provides access to cutting-edge capabilities from xAI, \nenabling rich, context-aware responses for enterprise and technical applications. Configuration \noptions allow flexible deployment within secure and performance-optimized pipelines.",
+  "lanes": {
+    "questions": [
+      "answers"
+    ]
+  },
+  "tile": [
+    "Model: ${parameters.llm_xai.profile}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/llm_xai",
+  "icon": "57"
+}

@@ -1,0 +1,22 @@
+{
+  "title": "Ollama",
+  "protocol": "llm_ollama://",
+  "prefix": "llm",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "llm"
+  ],
+  "actions": 0,
+  "description": "A component that integrates with locally-hosted language models through Ollama. \nIt enables on-premise text generation, summarization, and question answering \nwithout relying on external APIs. Ideal for privacy-sensitive applications, the \ncomponent offers low-latency inference and supports various open-source models. It \nallows organizations to leverage LLM capabilities while maintaining full control \nover data and infrastructure.",
+  "lanes": {
+    "questions": [
+      "answers"
+    ]
+  },
+  "tile": [
+    "Model: ${parameters.llm_ollama.profile}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/llm_ollama",
+  "icon": "44"
+}

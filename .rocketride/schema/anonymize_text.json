@@ -1,0 +1,19 @@
+{
+  "title": "Anonymize",
+  "protocol": "anonymize_text://",
+  "prefix": "anonymize_text",
+  "plans": null,
+  "capabilities": 6144,
+  "classType": [
+    "text"
+  ],
+  "actions": 0,
+  "description": "A filter component that \nidentifies and masks sensitive information in text data. It can be configured \nto detect and redact personally identifiable information (PII), maintaining \ndata privacy while preserving document context.</br>\n</br>\n<b>Note</b>: This component uses AI so 100% accuracy is not guaranteed. It is recommended to review the results.",
+  "lanes": {
+    "text": [
+      "text"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org/nodes/anonymize",
+  "icon": "6"
+}

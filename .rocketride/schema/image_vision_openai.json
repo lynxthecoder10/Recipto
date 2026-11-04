@@ -1,0 +1,47 @@
+{
+  "title": "OpenAI Vision",
+  "protocol": "image_vision_openai://",
+  "prefix": "image_vision_openai",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "image"
+  ],
+  "actions": 0,
+  "description": "A component that connects to OpenAI's vision-capable models for image analysis, \nOCR, visual understanding, and scene description. Supports GPT-4.1 and GPT-4o model families \nwith multimodal capabilities. Features robust error handling, automatic image processing, \nand flexible prompt configuration for a wide range of vision use cases.",
+  "lanes": {
+    "documents": [
+      "documents"
+    ],
+    "image": [
+      "text"
+    ]
+  },
+  "input": [
+    {
+      "description": "Image to analyze with OpenAI Vision models",
+      "lane": "image",
+      "output": [
+        {
+          "description": "Text analysis of the image content",
+          "lane": "text"
+        }
+      ]
+    },
+    {
+      "description": "Image documents to analyze with OpenAI Vision models",
+      "lane": "documents",
+      "output": [
+        {
+          "description": "Text analysis of each image document with original metadata (frame number, timestamp) preserved",
+          "lane": "documents"
+        }
+      ]
+    }
+  ],
+  "tile": [
+    "Model: ${parameters.image_vision_openai.profile}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/llm_vision_openai",
+  "icon": "32"
+}

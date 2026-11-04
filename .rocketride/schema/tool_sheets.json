@@ -1,0 +1,18 @@
+{
+  "title": "Google Sheets",
+  "protocol": "tool_sheets://",
+  "prefix": "sheets",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "tool"
+  ],
+  "actions": 0,
+  "description": "Exposes Google Sheets operations as agent tools.\nRead, write, append, and clear cell values; create spreadsheets; add, delete, duplicate, and copy sheets; and run arbitrary batchUpdate requests (formatting, charts, conditional formatting).\nAuthenticates via a Google service account or user OAuth.",
+  "lanes": {},
+  "tile": [
+    "Google Sheets (${parameters.sheets.access})"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/tool_google_workspace/sheets",
+  "icon": "95"
+}

@@ -1,0 +1,44 @@
+{
+  "title": "Persistent Memory",
+  "protocol": "memory_persistent://",
+  "prefix": "memory",
+  "plans": null,
+  "capabilities": 67584,
+  "classType": [
+    "memory"
+  ],
+  "actions": 0,
+  "description": "A persistent cross-session memory node that retains data across pipeline\ninvocations. Supports Redis for production and in-memory backends for\ntesting. Provides session management, keyed storage, history tracking,\nand automatic summarization of older entries.",
+  "lanes": {
+    "answers": [
+      "answers"
+    ],
+    "questions": [
+      "questions"
+    ]
+  },
+  "input": [
+    {
+      "description": "Questions are enriched with session memory context before forwarding",
+      "lane": "questions",
+      "output": [
+        {
+          "description": "Questions with memory context attached in metadata",
+          "lane": "questions"
+        }
+      ]
+    },
+    {
+      "description": "Answers are stored in session memory for future retrieval",
+      "lane": "answers",
+      "output": [
+        {
+          "description": "Answers passed through after persistence",
+          "lane": "answers"
+        }
+      ]
+    }
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/memory_persistent",
+  "icon": "61"
+}

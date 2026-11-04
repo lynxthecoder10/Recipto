@@ -1,0 +1,26 @@
+{
+  "title": "Media Toolkit: Inspect",
+  "protocol": "media_inspect://",
+  "prefix": "media_inspect",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "video"
+  ],
+  "actions": 0,
+  "description": "Measure streamed media and extract selected images.\n Outputs are returned through lanes; persistence belongs to downstream nodes.",
+  "lanes": {
+    "audio": [
+      "text",
+      "answers",
+      "image"
+    ],
+    "video": [
+      "text",
+      "answers",
+      "image"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org/nodes/media_inspect",
+  "icon": "60"
+}

@@ -1,0 +1,22 @@
+{
+  "title": "GLM (Z.ai)",
+  "protocol": "llm_glm://",
+  "prefix": "llm",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "llm"
+  ],
+  "actions": 0,
+  "description": "A component that connects to Zhipu AI's GLM large language models for \nadvanced natural language processing. The GLM-5 generation are hybrid-reasoning \nMoE models with configurable thinking modes, strong agentic and coding \nperformance, and up to a 1M-token context window: GLM-5.2 for frontier \nlong-context reasoning, GLM-5 Turbo for a fast cost-effective tier, and the \nopen-weight GLM-4.5 Air for efficient self-hosted workloads. Models are served \nthrough the OpenAI-compatible Z.ai cloud API (api.z.ai); self-hosted vLLM or \nSGLang deployments connect through the Custom Model profile.",
+  "lanes": {
+    "questions": [
+      "answers"
+    ]
+  },
+  "tile": [
+    "Model: ${parameters.llm_glm.profile}"
+  ],
+  "documentation": "https://docs.rocketride.org",
+  "icon": "50"
+}

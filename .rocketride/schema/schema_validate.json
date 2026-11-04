@@ -1,0 +1,19 @@
+{
+  "title": "Schema Validate",
+  "protocol": "schema_validate://",
+  "prefix": "schema_validate",
+  "plans": null,
+  "capabilities": 67584,
+  "classType": [
+    "text"
+  ],
+  "actions": 0,
+  "description": "A guard node for the audit-grade financial extraction suite. It flags \ninconsistencies in structured facts — most notably a cost row stored as revenue \n(and other metric/category mismatches, sign-convention violations, and missing \namounts/currency) — and makes sure provenance is never dropped. Reads and writes \nthe <code>answers</code> lane.</br>\n</br>\nValidation is <b>non-destructive</b>: original fields are kept, a <code>validation</code> \nblock (<code>valid</code>, <code>severity</code>, <code>flags</code>) is added, and a \n<code>provenance</code> entry records that the fact was checked. Records that are not \nfact objects pass through unchanged; nothing is ever dropped or fixed.",
+  "lanes": {
+    "answers": [
+      "answers"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org/nodes/schema_validate",
+  "icon": "6"
+}

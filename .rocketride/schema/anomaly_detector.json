@@ -1,0 +1,22 @@
+{
+  "title": "Anomaly Detector",
+  "protocol": "anomaly_detector://",
+  "prefix": "anomaly_detector",
+  "plans": null,
+  "capabilities": 67584,
+  "classType": [
+    "text"
+  ],
+  "actions": 0,
+  "description": "A pipeline monitoring component that detects anomalies in numeric output values using \nstatistical methods. It supports Z-Score, IQR (Interquartile Range), and Rolling Average \ndeviation detection with configurable sensitivity and window sizes. Detected anomalies are \nclassified by severity (normal, warning, critical) and added to document metadata.</br>\n</br>\nUse this node to monitor pipeline outputs for unexpected patterns, outliers, or shifts \nin data distribution that may indicate issues requiring attention.",
+  "lanes": {
+    "documents": [
+      "documents"
+    ],
+    "text": [
+      "text"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org/nodes/anomaly_detector",
+  "icon": "6"
+}

@@ -1,0 +1,22 @@
+{
+  "title": "OpenAI-Compatible API",
+  "protocol": "llm_openai_api://",
+  "prefix": "llm",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "llm"
+  ],
+  "actions": 0,
+  "description": "A component that connects to any OpenAI-compatible API endpoint for language model \ninference. Supports custom base URLs for providers like Featherless, Together, Groq, \nOllama, LM Studio, and any other OpenAI SDK-compatible service. Configure with your \nprovider's base URL, API key, and model name.",
+  "lanes": {
+    "questions": [
+      "answers"
+    ]
+  },
+  "tile": [
+    "Model: ${parameters.llm_openai_api.profile}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/llm_openai_api",
+  "icon": "32"
+}

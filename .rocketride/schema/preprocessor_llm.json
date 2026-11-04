@@ -1,0 +1,29 @@
+{
+  "title": "LLM",
+  "protocol": "preprocessor_llm://",
+  "prefix": "Preprocessor",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "preprocessor"
+  ],
+  "actions": 0,
+  "description": "A processing component that analyzes document content to extract concise \nsummaries, key points, and named entities and to divide a document for \nstorage into a vector database.",
+  "lanes": {
+    "table": [
+      "documents"
+    ],
+    "text": [
+      "documents"
+    ]
+  },
+  "invoke": {
+    "llm": {
+      "description": "LLM to use to process the document",
+      "min": 1
+    }
+  },
+  "tile": [],
+  "documentation": "https://docs.rocketride.org/nodes/preprocessor_llm",
+  "icon": "71"
+}

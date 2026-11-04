@@ -1,0 +1,24 @@
+{
+  "title": "Deep Agent Subagent",
+  "protocol": "agent_deepagent_subagent://",
+  "prefix": "agent",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "deepagent"
+  ],
+  "actions": 0,
+  "description": "Managed Deep Agent subagent. Must be wired into a Deep Agent node via the deepagent channel.\nCannot be invoked directly, has no questions lane.",
+  "invoke": {
+    "llm": {
+      "description": "LLM used by this sub-agent when delegated to",
+      "min": 1
+    },
+    "tool": {
+      "description": "Tools available to this sub-agent (via control-plane invoke)",
+      "min": 0
+    }
+  },
+  "documentation": "https://docs.rocketride.org/nodes/agent_deepagent/deepagent_subagent",
+  "icon": "2"
+}

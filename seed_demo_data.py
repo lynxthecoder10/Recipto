@@ -13,6 +13,7 @@ from contextlib import closing
 from models.db import (
     init_receipt_store,
     init_billing_store,
+    ensure_default_user,
     create_or_update_gala,
     list_galas,
     get_receipts_connection,
@@ -37,6 +38,9 @@ def main() -> None:
     print("Initialising database schema ...")
     init_receipt_store()
     init_billing_store()
+    default_user = ensure_default_user()
+    user_id = default_user["id"]
+    print(f"Assigning demo records to Owner: {default_user['name']} ({default_user['email']}) [ID: {user_id}]")
 
     # Clear existing galas and bills for clean demo seed
     with closing(get_receipts_connection()) as conn:
@@ -52,11 +56,12 @@ def main() -> None:
             tenant_name=tenant_name,
             phone_number=phone_number,
             monthly_rent=monthly_rent,
+            user_id=user_id,
         )
         phone_display = phone_number if phone_number else "(blank)"
         print(f"  {record['gala_number']:5s}  {record['tenant_name']:10s}  phone={phone_display:12s}  rent=Rs.{record['monthly_rent']:.2f}")
 
-    galas = list_galas()
+    galas = list_galas(user_id=user_id)
     print(f"\nDone. Total galas in database: {len(galas)}")
 
 

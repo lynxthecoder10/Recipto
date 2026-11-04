@@ -1,0 +1,19 @@
+{
+  "title": "Video",
+  "protocol": "embedding_video://",
+  "prefix": "embedding",
+  "plans": null,
+  "capabilities": 71680,
+  "classType": [
+    "embedding"
+  ],
+  "actions": 0,
+  "description": "A processing component that generates vector embeddings from video content \nby extracting frames at configurable intervals and encoding them using \nvision models such as CLIP. It transforms visual features from video frames \ninto numerical representations that capture the semantic and structural \ncharacteristics of the video. These embeddings enable similarity search, \nclustering, and integration into multimodal RAG workflows. Ideal for use \ncases involving video retrieval, semantic search, and content understanding.",
+  "lanes": {
+    "video": [
+      "documents"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org/nodes/embedding_video",
+  "icon": "34"
+}

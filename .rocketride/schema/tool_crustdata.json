@@ -1,0 +1,16 @@
+{
+  "title": "Crustdata",
+  "protocol": "tool_crustdata://",
+  "prefix": "crustdata",
+  "plans": null,
+  "capabilities": 68608,
+  "classType": [
+    "tool"
+  ],
+  "actions": 0,
+  "description": "Exposes Crustdata's B2B company and people search as agent tools.\nSearches Crustdata's indexed company and people data by filter criteria (industry, headcount, funding, current company, title, and more) and returns structured records.",
+  "lanes": {},
+  "tile": [],
+  "documentation": "https://docs.rocketride.org/nodes/tool_crustdata",
+  "icon": "90"
+}

@@ -1,0 +1,22 @@
+{
+  "title": "Aparavi AQL",
+  "protocol": "aparavi_aql://",
+  "prefix": "aparavi",
+  "plans": null,
+  "capabilities": 1024,
+  "classType": [
+    "database",
+    "tool"
+  ],
+  "actions": 0,
+  "description": "Queries the Aparavi data governance platform using AQL (Aparavi Query Language). \nAccepts natural-language questions, generates AQL SELECT statements via the \nconnected LLM, and returns file metadata rows from the Aparavi STORE table. \nSchema is fixed, no dynamic introspection required.",
+  "lanes": {},
+  "invoke": {
+    "llm": {
+      "description": "LLM used to generate AQL queries from natural language",
+      "min": 1
+    }
+  },
+  "documentation": "https://docs.rocketride.org/nodes/aparavi_aql",
+  "icon": "7"
+}

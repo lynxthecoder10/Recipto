@@ -1,0 +1,22 @@
+{
+  "title": "Mistral AI",
+  "protocol": "llm_mistral://",
+  "prefix": "llm",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "llm"
+  ],
+  "actions": 0,
+  "description": "A component that connects to Mistral AI's advanced language models for natural language processing. \nSupports a wide range of models from large (256K context) to small (32K context), including specialized \nmodels for reasoning and technical tasks. Features high-quality chat completions with robust error handling \nand automatic token management.",
+  "lanes": {
+    "questions": [
+      "answers"
+    ]
+  },
+  "tile": [
+    "Model: ${parameters.llm_mistral.profile}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/llm_mistral",
+  "icon": "43"
+}

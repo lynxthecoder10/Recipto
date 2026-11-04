@@ -1,0 +1,39 @@
+{
+  "title": "Image Orientation Fixer",
+  "protocol": "image_orient://",
+  "prefix": "image_orient",
+  "plans": null,
+  "capabilities": 67584,
+  "classType": [
+    "image"
+  ],
+  "actions": 0,
+  "description": "Turns scanned photographs the right way up. Finds faces at each of the four right-angle\nrotations and keeps the one they agree on, so a print scanned sideways or upside down comes out\nupright. It only acts when the evidence is clear: anything it is unsure about is passed through\nuntouched and listed on the text lane, because a photo turned the wrong way is worse than one\nleft alone.",
+  "lanes": {
+    "image": [
+      "image",
+      "text"
+    ]
+  },
+  "input": [
+    {
+      "description": "A photograph that may have been scanned at the wrong orientation.",
+      "lane": "image",
+      "output": [
+        {
+          "description": "The same photograph, turned upright when the node is confident and passed through byte-for-byte when it is not. The stream keeps its original name and format.",
+          "lane": "image"
+        },
+        {
+          "description": "JSON decision record: {decoded, rotation, confident, scores, faces, ratio, reason}. 'rotation' is the correction applied in degrees clockwise, and 'reason' names why an image was left alone, so the skipped set is reviewable without re-running.",
+          "lane": "text"
+        }
+      ]
+    }
+  ],
+  "tile": [
+    "Confidence: ${parameters.image_orient.margin}x"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/image_orient",
+  "icon": "41"
+}

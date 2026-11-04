@@ -1,0 +1,26 @@
+{
+  "title": "Pipeline Tool",
+  "protocol": "tool_pipe://",
+  "prefix": "tool_pipe",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "tool"
+  ],
+  "actions": 0,
+  "description": "Exposes an inline pipeline as an agent tool.\nConnect this node's output lanes to any pipeline nodes on the same canvas.\nWhen an agent calls the tool, the input is routed to every connected output lane.\nEnd each connected branch with a response node to return results.",
+  "lanes": {
+    "_source": [
+      "text",
+      "questions",
+      "documents",
+      "table",
+      "answers"
+    ]
+  },
+  "tile": [
+    "run_pipe"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/tool_pipe",
+  "icon": "110"
+}

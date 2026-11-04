@@ -1,0 +1,18 @@
+{
+  "title": "GitHub",
+  "protocol": "tool_github://",
+  "prefix": "github",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "tool"
+  ],
+  "actions": 0,
+  "description": "Exposes GitHub repository operations as agent tools.\nCovers files, issues, pull requests, reviews, releases, workflows, orgs, users,\ncode search, and commit history.",
+  "lanes": {},
+  "tile": [
+    "GitHub${parameters.github.defaultRepo ? ': ' + parameters.github.defaultRepo : ''}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/tool_github",
+  "icon": "99"
+}

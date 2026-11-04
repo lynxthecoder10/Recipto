@@ -1,0 +1,19 @@
+{
+  "title": "Normalize Facts",
+  "protocol": "normalize_facts://",
+  "prefix": "normalize_facts",
+  "plans": null,
+  "capabilities": 67584,
+  "classType": [
+    "text"
+  ],
+  "actions": 0,
+  "description": "A deterministic fact normalizer for the audit-grade financial extraction suite. \nReads facts on the <code>answers</code> lane and cleans them with pure Python (no LLM): \nit parses numbers and signs (parentheses, trailing/unicode minus, thousands separators), \ndetects and <b>tags</b> currency and scale (never converting, never multiplying the value), \nmaps free-text labels to standard metric names, and de-duplicates identical facts.</br>\n</br>\nThe normalization is <b>non-destructive</b>: the raw label and value are kept, a \n<code>normalized</code> block is added, and a <code>provenance</code> entry records how each \nfield was derived. Currency is tagged, not converted — conversion is the separate \n<code>currency_convert_explicit</code> node. Records that are not fact objects pass through unchanged.",
+  "lanes": {
+    "answers": [
+      "answers"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org/nodes/normalize_facts",
+  "icon": "6"
+}

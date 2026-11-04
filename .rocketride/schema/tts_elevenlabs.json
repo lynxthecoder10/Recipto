@@ -1,0 +1,28 @@
+{
+  "title": "Text To Speech (ElevenLabs)",
+  "protocol": "tts_elevenlabs://",
+  "prefix": "tts_elevenlabs",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "audio"
+  ],
+  "actions": 0,
+  "description": "Converts incoming text into speech using the ElevenLabs text-to-speech API.\nCalls the vendor API directly from the engine host over HTTPS and emits MP3 bytes on the audio lane.\nThe model and voice lists are maintained manually; the API key falls back to the ELEVENLABS_API_KEY environment variable when blank.",
+  "lanes": {
+    "answers": [
+      "audio"
+    ],
+    "documents": [
+      "audio"
+    ],
+    "questions": [
+      "audio"
+    ],
+    "text": [
+      "audio"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org/nodes/cloud_tts",
+  "icon": "9"
+}

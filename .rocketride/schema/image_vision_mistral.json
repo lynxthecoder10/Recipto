@@ -1,0 +1,25 @@
+{
+  "title": "Mistral Vision",
+  "protocol": "image_vision_mistral://",
+  "prefix": "image_vision_mistral",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "image"
+  ],
+  "actions": 0,
+  "description": "A component that connects to Mistral AI's vision-capable models for image analysis, \nOCR, and visual understanding tasks. Supports all Mistral vision models including \nMistral Large 3, Medium 3.1, Small 3.2, and Ministral models. Features robust error \nhandling, automatic image processing, and flexible prompt configuration for various use cases.",
+  "lanes": {
+    "documents": [
+      "documents"
+    ],
+    "image": [
+      "text"
+    ]
+  },
+  "tile": [
+    "Model: ${parameters.image_vision_mistral.profile}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/llm_vision_mistral",
+  "icon": "43"
+}

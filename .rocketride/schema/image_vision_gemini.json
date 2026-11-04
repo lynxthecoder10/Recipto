@@ -1,0 +1,47 @@
+{
+  "title": "Gemini Vision",
+  "protocol": "image_vision_gemini://",
+  "prefix": "image_vision_gemini",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "image"
+  ],
+  "actions": 0,
+  "description": "A component that connects to Google Gemini's vision-capable models for image analysis, \nOCR, visual understanding, and scene description. Supports Gemini 2.5 and 3.x models \nwith multimodal capabilities. Features robust error handling, automatic image processing, \nand flexible prompt configuration for a wide range of vision use cases.",
+  "lanes": {
+    "documents": [
+      "documents"
+    ],
+    "image": [
+      "text"
+    ]
+  },
+  "input": [
+    {
+      "description": "Image to analyze with Gemini Vision models",
+      "lane": "image",
+      "output": [
+        {
+          "description": "Text analysis of the image content",
+          "lane": "text"
+        }
+      ]
+    },
+    {
+      "description": "Image documents to analyze with Gemini Vision models",
+      "lane": "documents",
+      "output": [
+        {
+          "description": "Text analysis of each image document with original metadata (frame number, timestamp) preserved",
+          "lane": "documents"
+        }
+      ]
+    }
+  ],
+  "tile": [
+    "Model: ${parameters.image_vision_gemini.profile}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/llm_vision_gemini",
+  "icon": "42"
+}

@@ -1,0 +1,22 @@
+{
+  "title": "Transformer",
+  "protocol": "embedding_transformer://",
+  "prefix": "embedding",
+  "plans": null,
+  "capabilities": 6144,
+  "classType": [
+    "embedding"
+  ],
+  "actions": 0,
+  "description": "A component that transforms text into numerical vector representations using advanced embedding \nmodels. It converts input text, ranging from individual words to entire documents, into high-dimensional \nvectors that capture semantic meaning and relationships. These embeddings enable efficient similarity \nsearches, clustering, and other advanced natural language processing tasks. The text embedder is highly \nconfigurable, supporting various pre-trained models and fine-tuning options, ensuring flexibility for \ndifferent use cases across domains.",
+  "lanes": {
+    "documents": [
+      "documents"
+    ],
+    "questions": [
+      "questions"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org/nodes/embedding_transformer",
+  "icon": "33"
+}

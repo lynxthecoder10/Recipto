@@ -1,0 +1,16 @@
+{
+  "title": "Google Cloud Storage",
+  "protocol": "tool_gcs://",
+  "prefix": "gcs",
+  "plans": null,
+  "capabilities": 1024,
+  "classType": [
+    "tool"
+  ],
+  "actions": 0,
+  "description": "A tool component that interacts with Google Cloud Storage buckets.",
+  "lanes": {},
+  "invoke": {},
+  "documentation": "https://docs.rocketride.org/nodes/tool_gcs",
+  "icon": "97"
+}

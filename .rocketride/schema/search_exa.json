@@ -1,0 +1,24 @@
+{
+  "title": "Exa Search",
+  "protocol": "search_exa://",
+  "prefix": "search",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "search"
+  ],
+  "actions": 0,
+  "description": "A direct Exa web search node.\nAccepts user questions and returns Exa's raw search JSON as the answer.",
+  "lanes": {
+    "questions": [
+      "answers",
+      "text"
+    ]
+  },
+  "tile": [
+    "Type: ${parameters.search_exa.type}",
+    "Results: ${parameters.search_exa.numResults}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/search_exa",
+  "icon": "79"
+}

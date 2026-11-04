@@ -1,0 +1,16 @@
+{
+  "title": "DeepL",
+  "protocol": "tool_deepl://",
+  "prefix": "deepl",
+  "plans": null,
+  "capabilities": 68608,
+  "classType": [
+    "tool"
+  ],
+  "actions": 0,
+  "description": "Exposes DeepL translation and AI rephrasing as agent tools.\nTranslates text into a target language or rewrites it in a chosen style or tone via the DeepL API, returning the result plus the detected source language.",
+  "lanes": {},
+  "tile": [],
+  "documentation": "https://docs.rocketride.org/nodes/tool_deepl",
+  "icon": "92"
+}

@@ -1,0 +1,34 @@
+{
+  "title": "Data Extractor",
+  "protocol": "extract_data://",
+  "prefix": "extrace_data",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "text"
+  ],
+  "actions": 0,
+  "description": "A component that processes unstructured or semi-structured text and extracts \nstructured data in a tabular format. It identifies key fields, values, and \npatterns within the input content using configurable extraction rules or machine \nlearning models. The resulting output is organized into rows and columns, making \nit suitable for further analysis, storage, or integration into downstream systems. This \ncomponent is ideal for transforming documents, reports, or freeform text into usable \ndata structures, enabling automation and insight generation across various domains.",
+  "lanes": {
+    "documents": [
+      "answers",
+      "documents"
+    ],
+    "table": [
+      "answers",
+      "documents"
+    ],
+    "text": [
+      "answers",
+      "documents"
+    ]
+  },
+  "invoke": {
+    "llm": {
+      "description": "LLM to use for data extraction",
+      "min": 1
+    }
+  },
+  "documentation": "https://docs.rocketride.org/nodes/extract_data",
+  "icon": "6"
+}

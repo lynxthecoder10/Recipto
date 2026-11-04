@@ -1,0 +1,27 @@
+{
+  "title": "Pinecone",
+  "protocol": "pinecone://",
+  "prefix": "Pinecone Vector Store",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "store",
+    "tool"
+  ],
+  "actions": 0,
+  "description": "A component that connects to the Pinecone vector database for storing and retrieving \nhigh-dimensional embeddings. It enables efficient similarity search, indexing, and \nmanagement of vectorized data, such as text or image embeddings. Configurable with \nAPI credentials, index settings, and metadata filtering, the component supports fast \nand scalable operations across large embedding datasets. Ideal for semantic search, \nrecommendation systems, and retrieval-augmented generation workflows.",
+  "lanes": {
+    "documents": [],
+    "questions": [
+      "documents",
+      "answers",
+      "questions"
+    ]
+  },
+  "tile": [
+    "Mode: ${parameters.pinecone.profile}",
+    "Collection: ${parameters.pinecone.${profile}.collection}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/store_pinecone",
+  "icon": "67"
+}

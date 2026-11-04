@@ -1,0 +1,15 @@
+{
+  "title": "Remote Processing",
+  "protocol": "remote://",
+  "prefix": "Remote",
+  "plans": null,
+  "capabilities": 10240,
+  "classType": [
+    "infrastructure"
+  ],
+  "actions": 0,
+  "description": "A transport component that forwards data to a remote machine or \nprocessing node. It enables distributed pipeline architectures by \noffloading computation or specialized tasks to external systems. Configurable \nwith network endpoints, authentication, and serialization settings, \nit supports scalable and modular deployment across environments.",
+  "lanes": {},
+  "documentation": "https://docs.rocketride.org/nodes/remote",
+  "icon": "76"
+}

@@ -1,0 +1,20 @@
+{
+  "title": "Landing.ai Parse",
+  "protocol": "landing_ai_parse://",
+  "prefix": "landing_ai_parse",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "data"
+  ],
+  "actions": 0,
+  "description": "Parses documents with Landing.ai Agentic Document Extraction (ADE), \nextracting clean Markdown text and structured tables from PDFs, images, \nand spreadsheets using the DPT-2 model.",
+  "lanes": {
+    "tags": [
+      "text",
+      "table"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org/nodes/landing_ai/parse",
+  "icon": "45"
+}

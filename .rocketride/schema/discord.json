@@ -1,0 +1,32 @@
+{
+  "title": "Discord Bot",
+  "protocol": "discord://",
+  "prefix": "Discord",
+  "plans": null,
+  "capabilities": 2560,
+  "classType": [
+    "source"
+  ],
+  "actions": 0,
+  "description": "A Discord Bot source node that receives messages from channels and DMs via the Discord Gateway. \nSupports text messages and media attachments (images, audio, video, documents). \nEach message type is routed to the appropriate pipeline lane. \nPipeline responses are automatically sent back as replies to the originating channel or thread. \nSupports message content intent, attachment downloading, reply threading, and long-message chunking.",
+  "lanes": {
+    "_source": [
+      "text",
+      "image",
+      "audio",
+      "video",
+      "tags"
+    ]
+  },
+  "invoke": {
+    "tool": {
+      "description": "Database node that captured events are written to (via control-plane invoke)",
+      "min": 0
+    }
+  },
+  "tile": [
+    "Token: ${parameters.discord.botToken ? 'configured' : 'missing'}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/discord",
+  "icon": "28"
+}

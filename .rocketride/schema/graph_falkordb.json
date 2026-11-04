@@ -1,0 +1,31 @@
+{
+  "title": "FalkorDB",
+  "protocol": "graph_falkordb://",
+  "prefix": "falkordb",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "graph",
+    "tool"
+  ],
+  "actions": 0,
+  "description": "A processing component that connects to a FalkorDB graph database. \nAccepts natural-language questions, translates them to Cypher queries \nvia an LLM, and returns results to the pipeline. Also exposes the graph \nto an agent as a tool. Queries are read-only by default, enforced by the server.",
+  "lanes": {
+    "questions": [
+      "table",
+      "text",
+      "answers"
+    ]
+  },
+  "invoke": {
+    "llm": {
+      "description": "LLM to use to craft Cypher queries from question",
+      "min": 1
+    }
+  },
+  "tile": [
+    "Graph: ${parameters.graph_falkordb.${profile}.graph}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/graph_falkordb",
+  "icon": "37"
+}

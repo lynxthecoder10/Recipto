@@ -1,0 +1,22 @@
+{
+  "title": "Authoritative Overlay",
+  "protocol": "authoritative-overlay://",
+  "prefix": "authoritative_overlay",
+  "plans": null,
+  "capabilities": 67584,
+  "classType": [
+    "guard"
+  ],
+  "actions": 0,
+  "description": "Cross-checks extracted financial numbers against the US SEC EDGAR \ncompany-concept API for a configured CIK, scoped to a filing period \n(form / fy / fp / start / end / frame). Abstains (drops) the answer if there is no match.",
+  "lanes": {
+    "answers": [
+      "answers"
+    ],
+    "text": [
+      "answers"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org/nodes/authoritative_overlay",
+  "icon": "11"
+}

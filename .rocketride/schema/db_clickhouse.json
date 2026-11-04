@@ -1,0 +1,28 @@
+{
+  "title": "ClickHouse",
+  "protocol": "db_clickhouse://",
+  "prefix": "clickhouse",
+  "plans": null,
+  "capabilities": 1024,
+  "classType": [
+    "database",
+    "tool"
+  ],
+  "actions": 0,
+  "description": "A ClickHouse component that answers natural-language questions by translating \nthem into SQL and executing them against the database, returning rows as a table, \ntext, or structured answers. It also exposes an agent tool surface (get_data, \nget_schema, get_sql) for question-to-SQL querying. Read-only by default; raw SQL \nexecution is available to trusted callers via the allow_execute option.",
+  "lanes": {
+    "questions": [
+      "table",
+      "text",
+      "answers"
+    ]
+  },
+  "invoke": {
+    "llm": {
+      "description": "LLM that writes SQL from a natural-language question; not needed for execute (raw SQL)",
+      "min": 0
+    }
+  },
+  "documentation": "https://docs.rocketride.org/nodes/db_clickhouse",
+  "icon": "17"
+}

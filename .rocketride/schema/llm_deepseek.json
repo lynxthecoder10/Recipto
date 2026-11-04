@@ -1,0 +1,22 @@
+{
+  "title": "Deepseek",
+  "protocol": "llm_deepseek://",
+  "prefix": "llm",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "llm"
+  ],
+  "actions": 0,
+  "description": "A component that connects to DeepSeek’s large language models for advanced \nnatural language processing. It enables capabilities like text generation, \nsummarization, and code understanding. Optimized for technical domains, DeepSeek \noffers strong performance in handling programming-related queries, structured \ndata, and domain-specific tasks. The component is suitable for integrating \nintelligent reasoning and content generation into pipelines where accuracy and \ndomain adaptation are key.",
+  "lanes": {
+    "questions": [
+      "answers"
+    ]
+  },
+  "tile": [
+    "Model: ${parameters.llm_deepseek.profile}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/llm_deepseek",
+  "icon": "49"
+}

@@ -1,0 +1,22 @@
+{
+  "title": "OpenAI",
+  "protocol": "llm_openai://",
+  "prefix": "llm",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "llm"
+  ],
+  "actions": 0,
+  "description": "A component that connects to OpenAI's latest GPT models for advanced natural language \nprocessing. It supports tasks such as text generation, summarization, question \nanswering, and chat-based interactions. With access to state-of-the-art language \nmodels like GPT-5.4, GPT-5, GPT-4o, and GPT-4o-mini, this component enables \nhigh-quality, context-aware responses and creative text generation. Configurable with \nAPI keys and deployment options, it allows seamless integration into AI-driven \nworkflows with scalable performance and enhanced multimodal capabilities.",
+  "lanes": {
+    "questions": [
+      "answers"
+    ]
+  },
+  "tile": [
+    "Model: ${parameters.llm_openai.profile}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/llm_openai",
+  "icon": "32"
+}

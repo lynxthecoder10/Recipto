@@ -1,0 +1,26 @@
+{
+  "title": "RocketRide Vector",
+  "protocol": "rocketride_vector://",
+  "prefix": "RocketRide Vector Store",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "store"
+  ],
+  "actions": 0,
+  "description": "A RocketRide-managed vector store backed by PostgreSQL + pgvector. Stores \nand semantically searches high-dimensional embeddings in your own provisioned \nRocketRide cloud database with zero setup — no host, user, or password to enter; \nthe connection is resolved automatically from your signed-in RocketRide identity. \nAn HNSW index is created on first write so semantic search is fast from the start.",
+  "lanes": {
+    "documents": [],
+    "questions": [
+      "documents",
+      "answers",
+      "questions"
+    ]
+  },
+  "tile": [
+    "Table: ${parameters.rocketride_vector.${profile}.collection}",
+    "Similarity: ${parameters.rocketride_vector.${profile}.similarity}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/rocketride_vector",
+  "icon": "5"
+}

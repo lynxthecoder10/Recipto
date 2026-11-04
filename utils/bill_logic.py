@@ -170,8 +170,3 @@ def calculate_late_fee(
 
     fee = base_amount * rate * days_late
     return fee.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-
-
-def send_whatsapp_bill(pdf_bytes: bytes, phone_number: str) -> None:
-    """Placeholder for WhatsApp integration."""
-    print(f"[WhatsApp Placeholder] Sending bill PDF ({len(pdf_bytes)} bytes) to {phone_number}...")

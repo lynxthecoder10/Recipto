@@ -1,0 +1,42 @@
+{
+  "title": "Hybrid Rerank",
+  "protocol": "search_hybrid://",
+  "prefix": "Hybrid Rerank",
+  "plans": null,
+  "capabilities": 67584,
+  "classType": [
+    "rerank"
+  ],
+  "actions": 0,
+  "description": "A hybrid search component that re-ranks documents already retrieved by an \nupstream vector store, fusing their vector score with a BM25 keyword score \nfor improved ordering. Uses Reciprocal Rank Fusion (RRF) to merge both \nsignals into a unified ranking that captures both semantic meaning and exact \nkeyword matches. It re-orders the retrieved candidate set rather than issuing \na fresh embedding lookup, so it cannot surface documents the vector store did \nnot return. Configurable alpha parameter controls the balance between vector \nand keyword search. Ideal for RAG pipelines where neither pure semantic nor \npure keyword ordering alone is sufficient.",
+  "lanes": {
+    "questions": [
+      "documents",
+      "answers"
+    ]
+  },
+  "input": [
+    {
+      "description": "Receives questions with attached documents (from an upstream vector \nstore search) and re-ranks them using hybrid vector + BM25 scoring.",
+      "lane": "questions",
+      "output": [
+        {
+          "description": "Produces documents re-ranked by hybrid search score, combining \nvector similarity and keyword relevance via Reciprocal Rank Fusion.",
+          "lane": "documents",
+          "output": []
+        },
+        {
+          "description": "Produces an answer composed from the top-ranked documents.",
+          "lane": "answers",
+          "output": []
+        }
+      ]
+    }
+  ],
+  "tile": [
+    "Alpha: ${parameters.search_hybrid.${profile}.alpha}",
+    "Top K: ${parameters.search_hybrid.${profile}.top_k}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/search_hybrid",
+  "icon": "80"
+}

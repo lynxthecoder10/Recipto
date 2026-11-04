@@ -1,0 +1,16 @@
+{
+  "title": "Tavily",
+  "protocol": "tool_tavily://",
+  "prefix": "tavily",
+  "plans": null,
+  "capabilities": 68608,
+  "classType": [
+    "tool"
+  ],
+  "actions": 0,
+  "description": "Exposes Tavily real-time web search as an agent tool.\nPerforms live web searches via the Tavily API and returns structured results with titles, URLs, content snippets, and relevance scores.",
+  "lanes": {},
+  "tile": [],
+  "documentation": "https://docs.rocketride.org/nodes/tool_tavily",
+  "icon": "114"
+}

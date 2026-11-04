@@ -1,0 +1,17 @@
+{
+  "title": "Firestore",
+  "protocol": "db_firestore://",
+  "prefix": "firestore",
+  "plans": null,
+  "capabilities": 1024,
+  "classType": [
+    "database",
+    "tool"
+  ],
+  "actions": 0,
+  "description": "A processing component that connects to Google Cloud Firestore (Native mode).",
+  "lanes": {},
+  "invoke": {},
+  "documentation": "https://docs.rocketride.org/nodes/db_firestore",
+  "icon": "18"
+}

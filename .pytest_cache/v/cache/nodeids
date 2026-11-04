@@ -1,0 +1,15 @@
+[
+  "scratch/test_live_all.py::test_live",
+  "tests/test_audit_fixes.py::test_data_scoping_between_users",
+  "tests/test_audit_fixes.py::test_payment_negative_amount_rejected",
+  "tests/test_audit_fixes.py::test_payment_status_lifecycle_and_normalization",
+  "tests/test_audit_fixes.py::test_save_gala_validation",
+  "tests/test_audit_fixes.py::test_unauthenticated_routes_redirect_to_login",
+  "tests/test_audit_fixes.py::test_user_signup_and_login_flow",
+  "tests/test_per_user_identifiers.py::test_bill_lookup_and_update_isolation",
+  "tests/test_per_user_identifiers.py::test_bill_number_auto_generation_independent_sequences",
+  "tests/test_per_user_identifiers.py::test_direct_sql_uniqueness_constraint",
+  "tests/test_per_user_identifiers.py::test_gala_number_unique_per_user",
+  "tests/test_per_user_identifiers.py::test_receipt_number_unique_per_user_and_independent_sequences",
+  "tests/test_per_user_identifiers.py::test_single_user_cannot_create_duplicate_bill"
+]

@@ -1,0 +1,20 @@
+{
+  "title": "Reducto",
+  "protocol": "reducto://",
+  "prefix": "reducto",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "data"
+  ],
+  "actions": 0,
+  "description": "A parsing component that uses Reducto to extract text and structured data \nfrom various document formats including PDFs, images, and other document types. \nIt provides high-quality text extraction with support for tables, layout preservation, \nand multiple output formats.",
+  "lanes": {
+    "tags": [
+      "text",
+      "table"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org/nodes/reducto",
+  "icon": "75"
+}

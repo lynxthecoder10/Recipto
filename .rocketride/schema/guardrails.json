@@ -1,0 +1,26 @@
+{
+  "title": "Guardrails",
+  "protocol": "guardrails://",
+  "prefix": "guardrails",
+  "plans": null,
+  "capabilities": 67584,
+  "classType": [
+    "guard"
+  ],
+  "actions": 0,
+  "description": "A comprehensive input/output guardrails filter for AI safety. \nChecks questions before they reach the LLM (prompt injection, topic restriction, \ninput length) and checks answers after the LLM responds (hallucination detection, \ncontent safety, PII leak detection, format compliance).</br>\n</br>\n<b>Policy modes</b>: block (reject violations), warn (log and continue), log (silent logging).",
+  "lanes": {
+    "answers": [
+      "answers"
+    ],
+    "documents": [
+      "documents"
+    ],
+    "questions": [
+      "questions"
+    ]
+  },
+  "tile": [],
+  "documentation": "https://docs.rocketride.org/nodes/guardrails",
+  "icon": "11"
+}

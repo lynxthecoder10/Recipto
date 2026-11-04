@@ -1,0 +1,27 @@
+{
+  "title": "Milvus",
+  "protocol": "milvus://",
+  "prefix": "Milvus Vector Store",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "store",
+    "tool"
+  ],
+  "actions": 0,
+  "description": "A vector database component for Milvus, enabling efficient storage, indexing, \nand retrieval of vector embeddings. It supports high-performance similarity search, \nflexible indexing strategies (IVF, HNSW), scalable deployment, and management \nof vector data for machine learning and AI retrieval workflows.",
+  "lanes": {
+    "documents": [],
+    "questions": [
+      "documents",
+      "answers",
+      "questions"
+    ]
+  },
+  "tile": [
+    "Host/Port: ${parameters.milvus.${profile}.host}:${parameters.milvus.${profile}.port}",
+    "Collection: ${parameters.milvus.${profile}.collection}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/store_milvus",
+  "icon": "62"
+}

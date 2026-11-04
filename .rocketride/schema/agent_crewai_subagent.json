@@ -1,0 +1,24 @@
+{
+  "title": "CrewAI Subagent",
+  "protocol": "agent_crewai_subagent://",
+  "prefix": "agent",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "crewai"
+  ],
+  "actions": 0,
+  "description": "Managed CrewAI sub-agent. Must be wired into a CrewAI Manager via the crewai channel.\nCannot be invoked directly, has no questions lane.",
+  "invoke": {
+    "llm": {
+      "description": "LLM used by this sub-agent when delegated to",
+      "min": 1
+    },
+    "tool": {
+      "description": "Tools available to this sub-agent (via control-plane invoke)",
+      "min": 0
+    }
+  },
+  "documentation": "https://docs.rocketride.org/nodes/agent_crewai/crewai_subagent",
+  "icon": "1"
+}

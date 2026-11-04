@@ -1,0 +1,22 @@
+{
+  "title": "Amazon Bedrock",
+  "protocol": "llm_bedrock://",
+  "prefix": "llm",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "llm"
+  ],
+  "actions": 0,
+  "description": "A component that connects to Amazon Bedrock, providing access to a range \nof foundation models from leading AI providers through a unified AWS interface. \nIt supports text generation, summarization, classification, and other natural language \nprocessing tasks. With flexible model selection and secure, serverless deployment, the \ncomponent integrates seamlessly into AWS-powered pipelines, offering scalable, \nenterprise-ready AI capabilities without managing infrastructure.",
+  "lanes": {
+    "questions": [
+      "answers"
+    ]
+  },
+  "tile": [
+    "Model: ${parameters.llm_bedrock.profile}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/llm_bedrock",
+  "icon": "48"
+}

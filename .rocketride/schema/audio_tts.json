@@ -1,0 +1,28 @@
+{
+  "title": "Text To Speech",
+  "protocol": "audio_tts://",
+  "prefix": "audio_tts",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "audio"
+  ],
+  "actions": 0,
+  "description": "Converts incoming text into speech using Kokoro-82M (local KPipeline or --modelserver KokoroLoader).\nOutput is sent on the audio lane as WAV bytes.\nSee README for spaCy en_core_web_sm (misaki) and troubleshooting.",
+  "lanes": {
+    "answers": [
+      "audio"
+    ],
+    "documents": [
+      "audio"
+    ],
+    "questions": [
+      "audio"
+    ],
+    "text": [
+      "audio"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org/nodes/audio_tts",
+  "icon": "9"
+}

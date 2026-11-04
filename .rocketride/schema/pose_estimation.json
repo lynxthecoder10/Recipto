@@ -1,0 +1,40 @@
+{
+  "title": "Pose Estimation",
+  "protocol": "pose_estimation://",
+  "prefix": "pose_estimation",
+  "plans": null,
+  "capabilities": 71680,
+  "classType": [
+    "image"
+  ],
+  "actions": 0,
+  "description": "Top-down human pose estimation using RTMPose (Apache-2.0) via the rtmlib ONNX wrapper. \nRTMDet-nano performs person detection first, then RTMPose predicts 17 COCO keypoints per person crop. \nImage or document in; annotated frame out with the per-person keypoint array attached to the document's metadata. \nv1 is human-only (Sapiens deferred pending license review).",
+  "lanes": {
+    "image": [
+      "text",
+      "image"
+    ]
+  },
+  "input": [
+    {
+      "description": "AVI image stream to run pose estimation on.",
+      "lane": "image",
+      "output": [
+        {
+          "description": "Annotated image as raw stream - skeleton + keypoint overlay.",
+          "lane": "image"
+        },
+        {
+          "description": "JSON array of persons: [{label: 'person', box, keypoints: [{name, x, y, score}, ...]}].",
+          "lane": "text"
+        }
+      ]
+    }
+  ],
+  "tile": [
+    "Model: ${parameters.pose_estimation.profile}",
+    "Max persons: ${parameters.pose_estimation.max_persons}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/pose_estimation",
+  "icon": "68"
+}

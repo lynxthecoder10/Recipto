@@ -1,0 +1,23 @@
+{
+  "title": "Prompt",
+  "protocol": "prompt://",
+  "prefix": "prompt",
+  "plans": null,
+  "capabilities": 6144,
+  "classType": [
+    "text"
+  ],
+  "actions": 0,
+  "description": "A transformation component that takes multiple inputs and merges them \ninto a single question with a configurable prompt. This component is \ndesigned to work with chat, retrieval, or document systems, taking \nquestions, documents, text, and tables as input and combining them \nwith contextual prompts to improve LLM responses.",
+  "lanes": {
+    "documents": [],
+    "questions": [
+      "questions"
+    ],
+    "table": [],
+    "text": []
+  },
+  "tile": [],
+  "documentation": "https://docs.rocketride.org/nodes/prompt",
+  "icon": "72"
+}

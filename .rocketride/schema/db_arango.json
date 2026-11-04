@@ -1,0 +1,29 @@
+{
+  "title": "ArangoDB",
+  "protocol": "db_arango://",
+  "prefix": "arango",
+  "plans": null,
+  "capabilities": 1024,
+  "classType": [
+    "graph",
+    "database",
+    "tool"
+  ],
+  "actions": 0,
+  "description": "A processing component that connects to an ArangoDB multi-model database. \nAccepts natural-language questions, translates them to read-only AQL queries \nvia an LLM, and returns results to the pipeline. Works across documents, graphs \nand ArangoSearch views — designed for document retrieval, graph traversal, and RAG workflows.",
+  "lanes": {
+    "questions": [
+      "table",
+      "text",
+      "answers"
+    ]
+  },
+  "invoke": {
+    "llm": {
+      "description": "LLM to use to craft AQL queries from question",
+      "min": 1
+    }
+  },
+  "documentation": "https://docs.rocketride.org/nodes/graph_arango",
+  "icon": "16"
+}

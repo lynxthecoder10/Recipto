@@ -1,0 +1,21 @@
+{
+  "title": "Frame Grabber",
+  "protocol": "frame_grabber://",
+  "prefix": "frame_grabber",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "video"
+  ],
+  "actions": 0,
+  "description": "A component that extracts frames from video files and outputs them as image data. It \nsupports a variety of video formats and allows users to specify frame extraction \nintervals (e.g., every 5 seconds or at specific time points). The component processes \nvideo content, extracting selected frames as image objects, which can then be passed downstream \nfor further processing, analysis, or display.",
+  "lanes": {
+    "video": [
+      "image",
+      "table",
+      "documents"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org/nodes/frame_grabber",
+  "icon": "36"
+}

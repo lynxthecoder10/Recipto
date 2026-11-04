@@ -1,0 +1,28 @@
+{
+  "title": "Text To Speech (Rime)",
+  "protocol": "tts_rime://",
+  "prefix": "tts_rime",
+  "plans": null,
+  "capabilities": 67584,
+  "classType": [
+    "audio"
+  ],
+  "actions": 0,
+  "description": "Converts incoming text into speech using the Rime text-to-speech API.\nCalls the vendor API directly from the engine host over HTTPS and emits MP3 bytes on the audio lane.\nRime speakers are model-specific, so each model exposes its own curated speaker list; the API key falls back to the RIME_API_KEY environment variable when blank.",
+  "lanes": {
+    "answers": [
+      "audio"
+    ],
+    "documents": [
+      "audio"
+    ],
+    "questions": [
+      "audio"
+    ],
+    "text": [
+      "audio"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org",
+  "icon": "119"
+}

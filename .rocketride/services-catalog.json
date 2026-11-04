@@ -1,0 +1,2375 @@
+[
+  {
+    "name": "accessibility_describe",
+    "classType": [
+      "image"
+    ],
+    "description": "An accessibility-focused image analysis node that generates scene descriptions \noptimized for blind and visually impaired users.",
+    "lanes": {
+      "image": [
+        "text"
+      ]
+    }
+  },
+  {
+    "name": "agent_crewai",
+    "classType": [
+      "agent",
+      "tool"
+    ],
+    "description": "Standalone single-agent CrewAI node.",
+    "lanes": {
+      "questions": [
+        "answers"
+      ]
+    },
+    "invoke": {
+      "llm": {
+        "description": "LLM used by the agent",
+        "min": 1
+      },
+      "tool": {
+        "description": "Tools available to the agent (via control-plane invoke)",
+        "min": 0
+      }
+    }
+  },
+  {
+    "name": "agent_crewai_manager",
+    "classType": [
+      "agent",
+      "tool"
+    ],
+    "description": "Multi-agent manager using CrewAI hierarchical process.",
+    "lanes": {
+      "questions": [
+        "answers"
+      ]
+    },
+    "invoke": {
+      "crewai": {
+        "description": "Connected CrewAI Subagent nodes",
+        "min": 1
+      },
+      "llm": {
+        "description": "LLM used by the manager agent",
+        "min": 1
+      },
+      "tool": {
+        "description": "Cross-cutting tools available to the manager itself (via control-plane invoke)",
+        "min": 0
+      }
+    }
+  },
+  {
+    "name": "agent_crewai_subagent",
+    "classType": [
+      "crewai"
+    ],
+    "description": "Managed CrewAI sub-agent.",
+    "lanes": {},
+    "invoke": {
+      "llm": {
+        "description": "LLM used by this sub-agent when delegated to",
+        "min": 1
+      },
+      "tool": {
+        "description": "Tools available to this sub-agent (via control-plane invoke)",
+        "min": 0
+      }
+    }
+  },
+  {
+    "name": "agent_deepagent",
+    "classType": [
+      "agent",
+      "tool"
+    ],
+    "description": "Single-agent execution using Deep Agents.",
+    "lanes": {
+      "questions": [
+        "answers"
+      ]
+    },
+    "invoke": {
+      "deepagent": {
+        "description": "Optional DeepAgent Subagent nodes for hierarchical delegation",
+        "min": 0
+      },
+      "llm": {
+        "description": "LLM used by the agent",
+        "min": 1
+      },
+      "tool": {
+        "description": "Tools available to the agent (via control-plane invoke)",
+        "min": 0
+      }
+    }
+  },
+  {
+    "name": "agent_deepagent_subagent",
+    "classType": [
+      "deepagent"
+    ],
+    "description": "Managed Deep Agent subagent.",
+    "lanes": {},
+    "invoke": {
+      "llm": {
+        "description": "LLM used by this sub-agent when delegated to",
+        "min": 1
+      },
+      "tool": {
+        "description": "Tools available to this sub-agent (via control-plane invoke)",
+        "min": 0
+      }
+    }
+  },
+  {
+    "name": "agent_langchain",
+    "classType": [
+      "agent",
+      "tool"
+    ],
+    "description": "Single-agent execution using LangChain.",
+    "lanes": {
+      "questions": [
+        "answers"
+      ]
+    },
+    "invoke": {
+      "llm": {
+        "description": "LLM used by the agent",
+        "min": 1
+      },
+      "tool": {
+        "description": "Tools available to the agent (via control-plane invoke)",
+        "min": 0
+      }
+    }
+  },
+  {
+    "name": "agent_llamaindex",
+    "classType": [
+      "agent",
+      "tool"
+    ],
+    "description": "Single-agent execution using LlamaIndex's ReAct loop.",
+    "lanes": {
+      "questions": [
+        "answers"
+      ]
+    },
+    "invoke": {
+      "llm": {
+        "description": "LLM used by the agent",
+        "min": 1
+      },
+      "tool": {
+        "description": "Tools available to the agent (via control-plane invoke)",
+        "min": 0
+      }
+    }
+  },
+  {
+    "name": "agent_rocketride",
+    "classType": [
+      "agent",
+      "tool"
+    ],
+    "description": "Wave-planning agent built natively on the RocketRide architecture.",
+    "lanes": {
+      "questions": [
+        "answers"
+      ]
+    },
+    "invoke": {
+      "llm": {
+        "description": "LLM used by the agent for planning and synthesis",
+        "max": 1,
+        "min": 1
+      },
+      "memory": {
+        "description": "Keyed memory for the agent (via control-plane invoke)",
+        "max": 1,
+        "min": 1
+      },
+      "tool": {
+        "description": "Tools available to the agent (via control-plane invoke)",
+        "min": 0
+      }
+    }
+  },
+  {
+    "name": "anomaly_detector",
+    "classType": [
+      "text"
+    ],
+    "description": "A pipeline monitoring component that detects anomalies in numeric output values using \nstatistical methods.",
+    "lanes": {
+      "documents": [
+        "documents"
+      ],
+      "text": [
+        "text"
+      ]
+    }
+  },
+  {
+    "name": "anonymize_text",
+    "classType": [
+      "text"
+    ],
+    "description": "A filter component that \nidentifies and masks sensitive information in text data.",
+    "lanes": {
+      "text": [
+        "text"
+      ]
+    }
+  },
+  {
+    "name": "answer_documents",
+    "classType": [
+      "text"
+    ],
+    "description": "An adapter component that turns model/agent answers into embeddable documents.",
+    "lanes": {
+      "answers": [
+        "documents",
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "aparavi_aql",
+    "classType": [
+      "database",
+      "tool"
+    ],
+    "description": "Queries the Aparavi data governance platform using AQL (Aparavi Query Language).",
+    "lanes": {},
+    "invoke": {
+      "llm": {
+        "description": "LLM used to generate AQL queries from natural language",
+        "min": 1
+      }
+    }
+  },
+  {
+    "name": "astra_db",
+    "classType": [
+      "store",
+      "tool"
+    ],
+    "description": "A vector database component for Astra DB, enabling efficient storage and \nretrieval of vector embeddings.",
+    "lanes": {
+      "documents": [],
+      "questions": [
+        "documents",
+        "answers",
+        "questions"
+      ]
+    }
+  },
+  {
+    "name": "audio_player",
+    "classType": [
+      "audio"
+    ],
+    "description": "The Audio Player component plays audio through the system’s default audio\noutput device, including the audio track from video content.",
+    "lanes": {
+      "audio": [],
+      "video": []
+    }
+  },
+  {
+    "name": "audio_transcribe",
+    "classType": [
+      "audio"
+    ],
+    "description": "The Audio transcribe component recieves audio or video and transcribes into text.",
+    "lanes": {
+      "audio": [
+        "text"
+      ],
+      "video": [
+        "text"
+      ]
+    }
+  },
+  {
+    "name": "audio_tts",
+    "classType": [
+      "audio"
+    ],
+    "description": "Converts incoming text into speech using Kokoro-82M (local KPipeline or --modelserver KokoroLoader).",
+    "lanes": {
+      "answers": [
+        "audio"
+      ],
+      "documents": [
+        "audio"
+      ],
+      "questions": [
+        "audio"
+      ],
+      "text": [
+        "audio"
+      ]
+    }
+  },
+  {
+    "name": "authoritative-overlay",
+    "classType": [
+      "guard"
+    ],
+    "description": "Cross-checks extracted financial numbers against the US SEC EDGAR \ncompany-concept API for a configured CIK, scoped to a filing period \n(form / fy / fp / start / end / frame).",
+    "lanes": {
+      "answers": [
+        "answers"
+      ],
+      "text": [
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "background_removal",
+    "classType": [
+      "image"
+    ],
+    "description": "Foreground / background separation using BiRefNet (MIT).",
+    "lanes": {
+      "image": [
+        "text",
+        "image"
+      ]
+    }
+  },
+  {
+    "name": "chat",
+    "classType": [
+      "source"
+    ],
+    "description": "A user interface component that provides a web-based chat experience.",
+    "lanes": {
+      "_source": [
+        "questions"
+      ]
+    }
+  },
+  {
+    "name": "chroma",
+    "classType": [
+      "store",
+      "tool"
+    ],
+    "description": "A vector database component for Chroma, enabling efficient storage and \nretrieval of vector embeddings.",
+    "lanes": {
+      "documents": [],
+      "questions": [
+        "documents",
+        "answers",
+        "questions"
+      ]
+    }
+  },
+  {
+    "name": "chunker",
+    "classType": [
+      "preprocessor"
+    ],
+    "description": "A text chunking component that splits documents into smaller, semantically coherent \nchunks for downstream processing such as embedding, retrieval, and LLM-based generation.",
+    "lanes": {
+      "documents": [
+        "documents"
+      ]
+    }
+  },
+  {
+    "name": "context_optimizer",
+    "classType": [
+      "text"
+    ],
+    "description": "A transformation component that manages LLM context window budgets.",
+    "lanes": {
+      "questions": [
+        "questions"
+      ]
+    }
+  },
+  {
+    "name": "currency_convert_explicit",
+    "classType": [
+      "text"
+    ],
+    "description": "An opt-in currency converter for the audit-grade financial extraction suite.",
+    "lanes": {
+      "answers": [
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "db_arango",
+    "classType": [
+      "graph",
+      "database",
+      "tool"
+    ],
+    "description": "A processing component that connects to an ArangoDB multi-model database.",
+    "lanes": {
+      "questions": [
+        "table",
+        "text",
+        "answers"
+      ]
+    },
+    "invoke": {
+      "llm": {
+        "description": "LLM to use to craft AQL queries from question",
+        "min": 1
+      }
+    }
+  },
+  {
+    "name": "db_clickhouse",
+    "classType": [
+      "database",
+      "tool"
+    ],
+    "description": "A ClickHouse component that answers natural-language questions by translating \nthem into SQL and executing them against the database, returning rows as a table, \ntext, or structured answers.",
+    "lanes": {
+      "questions": [
+        "table",
+        "text",
+        "answers"
+      ]
+    },
+    "invoke": {
+      "llm": {
+        "description": "LLM that writes SQL from a natural-language question; not needed for execute (raw SQL)",
+        "min": 0
+      }
+    }
+  },
+  {
+    "name": "db_firestore",
+    "classType": [
+      "database",
+      "tool"
+    ],
+    "description": "A processing component that connects to Google Cloud Firestore (Native mode).",
+    "lanes": {},
+    "invoke": {}
+  },
+  {
+    "name": "db_hotdata",
+    "classType": [
+      "database",
+      "tool"
+    ],
+    "description": "Creates one ephemeral Hotdata database for each pipeline run, or attaches to an existing one so agents in separate runs can share it.",
+    "lanes": {
+      "answers": [],
+      "questions": [
+        "table",
+        "text",
+        "answers"
+      ]
+    },
+    "invoke": {
+      "llm": {
+        "description": "LLM that writes SQL from a natural-language question; not needed for execute (raw SQL)",
+        "min": 0
+      }
+    }
+  },
+  {
+    "name": "db_hydradb",
+    "classType": [
+      "graph",
+      "database",
+      "tool"
+    ],
+    "description": "A database/tool node for HydraDB, a managed graph + memory store.",
+    "lanes": {}
+  },
+  {
+    "name": "db_mysql",
+    "classType": [
+      "database",
+      "tool"
+    ],
+    "description": "A processing component that takes structured table data and inserts it \ninto a MySQL database.",
+    "lanes": {
+      "answers": [],
+      "questions": [
+        "table",
+        "text",
+        "answers"
+      ]
+    },
+    "invoke": {
+      "llm": {
+        "description": "LLM that writes SQL from a natural-language question; not needed for execute (raw SQL)",
+        "min": 0
+      }
+    }
+  },
+  {
+    "name": "db_postgres",
+    "classType": [
+      "database",
+      "tool"
+    ],
+    "description": "A processing component that takes structured table data and inserts it \ninto a PostgreSQL database.",
+    "lanes": {
+      "answers": [],
+      "questions": [
+        "table",
+        "text",
+        "answers"
+      ]
+    },
+    "invoke": {
+      "llm": {
+        "description": "LLM that writes SQL from a natural-language question; not needed for execute (raw SQL)",
+        "min": 0
+      }
+    }
+  },
+  {
+    "name": "db_supabase",
+    "classType": [
+      "database",
+      "tool"
+    ],
+    "description": "A processing component that takes structured table data and inserts it \ninto a Supabase (PostgreSQL) database.",
+    "lanes": {
+      "answers": [],
+      "questions": [
+        "table",
+        "text",
+        "answers"
+      ]
+    },
+    "invoke": {
+      "llm": {
+        "description": "LLM that writes SQL from a natural-language question; not needed for execute (raw SQL)",
+        "min": 0
+      }
+    }
+  },
+  {
+    "name": "depth_estimate",
+    "classType": [
+      "image"
+    ],
+    "description": "Monocular depth estimation using Depth Anything V2 Small (Apache-2.",
+    "lanes": {
+      "image": [
+        "text",
+        "image"
+      ]
+    }
+  },
+  {
+    "name": "detect",
+    "classType": [
+      "image"
+    ],
+    "description": "Per-frame object detection.",
+    "lanes": {
+      "image": [
+        "text",
+        "image"
+      ]
+    }
+  },
+  {
+    "name": "detect_segment",
+    "classType": [
+      "image"
+    ],
+    "description": "Pixel-level segmentation with HuggingFace-native engines: \nMask2Former-instance (MIT, default) for closed-set instance masks; \nMask2Former-semantic (MIT) for per-pixel class maps.",
+    "lanes": {
+      "image": [
+        "text",
+        "image"
+      ]
+    }
+  },
+  {
+    "name": "dictionary",
+    "classType": [
+      "text"
+    ],
+    "description": "A processing component that analyzes documents to extract a dictionary of \nkey terms and phrases.",
+    "lanes": {
+      "text": [
+        "documents"
+      ]
+    },
+    "invoke": {
+      "llm": {
+        "description": "LLM to use for Dictionary creation",
+        "min": 1
+      }
+    }
+  },
+  {
+    "name": "discord",
+    "classType": [
+      "source"
+    ],
+    "description": "A Discord Bot source node that receives messages from channels and DMs via the Discord Gateway.",
+    "lanes": {
+      "_source": [
+        "text",
+        "image",
+        "audio",
+        "video",
+        "tags"
+      ]
+    },
+    "invoke": {
+      "tool": {
+        "description": "Database node that captured events are written to (via control-plane invoke)",
+        "min": 0
+      }
+    }
+  },
+  {
+    "name": "dropper",
+    "classType": [
+      "source"
+    ],
+    "description": "A user interface component that provides a web-based dropper experience.",
+    "lanes": {
+      "_source": [
+        "tags"
+      ]
+    }
+  },
+  {
+    "name": "elasticsearch",
+    "classType": [
+      "store"
+    ],
+    "description": "A vector database component for Elasticsearch, enabling efficient storage and \nretrieval of vector embeddings.",
+    "lanes": {
+      "documents": [],
+      "questions": [
+        "text",
+        "documents",
+        "answers",
+        "questions"
+      ],
+      "text": []
+    }
+  },
+  {
+    "name": "embedding_image",
+    "classType": [
+      "embedding"
+    ],
+    "description": "A processing component that generates vector embeddings from image content \nusing advanced computer vision models.",
+    "lanes": {
+      "documents": [
+        "documents"
+      ],
+      "image": [
+        "documents"
+      ]
+    }
+  },
+  {
+    "name": "embedding_openai",
+    "classType": [
+      "embedding"
+    ],
+    "description": "A component that transforms text into numerical vector representations using advanced embedding \nmodels.",
+    "lanes": {
+      "documents": [
+        "documents"
+      ],
+      "questions": [
+        "questions"
+      ]
+    }
+  },
+  {
+    "name": "embedding_transformer",
+    "classType": [
+      "embedding"
+    ],
+    "description": "A component that transforms text into numerical vector representations using advanced embedding \nmodels.",
+    "lanes": {
+      "documents": [
+        "documents"
+      ],
+      "questions": [
+        "questions"
+      ]
+    }
+  },
+  {
+    "name": "embedding_video",
+    "classType": [
+      "embedding"
+    ],
+    "description": "A processing component that generates vector embeddings from video content \nby extracting frames at configurable intervals and encoding them using \nvision models such as CLIP.",
+    "lanes": {
+      "video": [
+        "documents"
+      ]
+    }
+  },
+  {
+    "name": "extract_data",
+    "classType": [
+      "text"
+    ],
+    "description": "A component that processes unstructured or semi-structured text and extracts \nstructured data in a tabular format.",
+    "lanes": {
+      "documents": [
+        "answers",
+        "documents"
+      ],
+      "table": [
+        "answers",
+        "documents"
+      ],
+      "text": [
+        "answers",
+        "documents"
+      ]
+    },
+    "invoke": {
+      "llm": {
+        "description": "LLM to use for data extraction",
+        "min": 1
+      }
+    }
+  },
+  {
+    "name": "extract_facts",
+    "classType": [
+      "text"
+    ],
+    "description": "The extraction brain.",
+    "lanes": {
+      "documents": [
+        "answers",
+        "documents"
+      ],
+      "table": [
+        "answers",
+        "documents"
+      ]
+    },
+    "invoke": {
+      "llm": {
+        "description": "LLM to use for fact extraction and validation",
+        "min": 1
+      }
+    }
+  },
+  {
+    "name": "filestore",
+    "classType": [
+      "store"
+    ],
+    "description": "File Store pipeline sink.",
+    "lanes": {
+      "audio": [
+        "json"
+      ],
+      "documents": [
+        "json"
+      ],
+      "image": [
+        "json"
+      ],
+      "table": [
+        "json"
+      ],
+      "text": [
+        "json"
+      ],
+      "video": [
+        "json"
+      ]
+    }
+  },
+  {
+    "name": "filestore_source",
+    "classType": [
+      "source"
+    ],
+    "description": "File Store source.",
+    "lanes": {
+      "_source": [
+        "tags"
+      ]
+    }
+  },
+  {
+    "name": "filesys",
+    "classType": [
+      "source"
+    ],
+    "description": "A source component that reads data from the local file system.",
+    "lanes": {
+      "_source": [
+        "tags"
+      ]
+    }
+  },
+  {
+    "name": "frame_grabber",
+    "classType": [
+      "video"
+    ],
+    "description": "A component that extracts frames from video files and outputs them as image data.",
+    "lanes": {
+      "video": [
+        "image",
+        "table",
+        "documents"
+      ]
+    }
+  },
+  {
+    "name": "graph_falkordb",
+    "classType": [
+      "graph",
+      "tool"
+    ],
+    "description": "A processing component that connects to a FalkorDB graph database.",
+    "lanes": {
+      "questions": [
+        "table",
+        "text",
+        "answers"
+      ]
+    },
+    "invoke": {
+      "llm": {
+        "description": "LLM to use to craft Cypher queries from question",
+        "min": 1
+      }
+    }
+  },
+  {
+    "name": "graph_neo4j",
+    "classType": [
+      "graph",
+      "tool"
+    ],
+    "description": "A processing component that connects to a Neo4J graph database.",
+    "lanes": {
+      "questions": [
+        "table",
+        "text",
+        "answers"
+      ]
+    },
+    "invoke": {
+      "llm": {
+        "description": "LLM to use to craft Cypher queries from question",
+        "min": 1
+      }
+    }
+  },
+  {
+    "name": "guardrails",
+    "classType": [
+      "guard"
+    ],
+    "description": "A comprehensive input/output guardrails filter for AI safety.",
+    "lanes": {
+      "answers": [
+        "answers"
+      ],
+      "documents": [
+        "documents"
+      ],
+      "questions": [
+        "questions"
+      ]
+    }
+  },
+  {
+    "name": "hash",
+    "classType": [
+      "data"
+    ],
+    "description": "A processing component that generates a unique fingerprint (hash) of a \ndocument's content.",
+    "lanes": {
+      "tags": [
+        "tags"
+      ]
+    }
+  },
+  {
+    "name": "image_cleanup",
+    "classType": [
+      "image"
+    ],
+    "description": "A component that processes an image, cleans it up for OCR tasks by converting to\ngray scale, removing noise, deskewing, and enhancing contrast.",
+    "lanes": {
+      "image": [
+        "image"
+      ]
+    }
+  },
+  {
+    "name": "image_orient",
+    "classType": [
+      "image"
+    ],
+    "description": "Turns scanned photographs the right way up.",
+    "lanes": {
+      "image": [
+        "image",
+        "text"
+      ]
+    }
+  },
+  {
+    "name": "image_vision_gemini",
+    "classType": [
+      "image"
+    ],
+    "description": "A component that connects to Google Gemini's vision-capable models for image analysis, \nOCR, visual understanding, and scene description.",
+    "lanes": {
+      "documents": [
+        "documents"
+      ],
+      "image": [
+        "text"
+      ]
+    }
+  },
+  {
+    "name": "image_vision_mistral",
+    "classType": [
+      "image"
+    ],
+    "description": "A component that connects to Mistral AI's vision-capable models for image analysis, \nOCR, and visual understanding tasks.",
+    "lanes": {
+      "documents": [
+        "documents"
+      ],
+      "image": [
+        "text"
+      ]
+    }
+  },
+  {
+    "name": "image_vision_ollama",
+    "classType": [
+      "image"
+    ],
+    "description": "A component that connects to locally-hosted open-source vision models through Ollama \nfor image analysis, description, and visual understanding tasks.",
+    "lanes": {
+      "documents": [
+        "documents"
+      ],
+      "image": [
+        "text"
+      ]
+    }
+  },
+  {
+    "name": "image_vision_openai",
+    "classType": [
+      "image"
+    ],
+    "description": "A component that connects to OpenAI's vision-capable models for image analysis, \nOCR, visual understanding, and scene description.",
+    "lanes": {
+      "documents": [
+        "documents"
+      ],
+      "image": [
+        "text"
+      ]
+    }
+  },
+  {
+    "name": "landing_ai_extract",
+    "classType": [
+      "data"
+    ],
+    "description": "Extracts structured fields from parsed Markdown using Landing.",
+    "lanes": {
+      "text": [
+        "answers",
+        "documents"
+      ]
+    }
+  },
+  {
+    "name": "landing_ai_parse",
+    "classType": [
+      "data"
+    ],
+    "description": "Parses documents with Landing.",
+    "lanes": {
+      "tags": [
+        "text",
+        "table"
+      ]
+    }
+  },
+  {
+    "name": "llamaparse",
+    "classType": [
+      "data"
+    ],
+    "description": "A document parsing component that uses LlamaParse to extract text and structured data \nfrom various document formats including PDFs, images, Word documents, Excel spreadsheets, \nand other formats.",
+    "lanes": {
+      "tags": [
+        "text",
+        "table"
+      ]
+    }
+  },
+  {
+    "name": "llm_anthropic",
+    "classType": [
+      "llm"
+    ],
+    "description": "A component that integrates with Anthropic's Claude models for natural \nlanguage understanding and generation.",
+    "lanes": {
+      "questions": [
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "llm_baidu_qianfan",
+    "classType": [
+      "llm"
+    ],
+    "description": "A component that connects to Baidu Qianfan ERNIE large language models through \nQianfan's OpenAI-compatible chat-completions API.",
+    "lanes": {
+      "questions": [
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "llm_bedrock",
+    "classType": [
+      "llm"
+    ],
+    "description": "A component that connects to Amazon Bedrock, providing access to a range \nof foundation models from leading AI providers through a unified AWS interface.",
+    "lanes": {
+      "questions": [
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "llm_deepseek",
+    "classType": [
+      "llm"
+    ],
+    "description": "A component that connects to DeepSeek’s large language models for advanced \nnatural language processing.",
+    "lanes": {
+      "questions": [
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "llm_gemini",
+    "classType": [
+      "llm"
+    ],
+    "description": "A component that connects to Gemini models for advanced natural language \nprocessing.",
+    "lanes": {
+      "questions": [
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "llm_glm",
+    "classType": [
+      "llm"
+    ],
+    "description": "A component that connects to Zhipu AI's GLM large language models for \nadvanced natural language processing.",
+    "lanes": {
+      "questions": [
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "llm_gmi_cloud",
+    "classType": [
+      "llm"
+    ],
+    "description": "A component that connects to GMI Cloud's large language models for advanced \nnatural language processing.",
+    "lanes": {
+      "questions": [
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "llm_kimi",
+    "classType": [
+      "llm"
+    ],
+    "description": "A component that connects to Moonshot AI's Kimi large language models for \nadvanced natural language processing.",
+    "lanes": {
+      "questions": [
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "llm_minimax",
+    "classType": [
+      "llm"
+    ],
+    "description": "A component that connects to MiniMax's large language models for advanced \nnatural language processing.",
+    "lanes": {
+      "questions": [
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "llm_mistral",
+    "classType": [
+      "llm"
+    ],
+    "description": "A component that connects to Mistral AI's advanced language models for natural language processing.",
+    "lanes": {
+      "questions": [
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "llm_nebius",
+    "classType": [
+      "llm"
+    ],
+    "description": "Connects to Nebius Token Factory's OpenAI-compatible inference API.",
+    "lanes": {
+      "questions": [
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "llm_ollama",
+    "classType": [
+      "llm"
+    ],
+    "description": "A component that integrates with locally-hosted language models through Ollama.",
+    "lanes": {
+      "questions": [
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "llm_openai",
+    "classType": [
+      "llm"
+    ],
+    "description": "A component that connects to OpenAI's latest GPT models for advanced natural language \nprocessing.",
+    "lanes": {
+      "questions": [
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "llm_openai_api",
+    "classType": [
+      "llm"
+    ],
+    "description": "A component that connects to any OpenAI-compatible API endpoint for language model \ninference.",
+    "lanes": {
+      "questions": [
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "llm_perplexity",
+    "classType": [
+      "llm"
+    ],
+    "description": "A component that connects to Perplexity AI's Sonar models for advanced natural language \nprocessing with real-time web search capabilities.",
+    "lanes": {
+      "questions": [
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "llm_qwen",
+    "classType": [
+      "llm"
+    ],
+    "description": "A component that connects to Alibaba Cloud's Qwen large language models via the \nDashScope API.",
+    "lanes": {
+      "questions": [
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "llm_xai",
+    "classType": [
+      "llm"
+    ],
+    "description": "A component that integrates with xAI's Grok language models for intelligent text generation \nand analysis.",
+    "lanes": {
+      "questions": [
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "local-text-output",
+    "classType": [
+      "target"
+    ],
+    "description": "A target component that writes data to the file system.",
+    "lanes": {
+      "text": []
+    }
+  },
+  {
+    "name": "mcp_client",
+    "classType": [
+      "tool"
+    ],
+    "description": "Connects to an external MCP server and exposes its tools for agent tool-calling.",
+    "lanes": {}
+  },
+  {
+    "name": "media_inspect",
+    "classType": [
+      "video"
+    ],
+    "description": "Measure streamed media and extract selected images.",
+    "lanes": {
+      "audio": [
+        "text",
+        "answers",
+        "image"
+      ],
+      "video": [
+        "text",
+        "answers",
+        "image"
+      ]
+    }
+  },
+  {
+    "name": "memory_internal",
+    "classType": [
+      "memory"
+    ],
+    "description": "Run-scoped keyed memory store exposed as agent tools.",
+    "lanes": {}
+  },
+  {
+    "name": "memory_persistent",
+    "classType": [
+      "memory"
+    ],
+    "description": "A persistent cross-session memory node that retains data across pipeline\ninvocations.",
+    "lanes": {
+      "answers": [
+        "answers"
+      ],
+      "questions": [
+        "questions"
+      ]
+    }
+  },
+  {
+    "name": "milvus",
+    "classType": [
+      "store",
+      "tool"
+    ],
+    "description": "A vector database component for Milvus, enabling efficient storage, indexing, \nand retrieval of vector embeddings.",
+    "lanes": {
+      "documents": [],
+      "questions": [
+        "documents",
+        "answers",
+        "questions"
+      ]
+    }
+  },
+  {
+    "name": "mongodb+srv",
+    "classType": [
+      "store",
+      "tool"
+    ],
+    "description": "A vector database component for MongoDB Atlas, enabling efficient storage and \nretrieval of vector embeddings using MongoDB's native vector search capabilities.",
+    "lanes": {
+      "documents": [],
+      "questions": [
+        "documents",
+        "answers",
+        "questions"
+      ]
+    }
+  },
+  {
+    "name": "ner",
+    "classType": [
+      "text"
+    ],
+    "description": "A text processing component that identifies and extracts named entities from text using \nstate-of-the-art transformer models.",
+    "lanes": {
+      "documents": [
+        "documents"
+      ],
+      "text": [
+        "text"
+      ]
+    }
+  },
+  {
+    "name": "normalize_facts",
+    "classType": [
+      "text"
+    ],
+    "description": "A deterministic fact normalizer for the audit-grade financial extraction suite.",
+    "lanes": {
+      "answers": [
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "ocr",
+    "classType": [
+      "image"
+    ],
+    "description": "A component that extracts machine-readable text from images and scanned documents \nusing optical character recognition.",
+    "lanes": {
+      "documents": [
+        "text"
+      ],
+      "image": [
+        "text",
+        "table"
+      ]
+    }
+  },
+  {
+    "name": "opensearch",
+    "classType": [
+      "store"
+    ],
+    "description": "An OpenSearch node that supports classic BM25 search and vector search \nfor ingestion and retrieval workflows.",
+    "lanes": {
+      "documents": [],
+      "questions": [
+        "text",
+        "answers",
+        "documents"
+      ],
+      "text": []
+    }
+  },
+  {
+    "name": "parse",
+    "classType": [
+      "data"
+    ],
+    "description": "A document parsing component that extracts rich content from a wide variety \nof document types.",
+    "lanes": {
+      "tags": [
+        "text",
+        "table",
+        "image",
+        "video",
+        "audio"
+      ]
+    }
+  },
+  {
+    "name": "pinecone",
+    "classType": [
+      "store",
+      "tool"
+    ],
+    "description": "A component that connects to the Pinecone vector database for storing and retrieving \nhigh-dimensional embeddings.",
+    "lanes": {
+      "documents": [],
+      "questions": [
+        "documents",
+        "answers",
+        "questions"
+      ]
+    }
+  },
+  {
+    "name": "pose_estimation",
+    "classType": [
+      "image"
+    ],
+    "description": "Top-down human pose estimation using RTMPose (Apache-2.",
+    "lanes": {
+      "image": [
+        "text",
+        "image"
+      ]
+    }
+  },
+  {
+    "name": "postgres",
+    "classType": [
+      "store",
+      "tool"
+    ],
+    "description": "A component that enhances PostgreSQL with vector similarity search \ncapabilities through the pgvector extension.",
+    "lanes": {
+      "documents": [],
+      "questions": [
+        "documents",
+        "answers",
+        "questions"
+      ]
+    }
+  },
+  {
+    "name": "preprocessor_code",
+    "classType": [
+      "preprocessor"
+    ],
+    "description": "A specialized component designed to parse and tokenize source code.",
+    "lanes": {
+      "text": [
+        "documents"
+      ]
+    }
+  },
+  {
+    "name": "preprocessor_langchain",
+    "classType": [
+      "preprocessor"
+    ],
+    "description": "A preprocessing component that segments large bodies of text into intelligently sized \nchunks for downstream processing.",
+    "lanes": {
+      "table": [
+        "documents"
+      ],
+      "text": [
+        "documents"
+      ]
+    }
+  },
+  {
+    "name": "preprocessor_llm",
+    "classType": [
+      "preprocessor"
+    ],
+    "description": "A processing component that analyzes document content to extract concise \nsummaries, key points, and named entities and to divide a document for \nstorage into a vector database.",
+    "lanes": {
+      "table": [
+        "documents"
+      ],
+      "text": [
+        "documents"
+      ]
+    },
+    "invoke": {
+      "llm": {
+        "description": "LLM to use to process the document",
+        "min": 1
+      }
+    }
+  },
+  {
+    "name": "prompt",
+    "classType": [
+      "text"
+    ],
+    "description": "A transformation component that takes multiple inputs and merges them \ninto a single question with a configurable prompt.",
+    "lanes": {
+      "documents": [],
+      "questions": [
+        "questions"
+      ],
+      "table": [],
+      "text": []
+    }
+  },
+  {
+    "name": "qdrant",
+    "classType": [
+      "store",
+      "tool"
+    ],
+    "description": "A vector database component for Qdrant, enabling efficient storage and \nretrieval of vector embeddings.",
+    "lanes": {
+      "documents": [],
+      "questions": [
+        "documents",
+        "answers",
+        "questions"
+      ]
+    }
+  },
+  {
+    "name": "question",
+    "classType": [
+      "text"
+    ],
+    "description": "A transformation component that takes input text and encapsulates \nit as a Question object without modification.",
+    "lanes": {
+      "text": [
+        "questions"
+      ]
+    }
+  },
+  {
+    "name": "reducto",
+    "classType": [
+      "data"
+    ],
+    "description": "A parsing component that uses Reducto to extract text and structured data \nfrom various document formats including PDFs, images, and other document types.",
+    "lanes": {
+      "tags": [
+        "text",
+        "table"
+      ]
+    }
+  },
+  {
+    "name": "remote",
+    "classType": [
+      "infrastructure"
+    ],
+    "description": "A transport component that forwards data to a remote machine or \nprocessing node.",
+    "lanes": {}
+  },
+  {
+    "name": "rerank_cohere",
+    "classType": [
+      "rerank"
+    ],
+    "description": "A reranking component powered by Cohere's Rerank API that improves \nsearch quality by reordering retrieved documents based on their \nrelevance to a given query.",
+    "lanes": {
+      "questions": [
+        "documents",
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "response_answers",
+    "classType": [
+      "infrastructure"
+    ],
+    "description": "A component that returns processed answers back to the requesting client.",
+    "lanes": {
+      "answers": []
+    }
+  },
+  {
+    "name": "response_audio",
+    "classType": [
+      "infrastructure"
+    ],
+    "description": "A component that returns processed audio back to the requesting client.",
+    "lanes": {
+      "audio": []
+    }
+  },
+  {
+    "name": "response_documents",
+    "classType": [
+      "infrastructure"
+    ],
+    "description": "A component that returns processed documents back to the requesting client.",
+    "lanes": {
+      "documents": []
+    }
+  },
+  {
+    "name": "response_hash",
+    "classType": [
+      "infrastructure"
+    ],
+    "description": "A component that returns the content fingerprint of each processed object back to \nthe requesting client.",
+    "lanes": {
+      "tags": []
+    }
+  },
+  {
+    "name": "response_image",
+    "classType": [
+      "infrastructure"
+    ],
+    "description": "A component that returns processed images back to the requesting client.",
+    "lanes": {
+      "image": []
+    }
+  },
+  {
+    "name": "response_json",
+    "classType": [
+      "infrastructure"
+    ],
+    "description": "A component that returns structured JSON data back to the requesting client.",
+    "lanes": {
+      "json": []
+    }
+  },
+  {
+    "name": "response_questions",
+    "classType": [
+      "infrastructure"
+    ],
+    "description": "A component that returns processed questions back to the requesting client.",
+    "lanes": {
+      "questions": []
+    }
+  },
+  {
+    "name": "response_table",
+    "classType": [
+      "infrastructure"
+    ],
+    "description": "A component that returns processed tables back to the requesting client.",
+    "lanes": {
+      "table": []
+    }
+  },
+  {
+    "name": "response_text",
+    "classType": [
+      "infrastructure"
+    ],
+    "description": "A component that returns processed text back to the requesting client.",
+    "lanes": {
+      "text": []
+    }
+  },
+  {
+    "name": "response_video",
+    "classType": [
+      "infrastructure"
+    ],
+    "description": "A component that returns processed video back to the requesting client.",
+    "lanes": {
+      "video": []
+    }
+  },
+  {
+    "name": "rocketride_graph",
+    "classType": [
+      "graph",
+      "tool"
+    ],
+    "description": "A RocketRide-managed graph database backed by PostgreSQL + Apache AGE.",
+    "lanes": {
+      "questions": [
+        "table",
+        "text",
+        "answers"
+      ]
+    },
+    "invoke": {
+      "llm": {
+        "description": "LLM to use to craft Cypher queries from question",
+        "min": 1
+      }
+    }
+  },
+  {
+    "name": "rocketride_sql",
+    "classType": [
+      "database",
+      "tool"
+    ],
+    "description": "A RocketRide-managed relational database.",
+    "lanes": {
+      "answers": [],
+      "questions": [
+        "table",
+        "text",
+        "answers"
+      ]
+    },
+    "invoke": {
+      "llm": {
+        "description": "LLM that writes SQL from a natural-language question; not needed for execute (raw SQL)",
+        "min": 0
+      }
+    }
+  },
+  {
+    "name": "rocketride_vector",
+    "classType": [
+      "store"
+    ],
+    "description": "A RocketRide-managed vector store backed by PostgreSQL + pgvector.",
+    "lanes": {
+      "documents": [],
+      "questions": [
+        "documents",
+        "answers",
+        "questions"
+      ]
+    }
+  },
+  {
+    "name": "scan_cropper",
+    "classType": [
+      "image"
+    ],
+    "description": "Splits a scan that holds several photos - a photo album page, or a handful of prints laid on the\nplaten - into one image per photo.",
+    "lanes": {
+      "image": [
+        "image",
+        "text"
+      ]
+    }
+  },
+  {
+    "name": "schema_validate",
+    "classType": [
+      "text"
+    ],
+    "description": "A guard node for the audit-grade financial extraction suite.",
+    "lanes": {
+      "answers": [
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "search_exa",
+    "classType": [
+      "search"
+    ],
+    "description": "A direct Exa web search node.",
+    "lanes": {
+      "questions": [
+        "answers",
+        "text"
+      ]
+    }
+  },
+  {
+    "name": "search_hybrid",
+    "classType": [
+      "rerank"
+    ],
+    "description": "A hybrid search component that re-ranks documents already retrieved by an \nupstream vector store, fusing their vector score with a BM25 keyword score \nfor improved ordering.",
+    "lanes": {
+      "questions": [
+        "documents",
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "summarization",
+    "classType": [
+      "text"
+    ],
+    "description": "A processing component that analyzes document content to extract concise \nsummaries, key points, and named entities.",
+    "lanes": {
+      "text": [
+        "text",
+        "documents"
+      ]
+    },
+    "invoke": {
+      "llm": {
+        "description": "LLM to use to summarize the document",
+        "min": 1
+      }
+    }
+  },
+  {
+    "name": "telegram",
+    "classType": [
+      "source"
+    ],
+    "description": "A Telegram Bot source node that receives messages from users via the Telegram Bot API.",
+    "lanes": {
+      "_source": [
+        "text",
+        "image",
+        "audio",
+        "video",
+        "tags"
+      ]
+    }
+  },
+  {
+    "name": "text-output",
+    "classType": [
+      "target"
+    ],
+    "description": "A target component that writes data to the file system.",
+    "lanes": {
+      "text": []
+    }
+  },
+  {
+    "name": "thumbnail",
+    "classType": [
+      "image"
+    ],
+    "description": "A processing component that creates thumbnails from input images.",
+    "lanes": {
+      "documents": [
+        "documents"
+      ],
+      "image": [
+        "documents",
+        "image"
+      ]
+    }
+  },
+  {
+    "name": "tool_apify",
+    "classType": [
+      "tool"
+    ],
+    "description": "Exposes Apify Actors as agent tools.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_bland_ai",
+    "classType": [
+      "tool"
+    ],
+    "description": "Make and manage AI-powered phone calls via Bland AI.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_butterbase",
+    "classType": [
+      "tool"
+    ],
+    "description": "Connects to the Butterbase MCP server and exposes its backend tools for agent tool-calling.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_calendar",
+    "classType": [
+      "tool"
+    ],
+    "description": "Exposes Google Calendar operations as agent tools.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_chartjs",
+    "classType": [
+      "tool"
+    ],
+    "description": "Generates Chart.",
+    "lanes": {},
+    "invoke": {
+      "llm": {
+        "description": "LLM used to generate Chart.js configurations from data",
+        "min": 1
+      }
+    }
+  },
+  {
+    "name": "tool_cognee",
+    "classType": [
+      "tool"
+    ],
+    "description": "Persistent semantic memory backed by a Cognee server, exposed as three agent tools.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_crustdata",
+    "classType": [
+      "tool"
+    ],
+    "description": "Exposes Crustdata's B2B company and people search as agent tools.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_daytona",
+    "classType": [
+      "tool"
+    ],
+    "description": "Gives agents an isolated Daytona cloud sandbox for running code and shell commands.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_deepl",
+    "classType": [
+      "tool"
+    ],
+    "description": "Exposes DeepL translation and AI rephrasing as agent tools.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_docs",
+    "classType": [
+      "tool"
+    ],
+    "description": "Exposes Google Docs operations as agent tools.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_drive",
+    "classType": [
+      "tool"
+    ],
+    "description": "Exposes Google Drive operations as agent tools.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_exa_search",
+    "classType": [
+      "tool"
+    ],
+    "description": "Exposes Exa semantic web search as an agent tool.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_excel",
+    "classType": [
+      "tool"
+    ],
+    "description": "Exposes Microsoft Excel operations as agent tools.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_filesystem",
+    "classType": [
+      "tool"
+    ],
+    "description": "File system tool for agents.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_firecrawl",
+    "classType": [
+      "tool"
+    ],
+    "description": "Exposes Firecrawl web-scraping operations as agent tools.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_gcs",
+    "classType": [
+      "tool"
+    ],
+    "description": "A tool component that interacts with Google Cloud Storage buckets.",
+    "lanes": {},
+    "invoke": {}
+  },
+  {
+    "name": "tool_git",
+    "classType": [
+      "tool"
+    ],
+    "description": "Exposes local Git repository operations as agent tools.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_github",
+    "classType": [
+      "tool"
+    ],
+    "description": "Exposes GitHub repository operations as agent tools.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_gmail",
+    "classType": [
+      "tool"
+    ],
+    "description": "Exposes Gmail operations as agent tools.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_gohighlevel",
+    "classType": [
+      "tool"
+    ],
+    "description": "Exposes the GoHighLevel (LeadConnector) v2 REST API as agent tools.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_guild",
+    "classType": [
+      "data",
+      "tool"
+    ],
+    "description": "Run Guild.",
+    "lanes": {
+      "documents": [
+        "documents",
+        "text",
+        "table"
+      ],
+      "questions": [
+        "answers",
+        "text",
+        "table"
+      ],
+      "text": [
+        "text",
+        "answers",
+        "table"
+      ]
+    }
+  },
+  {
+    "name": "tool_http_request",
+    "classType": [
+      "tool"
+    ],
+    "description": "Makes HTTP requests to public API endpoints, like curl for agents.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_laserdata_memory",
+    "classType": [
+      "tool"
+    ],
+    "description": "Durable, shared agent memory exposed as tools, backed by LaserData (Apache Iggy) via the Laser SDK.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_mem0",
+    "classType": [
+      "tool"
+    ],
+    "description": "Long-term, shared agent memory exposed as tools, backed by the hosted Mem0 Platform.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_n8n",
+    "classType": [
+      "data",
+      "tool"
+    ],
+    "description": "Trigger n8n workflows from a RocketRide pipeline or an agent.",
+    "lanes": {
+      "audio": [
+        "audio",
+        "text",
+        "answers",
+        "table"
+      ],
+      "documents": [
+        "documents",
+        "text",
+        "table"
+      ],
+      "image": [
+        "image",
+        "text",
+        "answers",
+        "table"
+      ],
+      "questions": [
+        "answers",
+        "text",
+        "table"
+      ],
+      "text": [
+        "text",
+        "answers",
+        "table"
+      ],
+      "video": [
+        "video",
+        "text",
+        "answers",
+        "table"
+      ]
+    }
+  },
+  {
+    "name": "tool_notion",
+    "classType": [
+      "tool"
+    ],
+    "description": "Exposes a Notion workspace (search, pages, databases) as agent tools.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_onedrive",
+    "classType": [
+      "tool"
+    ],
+    "description": "Exposes Microsoft OneDrive operations as agent tools.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_oura",
+    "classType": [
+      "tool"
+    ],
+    "description": "Exposes Oura Ring health data as read-only agent tools.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_outlook_calendar",
+    "classType": [
+      "tool"
+    ],
+    "description": "Exposes Microsoft Outlook Calendar operations as agent tools.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_outlook_mail",
+    "classType": [
+      "tool"
+    ],
+    "description": "Exposes Microsoft Outlook Mail operations as agent tools.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_pipe",
+    "classType": [
+      "tool"
+    ],
+    "description": "Exposes an inline pipeline as an agent tool.",
+    "lanes": {
+      "_source": [
+        "text",
+        "questions",
+        "documents",
+        "table",
+        "answers"
+      ]
+    }
+  },
+  {
+    "name": "tool_pipedrive",
+    "classType": [
+      "tool"
+    ],
+    "description": "Exposes the Pipedrive CRM REST API v1 as agent tools.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_python",
+    "classType": [
+      "tool"
+    ],
+    "description": "Executes Python code in a restricted in-process sandbox via exec().",
+    "lanes": {}
+  },
+  {
+    "name": "tool_sheets",
+    "classType": [
+      "tool"
+    ],
+    "description": "Exposes Google Sheets operations as agent tools.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_slack",
+    "classType": [
+      "tool"
+    ],
+    "description": "Exposes Slack workspace operations as agent tools.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_tavily",
+    "classType": [
+      "tool"
+    ],
+    "description": "Exposes Tavily real-time web search as an agent tool.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_v0",
+    "classType": [
+      "tool"
+    ],
+    "description": "A component that connects to Vercel's v0 API to generate React + Tailwind CSS UI \ncomponents from natural-language prompts.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_vertex_search",
+    "classType": [
+      "tool"
+    ],
+    "description": "A processing component that interacts with Google Vertex AI Vector Search.",
+    "lanes": {},
+    "invoke": {}
+  },
+  {
+    "name": "tool_word",
+    "classType": [
+      "tool"
+    ],
+    "description": "Exposes Microsoft Word document operations as agent tools.",
+    "lanes": {}
+  },
+  {
+    "name": "tool_xtrace_memory",
+    "classType": [
+      "tool"
+    ],
+    "description": "Long-term, shared agent memory exposed as tools, backed by xTrace Memory Manager.",
+    "lanes": {}
+  },
+  {
+    "name": "tools",
+    "classType": [
+      "source"
+    ],
+    "description": "A source component that transfers no data: it exists to host tool nodes.",
+    "lanes": {
+      "_source": []
+    },
+    "invoke": {
+      "tool": {
+        "description": "Tools hosted by this endpoint (via control-plane invoke)",
+        "min": 0
+      }
+    }
+  },
+  {
+    "name": "tts_elevenlabs",
+    "classType": [
+      "audio"
+    ],
+    "description": "Converts incoming text into speech using the ElevenLabs text-to-speech API.",
+    "lanes": {
+      "answers": [
+        "audio"
+      ],
+      "documents": [
+        "audio"
+      ],
+      "questions": [
+        "audio"
+      ],
+      "text": [
+        "audio"
+      ]
+    }
+  },
+  {
+    "name": "tts_openai",
+    "classType": [
+      "audio"
+    ],
+    "description": "Converts incoming text into speech using the OpenAI text-to-speech API.",
+    "lanes": {
+      "answers": [
+        "audio"
+      ],
+      "documents": [
+        "audio"
+      ],
+      "questions": [
+        "audio"
+      ],
+      "text": [
+        "audio"
+      ]
+    }
+  },
+  {
+    "name": "tts_rime",
+    "classType": [
+      "audio"
+    ],
+    "description": "Converts incoming text into speech using the Rime text-to-speech API.",
+    "lanes": {
+      "answers": [
+        "audio"
+      ],
+      "documents": [
+        "audio"
+      ],
+      "questions": [
+        "audio"
+      ],
+      "text": [
+        "audio"
+      ]
+    }
+  },
+  {
+    "name": "twelvelabs",
+    "classType": [
+      "video"
+    ],
+    "description": "Sends a video to TwelveLabs along with instructions and returns the generated text response.",
+    "lanes": {
+      "video": [
+        "text"
+      ]
+    }
+  },
+  {
+    "name": "video_composer",
+    "classType": [
+      "video"
+    ],
+    "description": "Stitches a sequence of image frames into an MP4 video using FFmpeg.",
+    "lanes": {
+      "image": [
+        "video"
+      ]
+    }
+  },
+  {
+    "name": "weaviate",
+    "classType": [
+      "store",
+      "tool"
+    ],
+    "description": "A component that stores vector embeddings in a Weaviate instance \nfor semantic search and retrieval.",
+    "lanes": {
+      "documents": [],
+      "questions": [
+        "documents",
+        "answers",
+        "questions"
+      ]
+    }
+  },
+  {
+    "name": "webhook",
+    "classType": [
+      "source"
+    ],
+    "description": "A source component that listens for incoming HTTP requests and accepts \nuploaded documents or data from external systems or processes.",
+    "lanes": {
+      "_source": [
+        "tags",
+        "text",
+        "json",
+        "audio",
+        "video",
+        "image",
+        "questions"
+      ]
+    }
+  }
+]

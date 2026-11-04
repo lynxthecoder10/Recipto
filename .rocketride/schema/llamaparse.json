@@ -1,0 +1,21 @@
+{
+  "title": "LlamaParse",
+  "protocol": "llamaparse://",
+  "prefix": "llamaparse",
+  "plans": null,
+  "capabilities": 6144,
+  "classType": [
+    "data"
+  ],
+  "actions": 0,
+  "description": "A document parsing component that uses LlamaParse to extract text and structured data \nfrom various document formats including PDFs, images, Word documents, Excel spreadsheets, \nand other formats. It provides high-quality text extraction with support for tables, \nlayout preservation, and markdown output formatting. \nNote: output is flattened to Markdown and does not preserve cell-level provenance \n(page boundaries, bbox coordinates, or the table-HTML cell grid), so it is not suitable \nfor audit-grade or provenance-bearing extraction; use the datalab_parse node for \nstructure-preserving parsing with page and coordinate data.",
+  "lanes": {
+    "tags": [
+      "text",
+      "table"
+    ]
+  },
+  "tile": [],
+  "documentation": "https://docs.rocketride.org/nodes/llamaparse",
+  "icon": "4"
+}

@@ -1,0 +1,18 @@
+{
+  "title": "Google Calendar",
+  "protocol": "tool_calendar://",
+  "prefix": "calendar",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "tool"
+  ],
+  "actions": 0,
+  "description": "Exposes Google Calendar operations as agent tools.\nList, get, create, update, move, and delete events (including recurring-series instances and natural-language quick-add); query free/busy; manage calendars and access-control (ACL) rules.\nSupports incremental sync via syncToken and sends attendee invites at the write tier. Authenticates via a Google service account or user OAuth.",
+  "lanes": {},
+  "tile": [
+    "Google Calendar (${parameters.calendar.access})"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/tool_google_workspace/calendar",
+  "icon": "87"
+}

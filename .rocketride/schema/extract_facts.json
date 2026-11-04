@@ -1,0 +1,30 @@
+{
+  "title": "Fact Extractor",
+  "protocol": "extract_facts://",
+  "prefix": "extract_facts",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "text"
+  ],
+  "actions": 0,
+  "description": "The extraction brain. Reads document context together with a table cell by cell, \nand runs a validator pass that double-checks the extracted values on disagreement, \nreconciling and tie-breaking before emitting fully-qualified facts. Each fact carries \nthe user-configured target fields plus auto-attached provenance (page, table id, row, \ncolumn, source text, and a confidence score) so downstream consumers can trace every \nvalue back to where it came from.",
+  "lanes": {
+    "documents": [
+      "answers",
+      "documents"
+    ],
+    "table": [
+      "answers",
+      "documents"
+    ]
+  },
+  "invoke": {
+    "llm": {
+      "description": "LLM to use for fact extraction and validation",
+      "min": 1
+    }
+  },
+  "documentation": "https://docs.rocketride.org/nodes/extract_facts",
+  "icon": "6"
+}

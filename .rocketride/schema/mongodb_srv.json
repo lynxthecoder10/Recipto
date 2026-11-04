@@ -1,0 +1,27 @@
+{
+  "title": "MongoDB Atlas",
+  "protocol": "mongodb+srv://",
+  "prefix": "Atlas Vector Store",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "store",
+    "tool"
+  ],
+  "actions": 0,
+  "description": "A vector database component for MongoDB Atlas, enabling efficient storage and \nretrieval of vector embeddings using MongoDB's native vector search capabilities. \nIt supports similarity search, filtering, and management of vector data with \nhigh performance and advanced matching capabilities using Atlas Vector Search.\n</br></br><a href=\"https://www.mongodb.com/products/platform/atlas-vector-search\" target=\"_blank\">MongoDB Atlas Vector Search</a>",
+  "lanes": {
+    "documents": [],
+    "questions": [
+      "documents",
+      "answers",
+      "questions"
+    ]
+  },
+  "tile": [
+    "Host/Port: ${parameters.atlas.host}:${parameters.atlas.port}",
+    "Collection: ${parameters.atlas.collection}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/store_atlas",
+  "icon": "63"
+}

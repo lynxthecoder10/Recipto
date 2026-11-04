@@ -1,0 +1,20 @@
+{
+  "title": "Answers to Documents",
+  "protocol": "answer_documents://",
+  "prefix": "answer_documents",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "text"
+  ],
+  "actions": 0,
+  "description": "An adapter component that turns model/agent answers into embeddable documents. \nIt reads the answers lane and emits one document per validated fact (a JSON array \nyields one document per item; a JSON object or plain-text answer yields a single \ndocument), so an LLM's structured, self-describing output can be embedded and indexed \nback into a vector store. The original answer is also passed through unchanged, letting \na pipeline index the answer and keep serving it in the same run.",
+  "lanes": {
+    "answers": [
+      "documents",
+      "answers"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org/nodes/answer_documents",
+  "icon": "6"
+}

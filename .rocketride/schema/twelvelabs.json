@@ -1,0 +1,19 @@
+{
+  "title": "TwelveLabs",
+  "protocol": "twelvelabs://",
+  "prefix": "twelvelabs",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "video"
+  ],
+  "actions": 0,
+  "description": "Sends a video to TwelveLabs along with instructions and returns the generated text response.",
+  "lanes": {
+    "video": [
+      "text"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org/nodes/twelvelabs",
+  "icon": "120"
+}

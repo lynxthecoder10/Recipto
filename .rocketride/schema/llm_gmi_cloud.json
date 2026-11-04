@@ -1,0 +1,22 @@
+{
+  "title": "GMI Cloud",
+  "protocol": "llm_gmi_cloud://",
+  "prefix": "llm",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "llm"
+  ],
+  "actions": 0,
+  "description": "A component that connects to GMI Cloud's large language models for advanced \nnatural language processing. GMI Cloud hosts 100+ OpenAI-compatible models \nincluding Llama 4, Qwen3, DeepSeek, GPT, Claude, and Gemini on owned H100/H200 \nGPU infrastructure. It enables capabilities like text generation, summarization, \nreasoning, and code understanding across a wide range of open-weight and \nproprietary models through a unified OpenAI-compatible API.",
+  "lanes": {
+    "questions": [
+      "answers"
+    ]
+  },
+  "tile": [
+    "Model: ${parameters.llm_gmi_cloud.profile}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/llm_gmi_cloud",
+  "icon": "51"
+}

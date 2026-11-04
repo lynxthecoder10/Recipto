@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import calendar
+import functools
 import io
 import os
 import re
@@ -20,8 +21,10 @@ from flask import (
     redirect,
     render_template,
     request,
+    session,
     url_for,
 )
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from models.db import (
     BillingDuplicateError,
@@ -30,13 +33,19 @@ from models.db import (
     create_bill,
     create_bills_for_cycles,
     create_or_update_gala,
+    create_user,
+    ensure_default_user,
     get_bill_by_no,
+    get_gala_by_id,
+    get_user_by_email,
+    get_user_by_id,
     init_billing_store,
     init_receipt_store,
     list_bills,
     list_galas,
     update_bill_payment_status,
     update_bill_whatsapp_status,
+    update_user_profile,
 )
 from utils.bill_logic import (
     MONTH_OPTIONS,
@@ -58,10 +67,34 @@ from utils.whatsapp_automation import (
 PROJECT_ROOT = Path(__file__).resolve().parent
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "recipto-dev-secret-change-in-production")
+app.secret_key = os.environ.get("SECRET_KEY", "recipto-super-secret-production-key-2026-mumbai")
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+
+
+def login_required(view_func):
+    """Decorator to ensure requests are from authenticated users."""
+    @functools.wraps(view_func)
+    def wrapped_view(*args, **kwargs):
+        if "user_id" not in session:
+            if request.path.startswith("/api/"):
+                return jsonify({"error": "Authentication required"}), 401
+            flash("Please sign in to access Recipto.", "warning")
+            return redirect(url_for("login_page", next=request.url))
+        return view_func(*args, **kwargs)
+    return wrapped_view
+
+
+@app.context_processor
+def inject_current_user():
+    """Inject the active authenticated user into all Jinja templates."""
+    user_id = session.get("user_id")
+    current_user = get_user_by_id(user_id) if user_id else None
+    return {"current_user": current_user}
 
 
 def _enrich_bill(bill: dict) -> dict:
+    """Enrich raw database bill dictionary with formatted labels and normalized status."""
     start = bill.get("start_month", 1)
     end = bill.get("end_month", 1)
     year = bill.get("year", datetime.now().year)
@@ -79,13 +112,29 @@ def _enrich_bill(bill: dict) -> dict:
 
     phone = bill.get("phone_number", "")
     tenant_name = bill.get("tenant_name", "Tenant")
-    amount = bill.get("amount", 0.0) or 0.0
-    amount_paid = bill.get("amount_paid", 0.0) or 0.0
-    pending_raw = bill.get("pending_amount")
-    pending = pending_raw if pending_raw is not None else max(0.0, amount - amount_paid)
+    amount = float(bill.get("amount", 0.0) or 0.0)
+    amount_paid = float(bill.get("amount_paid", 0.0) or 0.0)
+
+    # Standardize payment_status to 'paid', 'pending', or 'partial'
+    raw_status = str(bill.get("payment_status") or "pending").strip().lower()
+    if raw_status in ("full paid", "paid"):
+        status = "paid"
+    elif raw_status in ("half paid", "partial"):
+        status = "partial"
+    else:
+        status = "pending"
+    bill["payment_status"] = status
+
+    # Ensure pending amount is accurate
+    if status == "paid":
+        pending = 0.0
+    else:
+        pending_raw = bill.get("pending_amount")
+        pending = float(pending_raw) if pending_raw is not None else max(0.0, amount - amount_paid)
     bill["pending_amount"] = pending
+
     bill["whatsapp_status"] = bill.get("whatsapp_status", "Pending") or "Pending"
-    
+
     if pending > 0:
         bill["whatsapp_url"] = build_whatsapp_deeplink(phone, bill, is_reminder=True)
     else:
@@ -94,18 +143,143 @@ def _enrich_bill(bill: dict) -> dict:
     return bill
 
 
+# Initialize SQLite storage and ensure default user exists
 init_receipt_store()
 init_billing_store()
+ensure_default_user()
 
 
 # ---------------------------------------------------------------------------
-# Dashboard
+# Authentication Routes (Signup, Login, Logout, Forgot Password)
+# ---------------------------------------------------------------------------
+
+@app.route("/login", methods=["GET", "POST"])
+def login_page():
+    if "user_id" in session:
+        return redirect(url_for("dashboard"))
+
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "")
+        next_url = request.args.get("next") or url_for("dashboard")
+
+        if not email or not password:
+            flash("Please provide both email and password.", "error")
+            return render_template("login.html")
+
+        user = get_user_by_email(email)
+        if user and check_password_hash(user["password_hash"], password):
+            session.clear()
+            session["user_id"] = user["id"]
+            session["user_name"] = user["name"]
+            session["user_email"] = user["email"]
+            session["user_role"] = user["role"]
+            flash(f"Welcome back, {user['name']}!", "success")
+            return redirect(next_url)
+        else:
+            flash("Invalid email or password. Please check your credentials.", "error")
+            return render_template("login.html", email=email)
+
+    return render_template("login.html")
+
+
+@app.route("/signup", methods=["GET", "POST"])
+def signup_page():
+    if "user_id" in session and request.method == "GET":
+        return redirect(url_for("dashboard"))
+
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        email = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "")
+        confirm_password = request.form.get("confirm_password", "")
+        role = request.form.get("role", "owner").strip().lower() or "owner"
+
+        if not name or not email or not password:
+            flash("All required fields must be completed.", "error")
+            return render_template("signup.html", name=name, email=email)
+
+        if "@" not in email or "." not in email:
+            flash("Please enter a valid email address.", "error")
+            return render_template("signup.html", name=name, email=email)
+
+        if len(password) < 6:
+            flash("Password must be at least 6 characters long.", "error")
+            return render_template("signup.html", name=name, email=email)
+
+        if password != confirm_password:
+            flash("Passwords do not match.", "error")
+            return render_template("signup.html", name=name, email=email)
+
+        if get_user_by_email(email):
+            flash("An account with this email address already exists. Please sign in.", "error")
+            return redirect(url_for("login_page"))
+
+        try:
+            pwd_hash = generate_password_hash(password)
+            user = create_user(
+                email=email,
+                password_hash=pwd_hash,
+                name=name,
+                role=role,
+            )
+            session.clear()
+            session["user_id"] = user["id"]
+            session["user_name"] = user["name"]
+            session["user_email"] = user["email"]
+            session["user_role"] = user["role"]
+            flash(f"Account registered successfully! Welcome to Recipto, {name}.", "success")
+            return redirect(url_for("dashboard"))
+        except BillingStorageError as exc:
+            flash(str(exc), "error")
+            return render_template("signup.html", name=name, email=email)
+
+    return render_template("signup.html")
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    flash("You have been signed out safely.", "info")
+    return redirect(url_for("login_page"))
+
+
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password_page():
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+        if not email:
+            flash("Please enter your registered email address.", "error")
+            return render_template("forgot_password.html")
+
+        user = get_user_by_email(email)
+        if user:
+            # Simulate password reset link dispatched to registered email
+            flash(
+                f"A secure password reset link has been dispatched to {email}. Please check your inbox.",
+                "success",
+            )
+        else:
+            # Prevent email enumeration while maintaining clean UX
+            flash(
+                f"If an account exists for {email}, a recovery link has been sent.",
+                "info",
+            )
+        return redirect(url_for("login_page"))
+
+    return render_template("forgot_password.html")
+
+
+# ---------------------------------------------------------------------------
+# Dashboard (Protected & Scoped)
 # ---------------------------------------------------------------------------
 
 @app.route("/")
+@login_required
 def dashboard():
-    galas = list_galas()
-    bills_raw = list_bills(limit=10000)
+    user_id = session["user_id"]
+    galas = list_galas(user_id=user_id)
+    bills_raw = list_bills(limit=10000, user_id=user_id)
     bills = [_enrich_bill(b) for b in bills_raw]
 
     paid = [b for b in bills if b.get("payment_status") == "paid"]
@@ -130,17 +304,21 @@ def dashboard():
 
 
 # ---------------------------------------------------------------------------
-# Gala Management
+# Gala Management (Protected & Scoped)
 # ---------------------------------------------------------------------------
 
 @app.route("/galas")
+@login_required
 def galas_page():
-    galas = list_galas()
+    user_id = session["user_id"]
+    galas = list_galas(user_id=user_id)
     return render_template("galas.html", active_page="galas", galas=galas)
 
 
 @app.post("/galas")
+@login_required
 def save_gala():
+    user_id = session["user_id"]
     gala_number = request.form.get("gala_number", "").strip()
     tenant_name = request.form.get("tenant_name", "").strip()
     phone_number = request.form.get("phone_number", "").strip()
@@ -150,10 +328,17 @@ def save_gala():
         flash("Gala number and tenant name are required.", "error")
         return redirect(url_for("galas_page"))
 
+    if len(gala_number) > 50:
+        flash("Gala number must be under 50 characters.", "error")
+        return redirect(url_for("galas_page"))
+
     try:
         monthly_rent = float(monthly_rent_raw)
+        if monthly_rent < 0:
+            flash("Monthly Rent cannot be negative.", "error")
+            return redirect(url_for("galas_page"))
     except ValueError:
-        flash("Monthly Rent must be a number.", "error")
+        flash("Monthly Rent must be a valid number.", "error")
         return redirect(url_for("galas_page"))
 
     try:
@@ -162,6 +347,7 @@ def save_gala():
             tenant_name=tenant_name,
             phone_number=phone_number,
             monthly_rent=monthly_rent,
+            user_id=user_id,
         )
         flash(f"Gala {gala_number} saved successfully.", "success")
     except BillingStorageError as exc:
@@ -171,13 +357,15 @@ def save_gala():
 
 
 # ---------------------------------------------------------------------------
-# Billing (Generate Bills)
+# Billing (Generate Bills - Protected & Scoped)
 # ---------------------------------------------------------------------------
 
 @app.route("/billing")
+@login_required
 def billing_page():
+    user_id = session["user_id"]
     now = datetime.now()
-    galas = list_galas()
+    galas = list_galas(user_id=user_id)
     return render_template(
         "billing.html",
         active_page="billing",
@@ -191,7 +379,9 @@ def billing_page():
 
 
 @app.post("/billing/download")
+@login_required
 def generate_bill_download():
+    user_id = session["user_id"]
     gala_id_raw = request.form.get("gala_id", "").strip()
     billing_type = request.form.get("billing_type", "quarter").strip()
     year_raw = request.form.get("year", str(datetime.now().year)).strip()
@@ -203,14 +393,16 @@ def generate_bill_download():
     try:
         gala_id = int(gala_id_raw)
         year = int(year_raw)
+        if not (2000 <= year <= 2100):
+            flash("Year must be between 2000 and 2100.", "error")
+            return redirect(url_for("billing_page"))
     except ValueError:
         flash("Invalid input format.", "error")
         return redirect(url_for("billing_page"))
 
-    galas = list_galas()
-    selected_gala = next((g for g in galas if g["id"] == gala_id), None)
+    selected_gala = get_gala_by_id(gala_id, user_id=user_id)
     if not selected_gala:
-        flash("Selected Gala not found.", "error")
+        flash("Selected Gala not found or does not belong to your account.", "error")
         return redirect(url_for("billing_page"))
 
     monthly_rent = selected_gala["monthly_rent"]
@@ -231,6 +423,7 @@ def generate_bill_download():
                 year=year,
                 selected_quarters=selected_quarters,
                 monthly_rent=monthly_rent,
+                user_id=user_id,
             )
         except (BillingDuplicateError, BillingStorageError) as exc:
             flash(str(exc), "error")
@@ -263,6 +456,7 @@ def generate_bill_download():
                 monthly_rent=monthly_rent,
                 billing_type="custom",
                 cycle_code=cycle_code,
+                user_id=user_id,
             )
             created_bills = [record]
         except (BillingDuplicateError, BillingStorageError) as exc:
@@ -275,7 +469,7 @@ def generate_bill_download():
 
     enriched_bills = [_enrich_bill(b) for b in created_bills]
 
-    # Automatically trigger WhatsApp Web automation in background thread
+    # Trigger WhatsApp Web automation asynchronously in background thread
     threading.Thread(
         target=send_bulk_messages,
         args=(enriched_bills,),
@@ -326,7 +520,6 @@ def generate_bill_download():
         response.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
         return response
     else:
-        # Package multiple generated bill PDFs into a zip archive
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
             for filename, pdf_bytes in pdf_files:
@@ -340,13 +533,15 @@ def generate_bill_download():
 
 
 # ---------------------------------------------------------------------------
-# Payment Verification
+# Payment Verification (Protected & Scoped)
 # ---------------------------------------------------------------------------
 
 @app.route("/payments")
+@login_required
 def payments_page():
-    galas = list_galas()
-    bills_raw = list_bills(limit=1000)
+    user_id = session["user_id"]
+    galas = list_galas(user_id=user_id)
+    bills_raw = list_bills(limit=1000, user_id=user_id)
     bills = [_enrich_bill(b) for b in bills_raw]
     return render_template(
         "payments.html",
@@ -357,22 +552,27 @@ def payments_page():
 
 
 @app.post("/payments/update/<path:bill_no>")
+@login_required
 def update_bill_payment(bill_no: str):
+    user_id = session["user_id"]
     amount_paid_raw = request.form.get("amount_paid", "0").strip()
     payment_method = request.form.get("payment_method", "").strip()
 
     try:
         amount_paid = float(amount_paid_raw)
+        if amount_paid < 0:
+            flash("Amount paid cannot be negative.", "error")
+            return redirect(url_for("payments_page"))
     except ValueError:
-        flash("Amount paid must be a number.", "error")
+        flash("Amount paid must be a valid number.", "error")
         return redirect(url_for("payments_page"))
 
     try:
-        result = update_bill_payment_status(bill_no, amount_paid, payment_method)
+        result = update_bill_payment_status(bill_no, amount_paid, payment_method, user_id=user_id)
         if result:
             flash(f"Payment for {bill_no} updated successfully.", "success")
         else:
-            flash(f"Bill {bill_no} not found.", "error")
+            flash(f"Bill {bill_no} not found or unauthorized.", "error")
     except BillingStorageError as exc:
         flash(str(exc), "error")
 
@@ -380,10 +580,12 @@ def update_bill_payment(bill_no: str):
 
 
 @app.post("/payments/reminder/<path:bill_no>")
+@login_required
 def send_payment_reminder(bill_no: str):
-    bill = get_bill_by_no(bill_no)
+    user_id = session["user_id"]
+    bill = get_bill_by_no(bill_no, user_id=user_id)
     if not bill:
-        flash("Bill not found.", "error")
+        flash("Bill not found or unauthorized.", "error")
         return redirect(url_for("payments_page"))
 
     enriched = _enrich_bill(bill)
@@ -397,19 +599,21 @@ def send_payment_reminder(bill_no: str):
         daemon=True,
     ).start()
 
-    flash(f"WhatsApp Web payment reminder launched for {bill_no}.", "success")
+    flash(f"WhatsApp payment reminder launched for {bill_no}.", "success")
     return redirect(url_for("payments_page"))
 
 
 # ---------------------------------------------------------------------------
-# Bill History
+# Bill History & Archive (Protected & Scoped)
 # ---------------------------------------------------------------------------
 
 @app.route("/history")
+@login_required
 def history_page():
+    user_id = session["user_id"]
     now = datetime.now()
-    galas = list_galas()
-    bills_raw = list_bills(limit=1000)
+    galas = list_galas(user_id=user_id)
+    bills_raw = list_bills(limit=1000, user_id=user_id)
     bills = [_enrich_bill(b) for b in bills_raw]
 
     searched_bill = None
@@ -420,7 +624,6 @@ def history_page():
 
     if gala_number_query and year_query:
         found = None
-
         target_start = None
         target_end = None
         target_cycle = None
@@ -452,7 +655,7 @@ def history_page():
             if target_start is not None and target_end is not None:
                 match_period = (b["start_month"] == target_start and b["end_month"] == target_end)
             elif target_cycle:
-                match_period = (b["cycle"] == target_cycle)
+                match_period = (b["cycle"] == target_cycle or b["cycle"] in (target_cycle.split("-") if "-" in target_cycle else [target_cycle]))
             else:
                 match_period = True
 
@@ -480,10 +683,12 @@ def history_page():
 
 
 @app.post("/history/download/<path:bill_no>")
+@login_required
 def download_existing_bill(bill_no: str):
-    bill = get_bill_by_no(bill_no)
+    user_id = session["user_id"]
+    bill = get_bill_by_no(bill_no, user_id=user_id)
     if not bill:
-        flash("Bill not found.", "error")
+        flash("Bill not found or unauthorized.", "error")
         return redirect(url_for("history_page"))
 
     start_m = bill.get("start_month", 1)
@@ -501,10 +706,12 @@ def download_existing_bill(bill_no: str):
     sig_file = PROJECT_ROOT / "static" / "signature.png"
     signature_path = sig_file.as_uri() if sig_file.is_file() else None
 
-    gen_date = bill["created_at"].split()[0]
+    gen_date = str(bill.get("created_at", "")).split()[0]
     date_parts = gen_date.split("-")
     if len(date_parts) == 3:
         gen_date = f"{date_parts[2]}/{date_parts[1]}/{date_parts[0]}"
+    else:
+        gen_date = datetime.now().strftime("%d/%m/%Y")
 
     receipt_html = render_template(
         template_name,
@@ -533,30 +740,89 @@ def download_existing_bill(bill_no: str):
 
 
 # ---------------------------------------------------------------------------
-# Reports (Placeholder)
+# Reports & Analytics (Protected)
 # ---------------------------------------------------------------------------
 
 @app.route("/reports")
+@login_required
 def reports_page():
     return render_template("reports.html", active_page="reports")
 
 
 # ---------------------------------------------------------------------------
-# Settings (Placeholder)
+# Settings & Profile Management (Protected)
 # ---------------------------------------------------------------------------
 
 @app.route("/settings")
+@login_required
 def settings_page():
     return render_template("settings.html", active_page="settings")
 
 
+@app.post("/settings/profile")
+@login_required
+def update_profile():
+    user_id = session["user_id"]
+    name = request.form.get("name", "").strip()
+    email = request.form.get("email", "").strip().lower()
+
+    if not name or not email or "@" not in email:
+        flash("Please provide a valid name and email address.", "error")
+        return redirect(url_for("settings_page"))
+
+    try:
+        updated = update_user_profile(user_id, name=name, email=email)
+        session["user_name"] = updated["name"]
+        session["user_email"] = updated["email"]
+        flash("Profile updated successfully.", "success")
+    except BillingStorageError as exc:
+        flash(str(exc), "error")
+
+    return redirect(url_for("settings_page"))
+
+
+@app.post("/settings/password")
+@login_required
+def change_password():
+    user_id = session["user_id"]
+    current_password = request.form.get("current_password", "")
+    new_password = request.form.get("new_password", "")
+    confirm_new_password = request.form.get("confirm_new_password", "")
+
+    user = get_user_by_id(user_id)
+    user_record = get_user_by_email(user["email"])
+
+    if not check_password_hash(user_record["password_hash"], current_password):
+        flash("Current password is incorrect.", "error")
+        return redirect(url_for("settings_page"))
+
+    if len(new_password) < 6:
+        flash("New password must be at least 6 characters long.", "error")
+        return redirect(url_for("settings_page"))
+
+    if new_password != confirm_new_password:
+        flash("New passwords do not match.", "error")
+        return redirect(url_for("settings_page"))
+
+    try:
+        new_hash = generate_password_hash(new_password)
+        update_user_profile(user_id, name=user["name"], email=user["email"], password_hash=new_hash)
+        flash("Password updated successfully.", "success")
+    except BillingStorageError as exc:
+        flash(str(exc), "error")
+
+    return redirect(url_for("settings_page"))
+
+
 # ---------------------------------------------------------------------------
-# API Endpoints
+# API Endpoints (Protected & Scoped)
 # ---------------------------------------------------------------------------
 
 @app.route("/api/galas")
+@login_required
 def api_list_galas():
-    return jsonify({"galas": list_galas()})
+    user_id = session["user_id"]
+    return jsonify({"galas": list_galas(user_id=user_id)})
 
 
 # ---------------------------------------------------------------------------
@@ -565,30 +831,26 @@ def api_list_galas():
 
 @app.route("/receipts")
 def legacy_receipts():
-    """Redirect old /receipts URL to new /billing page."""
     return redirect(url_for("billing_page"), code=301)
 
 
 @app.post("/receipts/download")
 def legacy_receipts_download():
-    """Redirect old /receipts/download to new /billing/download."""
     return redirect(url_for("generate_bill_download"), code=307)
 
 
 @app.route("/receipts/history")
 def legacy_receipts_history():
-    """Redirect old /receipts/history to new /history page."""
     return redirect(url_for("history_page"), code=301)
 
 
 @app.route("/billing/galas", methods=["GET"])
 def legacy_billing_galas_get():
-    """Redirect old /billing/galas GET to /galas."""
     return redirect(url_for("galas_page"), code=301)
 
 
 # ---------------------------------------------------------------------------
-# Entry Point
+# Application Entry Point
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":

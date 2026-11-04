@@ -1,0 +1,39 @@
+{
+  "title": "Cohere Rerank",
+  "protocol": "rerank_cohere://",
+  "prefix": "rerank",
+  "plans": null,
+  "capabilities": 67584,
+  "classType": [
+    "rerank"
+  ],
+  "actions": 0,
+  "description": "A reranking component powered by Cohere's Rerank API that improves \nsearch quality by reordering retrieved documents based on their \nrelevance to a given query. Supports the rerank-english-v3.0 and rerank-v3.5 models \nwith configurable top-K selection and minimum score thresholds.",
+  "lanes": {
+    "questions": [
+      "documents",
+      "answers"
+    ]
+  },
+  "input": [
+    {
+      "description": "Takes questions with retrieved documents and reranks them by relevance.",
+      "lane": "questions",
+      "output": [
+        {
+          "description": "Produces reranked documents ordered by relevance score.",
+          "lane": "documents"
+        },
+        {
+          "description": "Produces an answer with reranked documents.",
+          "lane": "answers"
+        }
+      ]
+    }
+  ],
+  "tile": [
+    "Cohere Rerank"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/rerank_cohere",
+  "icon": "77"
+}

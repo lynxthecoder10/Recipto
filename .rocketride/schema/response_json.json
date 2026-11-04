@@ -1,0 +1,18 @@
+{
+  "title": "Return JSON",
+  "protocol": "response_json://",
+  "prefix": "response",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "infrastructure"
+  ],
+  "actions": 0,
+  "description": "A component that returns structured JSON data back to the requesting client. It handles \nthe response phase of the HTTP request-response cycle by returning the results as a JSON \nobject. This component ensures that data is transmitted efficiently and clearly to \nthe client, providing a standardized format for the response.",
+  "lanes": {
+    "json": []
+  },
+  "tile": [],
+  "documentation": "https://docs.rocketride.org/nodes/response",
+  "icon": "78"
+}

@@ -1,0 +1,27 @@
+{
+  "title": "Summarization: LLM",
+  "protocol": "summarization://",
+  "prefix": "Summarization",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "text"
+  ],
+  "actions": 0,
+  "description": "A processing component that analyzes document content to extract concise \nsummaries, key points, and named entities. Designed to enhance understanding \nand downstream utility, it supports unstructured text and delivers structured \ninsights for indexing, search, or display. Ideal for distilling key information \nfrom large volumes of content.",
+  "lanes": {
+    "text": [
+      "text",
+      "documents"
+    ]
+  },
+  "invoke": {
+    "llm": {
+      "description": "LLM to use to summarize the document",
+      "min": 1
+    }
+  },
+  "tile": [],
+  "documentation": "https://docs.rocketride.org/nodes/summarization",
+  "icon": "81"
+}

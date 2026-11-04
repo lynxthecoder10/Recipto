@@ -1,0 +1,27 @@
+{
+  "title": "Astra DB",
+  "protocol": "astra_db://",
+  "prefix": "Astra DB Vector Store",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "store",
+    "tool"
+  ],
+  "actions": 0,
+  "description": "A vector database component for Astra DB, enabling efficient storage and \nretrieval of vector embeddings. It supports similarity search, filtering, \nand management of vector data with high performance and advanced matching capabilities.",
+  "lanes": {
+    "documents": [],
+    "questions": [
+      "documents",
+      "answers",
+      "questions"
+    ]
+  },
+  "tile": [
+    "Mode : ${parameters.astra_db.profile}",
+    "Collection: ${parameters.astra_db.${profile}.collection}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/store_astra",
+  "icon": "8"
+}

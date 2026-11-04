@@ -1,0 +1,18 @@
+{
+  "title": "Return Fingerprint",
+  "protocol": "response_hash://",
+  "prefix": "response",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "infrastructure"
+  ],
+  "actions": 0,
+  "description": "A component that returns the content fingerprint of each processed object back to \nthe requesting client. The hash is taken from the object itself rather than from the \nconnected lane, so the component reports whatever fingerprint the pipeline has produced \nfor the object by the time it completes, as part of the standard JSON response.",
+  "lanes": {
+    "tags": []
+  },
+  "tile": [],
+  "documentation": "https://docs.rocketride.org",
+  "icon": "78"
+}

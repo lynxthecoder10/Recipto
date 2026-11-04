@@ -1,0 +1,18 @@
+{
+  "title": "Excel",
+  "protocol": "tool_excel://",
+  "prefix": "excel",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "tool"
+  ],
+  "actions": 0,
+  "description": "Exposes Microsoft Excel operations as agent tools.\nList worksheets and tables; read, write, and clear ranges; add worksheets, tables, table rows, and charts; recalculate; create workbooks. Operates on xlsx files in the acting user's OneDrive via the Microsoft Graph workbook API.\nAuthenticates via an Entra app (client credentials) or user OAuth.",
+  "lanes": {},
+  "tile": [
+    "Excel (${parameters.excel.access})"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/tool_microsoft_365/excel",
+  "icon": "95"
+}

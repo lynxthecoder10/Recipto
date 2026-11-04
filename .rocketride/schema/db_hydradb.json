@@ -1,0 +1,17 @@
+{
+  "title": "HydraDB",
+  "protocol": "db_hydradb://",
+  "prefix": "hydradb",
+  "plans": null,
+  "capabilities": 1024,
+  "classType": [
+    "graph",
+    "database",
+    "tool"
+  ],
+  "actions": 0,
+  "description": "A database/tool node for HydraDB, a managed graph + memory store. \nExposes agent-callable tools to store text as memories (with automatic knowledge-graph \nextraction) and recall graph-enriched context by natural-language query. Retrieval is \nHydraDB's native server-side search - no embeddings or query language required.",
+  "lanes": {},
+  "documentation": "https://docs.rocketride.org/nodes/graph_hydradb",
+  "icon": "20"
+}

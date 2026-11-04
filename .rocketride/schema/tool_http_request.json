@@ -1,0 +1,18 @@
+{
+  "title": "HTTP Request",
+  "protocol": "tool_http_request://",
+  "prefix": "http",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "tool"
+  ],
+  "actions": 0,
+  "description": "Makes HTTP requests to public API endpoints, like curl for agents.\nThe agent provides the request (method, URL, headers, body); credentials come per call or from the node config, where ${ROCKETRIDE_*} placeholders resolve on the engine.\nThe node blocks non-public network destinations, returns 3xx responses without following them automatically, and enforces URL patterns and enabled HTTP methods.",
+  "lanes": {},
+  "tile": [
+    "Tool: ${parameters.http_request.serverName}.http_request"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/tool_http_request",
+  "icon": "103"
+}

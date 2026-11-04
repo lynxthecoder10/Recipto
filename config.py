@@ -3,9 +3,11 @@
 import os
 
 # WhatsApp Web Automation Timing (in seconds)
-WHATSAPP_LOAD_TIME = int(os.environ.get("WHATSAPP_LOAD_TIME", "30"))
-BEFORE_ENTER = float(os.environ.get("BEFORE_ENTER", "1.0"))
-AFTER_SEND = float(os.environ.get("AFTER_SEND", "3.0"))
+WHATSAPP_LOAD_TIME = int(os.environ.get("WHATSAPP_LOAD_TIME", "15"))
+WHATSAPP_MAX_RETRIES = int(os.environ.get("WHATSAPP_MAX_RETRIES", "3"))
+WHATSAPP_RETRY_INTERVAL = float(os.environ.get("WHATSAPP_RETRY_INTERVAL", "3.0"))
+BEFORE_ENTER = float(os.environ.get("BEFORE_ENTER", "1.5"))
+AFTER_SEND = float(os.environ.get("AFTER_SEND", "4.0"))
 BETWEEN_MESSAGES = float(os.environ.get("BETWEEN_MESSAGES", "2.0"))
 
 # Flag to enable/disable desktop browser automation

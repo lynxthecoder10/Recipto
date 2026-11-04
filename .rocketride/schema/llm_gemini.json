@@ -1,0 +1,22 @@
+{
+  "title": "Gemini",
+  "protocol": "llm_gemini://",
+  "prefix": "llm",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "llm"
+  ],
+  "actions": 0,
+  "description": "A component that connects to Gemini models for advanced natural language \nprocessing. It supports tasks such as text generation, summarization, question \nanswering, and chat-based interactions. With access to state-of-the-art language \nmodels like Gemini-3.1-pro with 1M token context window, this component enables \nhigh-quality, context-aware responses and creative text generation. Configurable \nwith API keys and deployment options, it allows seamless integration into AI-driven \nworkflows with scalable performance.",
+  "lanes": {
+    "questions": [
+      "answers"
+    ]
+  },
+  "tile": [
+    "Model: ${parameters.llm_gemini.profile}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/llm_gemini",
+  "icon": "42"
+}

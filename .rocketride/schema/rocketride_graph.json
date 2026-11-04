@@ -1,0 +1,28 @@
+{
+  "title": "RocketRide Graph",
+  "protocol": "rocketride_graph://",
+  "prefix": "rocketridegraph",
+  "plans": null,
+  "capabilities": 1024,
+  "classType": [
+    "graph",
+    "tool"
+  ],
+  "actions": 0,
+  "description": "A RocketRide-managed graph database backed by PostgreSQL + Apache AGE. \nAnswers natural-language questions over your own provisioned RocketRide cloud \ngraph with zero setup — no host, user, or password to enter; the connection is \nresolved automatically from your signed-in RocketRide identity. Cypher queries \nare translated to AGE with a resource firewall, and safe reads run in read-only \ntransactions server-side.",
+  "lanes": {
+    "questions": [
+      "table",
+      "text",
+      "answers"
+    ]
+  },
+  "invoke": {
+    "llm": {
+      "description": "LLM to use to craft Cypher queries from question",
+      "min": 1
+    }
+  },
+  "documentation": "https://docs.rocketride.org/nodes/rocketride_graph",
+  "icon": "5"
+}

@@ -1,0 +1,25 @@
+{
+  "title": "Dictionary",
+  "protocol": "dictionary://",
+  "prefix": "Dictionary",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "text"
+  ],
+  "actions": 0,
+  "description": "A processing component that analyzes documents to extract a dictionary of \nkey terms and phrases. It identifies domain-specific vocabulary, recurring \nexpressions, and relevant terminology, building a structured list for downstream \nenrichment or reference. Useful for creating glossaries, supporting classification, \nor enhancing search relevance, the component helps surface important language patterns \nfrom unstructured content.",
+  "lanes": {
+    "text": [
+      "documents"
+    ]
+  },
+  "invoke": {
+    "llm": {
+      "description": "LLM to use for Dictionary creation",
+      "min": 1
+    }
+  },
+  "documentation": "https://docs.rocketride.org/nodes/dictionary",
+  "icon": "27"
+}

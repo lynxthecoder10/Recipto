@@ -1,0 +1,15 @@
+{
+  "title": "Memory (Internal)",
+  "protocol": "memory_internal://",
+  "prefix": "memory",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "memory"
+  ],
+  "actions": 0,
+  "description": "Run-scoped keyed memory store exposed as agent tools.\nProvides put, get, peek, list, and clear operations so agents can\npersist intermediate results across planning waves without bloating\nthe LLM context window.",
+  "lanes": {},
+  "documentation": "https://docs.rocketride.org/nodes/memory_internal",
+  "icon": "61"
+}

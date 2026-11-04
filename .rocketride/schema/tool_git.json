@@ -1,0 +1,18 @@
+{
+  "title": "Git",
+  "protocol": "tool_git://",
+  "prefix": "git",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "tool"
+  ],
+  "actions": 0,
+  "description": "Exposes local Git repository operations as agent tools. \nCovers clone, init, status, log, show, diff, blame, stage, commit, stash, branch management, pull, push, and code search. \nRuns entirely in-process without requiring a host git installation. \nSupports secure authentication via personal access tokens and SSH keys.",
+  "lanes": {},
+  "tile": [
+    "Git: ${parameters.git.repoPath || 'not configured'}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/tool_git",
+  "icon": "98"
+}

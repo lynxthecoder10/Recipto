@@ -1,0 +1,24 @@
+{
+  "title": "Tools",
+  "protocol": "tools://",
+  "prefix": "Tools",
+  "plans": null,
+  "capabilities": 3584,
+  "classType": [
+    "source"
+  ],
+  "actions": 0,
+  "description": "A source component that transfers no data: it exists to host tool nodes. \nConnect tools to it via the tool invoke channel and call them directly from \na client with client.tool() - no agent, no LLM, no data lanes. Ideal for \npipelines whose whole purpose is exposing capabilities (file storage, vector \nstore management, integrations) to an application.",
+  "lanes": {
+    "_source": []
+  },
+  "invoke": {
+    "tool": {
+      "description": "Tools hosted by this endpoint (via control-plane invoke)",
+      "min": 0
+    }
+  },
+  "tile": [],
+  "documentation": "https://docs.rocketride.org/nodes/webhook/tools",
+  "icon": "118"
+}

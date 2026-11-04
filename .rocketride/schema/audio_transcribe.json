@@ -1,0 +1,22 @@
+{
+  "title": "Transcribe",
+  "protocol": "audio_transcribe://",
+  "prefix": "audio_transcribe",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "audio"
+  ],
+  "actions": 0,
+  "description": "The Audio transcribe component recieves audio or video and transcribes into text.",
+  "lanes": {
+    "audio": [
+      "text"
+    ],
+    "video": [
+      "text"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org/nodes/audio_transcribe",
+  "icon": "10"
+}

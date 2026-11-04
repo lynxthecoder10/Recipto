@@ -1,0 +1,28 @@
+{
+  "title": "Neo4J",
+  "protocol": "graph_neo4j://",
+  "prefix": "neo4j",
+  "plans": null,
+  "capabilities": 1024,
+  "classType": [
+    "graph",
+    "tool"
+  ],
+  "actions": 0,
+  "description": "A processing component that connects to a Neo4J graph database. \nAccepts natural-language questions, translates them to Cypher queries \nvia an LLM, and returns results to the pipeline. Designed for knowledge graph retrieval, \nentity linking, and graph-based RAG workflows.",
+  "lanes": {
+    "questions": [
+      "table",
+      "text",
+      "answers"
+    ]
+  },
+  "invoke": {
+    "llm": {
+      "description": "LLM to use to craft Cypher queries from question",
+      "min": 1
+    }
+  },
+  "documentation": "https://docs.rocketride.org/nodes/graph_neo4j",
+  "icon": "38"
+}

@@ -1,0 +1,25 @@
+{
+  "title": "General Text",
+  "protocol": "preprocessor_langchain://",
+  "prefix": "Preprocessor",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "preprocessor"
+  ],
+  "actions": 0,
+  "description": "A preprocessing component that segments large bodies of text into intelligently sized \nchunks for downstream processing. It recursively splits content based on a hierarchy \nof separators (such as paragraphs, sentences, or words) preserving context while ensuring \neach chunk meets token or length constraints. This enables efficient handling of lengthy \ndocuments in workflows like embedding, retrieval, or LLM-based generation. Ideal for \npreparing content for language models where context length and coherence are critical.",
+  "lanes": {
+    "table": [
+      "documents"
+    ],
+    "text": [
+      "documents"
+    ]
+  },
+  "tile": [
+    "Mode: ${parameters.preprocessor_langchain.profile}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/preprocessor_langchain",
+  "icon": "70"
+}

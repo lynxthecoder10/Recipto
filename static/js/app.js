@@ -278,6 +278,8 @@
       lastGTime = 0; // reset
       if (key === 'd') {
         window.location.href = '/';
+      } else if (key === 'm') {
+        window.location.href = '/galas';
       } else if (key === 'b') {
         window.location.href = '/billing';
       } else if (key === 'p') {

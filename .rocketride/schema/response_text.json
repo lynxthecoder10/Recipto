@@ -1,0 +1,18 @@
+{
+  "title": "Return Text",
+  "protocol": "response_text://",
+  "prefix": "response",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "infrastructure"
+  ],
+  "actions": 0,
+  "description": "A component that returns processed text back to the requesting client. It handles the \nresponse phase of the HTTP request-response cycle by returning the results as a JSON \nobject. This component ensures that data is transmitted efficiently and clearly to \nthe client, providing a standardized format for the response.",
+  "lanes": {
+    "text": []
+  },
+  "tile": [],
+  "documentation": "https://docs.rocketride.org/nodes/response",
+  "icon": "78"
+}

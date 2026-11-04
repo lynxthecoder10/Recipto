@@ -1,0 +1,22 @@
+{
+  "title": "Image",
+  "protocol": "embedding_image://",
+  "prefix": "embedding",
+  "plans": null,
+  "capabilities": 6144,
+  "classType": [
+    "embedding"
+  ],
+  "actions": 0,
+  "description": "A processing component that generates vector embeddings from image content \nusing advanced computer vision models. It transforms visual features into \nnumerical representations that capture the semantic and structural characteristics \nof the image. These embeddings enable similarity search, clustering, and \nintegration into multimodal workflows. Ideal for use cases involving image retrieval, \nclassification, or content understanding.",
+  "lanes": {
+    "documents": [
+      "documents"
+    ],
+    "image": [
+      "documents"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org/nodes/embedding_image",
+  "icon": "31"
+}

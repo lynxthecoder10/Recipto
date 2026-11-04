@@ -1,0 +1,27 @@
+{
+  "title": "Chroma",
+  "protocol": "chroma://",
+  "prefix": "Chroma Vector Store",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "store",
+    "tool"
+  ],
+  "actions": 0,
+  "description": "A vector database component for Chroma, enabling efficient storage and \nretrieval of vector embeddings. It supports similarity search, filtering, \nand management of vector data with high performance.",
+  "lanes": {
+    "documents": [],
+    "questions": [
+      "documents",
+      "answers",
+      "questions"
+    ]
+  },
+  "tile": [
+    "Host/Port: ${parameters.chroma.${profile}.host}:${parameters.chroma.${profile}.port}",
+    "Collection: ${parameters.chroma.${profile}.collection}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/store_chroma",
+  "icon": "14"
+}

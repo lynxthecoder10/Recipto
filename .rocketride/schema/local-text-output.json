@@ -1,0 +1,17 @@
+{
+  "title": "Local Text Output",
+  "protocol": "local-text-output://",
+  "prefix": "Local Text Output",
+  "plans": null,
+  "capabilities": 10243,
+  "classType": [
+    "target"
+  ],
+  "actions": 0,
+  "description": "A target component that writes data to the file system. It supports \noutputting structured or unstructured content to files in a variety \nof formats such as JSON, CSV, or plain text. Configurable with output \npaths and naming conventions, the component enables flexible persistence \nof processed data to networked storage.",
+  "lanes": {
+    "text": []
+  },
+  "documentation": "https://docs.rocketride.org/nodes/local_text_output",
+  "icon": "58"
+}

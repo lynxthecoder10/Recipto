@@ -1,0 +1,22 @@
+{
+  "title": "Nebius",
+  "protocol": "llm_nebius://",
+  "prefix": "llm",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "llm"
+  ],
+  "actions": 0,
+  "description": "Connects to Nebius Token Factory's OpenAI-compatible inference API.\nHosts open models (Llama, Qwen, DeepSeek) for reasoning, generation, and tool-calling. This is a branded preset of the generic OpenAI-Compatible API node, so it shares the same implementation; the base URL is pinned to Nebius Token Factory.",
+  "lanes": {
+    "questions": [
+      "answers"
+    ]
+  },
+  "tile": [
+    "Model: ${parameters.llm_openai_api.profile}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/llm_openai_api",
+  "icon": "54"
+}

@@ -1,0 +1,22 @@
+{
+  "title": "Baidu Qianfan",
+  "protocol": "llm_baidu_qianfan://",
+  "prefix": "llm",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "llm"
+  ],
+  "actions": 0,
+  "description": "A component that connects to Baidu Qianfan ERNIE large language models through \nQianfan's OpenAI-compatible chat-completions API. It supports chat-based text generation, \nquestion answering, summarization, and Chinese-language enterprise AI workflows with configurable \nAPI keys and base URLs.",
+  "lanes": {
+    "questions": [
+      "answers"
+    ]
+  },
+  "tile": [
+    "Model: ${parameters.llm_baidu_qianfan.profile}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/llm_baidu_qianfan",
+  "icon": "47"
+}

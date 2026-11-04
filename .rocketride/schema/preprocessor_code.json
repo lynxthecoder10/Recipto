@@ -1,0 +1,20 @@
+{
+  "title": "Code",
+  "protocol": "preprocessor_code://",
+  "prefix": "Preprocessor",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "preprocessor"
+  ],
+  "actions": 0,
+  "description": "A specialized component designed to parse and tokenize source code. It extracts \nstructural elements such as functions, classes, and comments, enabling deeper semantic \nanalysis. This component prepares source files for tasks like classification, embedding, \nor search by breaking them into meaningful syntactic units. Supporting multiple programming \nlanguages, it enables intelligent workflows involving code understanding, summarization, \nand reasoning.",
+  "lanes": {
+    "text": [
+      "documents"
+    ]
+  },
+  "tile": [],
+  "documentation": "https://docs.rocketride.org/nodes/preprocessor_code",
+  "icon": "69"
+}

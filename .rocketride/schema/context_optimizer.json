@@ -1,0 +1,31 @@
+{
+  "title": "Context Optimizer",
+  "protocol": "context_optimizer://",
+  "prefix": "context_optimizer",
+  "plans": null,
+  "capabilities": 67584,
+  "classType": [
+    "text"
+  ],
+  "actions": 0,
+  "description": "A transformation component that manages LLM context window budgets. \nIt counts tokens, allocates budgets across system prompt, query, documents, \nand conversation history, then truncates or summarizes content to fit within \nmodel-specific token limits.</br>\n</br>\nSupports GPT, Claude, and Gemini model families with configurable budget \npercentages and priority-based allocation.",
+  "lanes": {
+    "questions": [
+      "questions"
+    ]
+  },
+  "input": [
+    {
+      "description": "Questions with context to optimize",
+      "lane": "questions",
+      "min": 1,
+      "output": [
+        {
+          "description": "Questions with optimized context fitting within model token limits",
+          "lane": "questions"
+        }
+      ]
+    }
+  ],
+  "icon": "6"
+}

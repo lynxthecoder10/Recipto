@@ -1,0 +1,28 @@
+{
+  "title": "Elasticsearch",
+  "protocol": "elasticsearch://",
+  "prefix": "Elasticsearch Vector Store",
+  "plans": null,
+  "capabilities": 2048,
+  "classType": [
+    "store"
+  ],
+  "actions": 0,
+  "description": "A vector database component for Elasticsearch, enabling efficient storage and \nretrieval of vector embeddings. It supports similarity search, filtering, \nand management of vector data with high performance. Supports Elastic Cloud \nServerless, Elastic Cloud Hosted, and self-managed Elasticsearch deployments.",
+  "lanes": {
+    "documents": [],
+    "questions": [
+      "text",
+      "documents",
+      "answers",
+      "questions"
+    ],
+    "text": []
+  },
+  "tile": [
+    "Host/Port: ${parameters.elasticsearch.${profile}.host}:${parameters.elasticsearch.${profile}.port}",
+    "Index: ${parameters.elasticsearch.${profile}.index}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/store_elasticsearch/elasticsearch",
+  "icon": "30"
+}

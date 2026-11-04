@@ -1,0 +1,22 @@
+{
+  "title": "File Store Source",
+  "protocol": "filestore_source://",
+  "prefix": "fs",
+  "plans": null,
+  "capabilities": 2560,
+  "classType": [
+    "source"
+  ],
+  "actions": 0,
+  "description": "File Store source. Streams files from the account-scoped RocketRide file store into the pipeline as raw objects for downstream processing.\nPoint it at a file to process just that file, or at a folder to process every file in it; enable 'Recursive' to also descend into subfolders.\nPaths are relative to the task's storage anchor, resolved automatically from the running task.",
+  "lanes": {
+    "_source": [
+      "tags"
+    ]
+  },
+  "tile": [
+    "Path: ${parameters.filesystem.path}"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/tool_filesystem",
+  "icon": "35"
+}

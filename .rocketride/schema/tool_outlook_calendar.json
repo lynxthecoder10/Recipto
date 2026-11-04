@@ -1,0 +1,18 @@
+{
+  "title": "Outlook Calendar",
+  "protocol": "tool_outlook_calendar://",
+  "prefix": "outlook_calendar",
+  "plans": null,
+  "capabilities": 3072,
+  "classType": [
+    "tool"
+  ],
+  "actions": 0,
+  "description": "Exposes Microsoft Outlook Calendar operations as agent tools.\nList and read events (including calendarView expansion of recurrences), create/update/delete events, respond to invitations, find meeting times, get free/busy schedules, list and create calendars, and delta-sync a calendar view, on the acting user's calendar via the Microsoft Graph calendar API.\nAuthenticates via an Entra app (client credentials) or user OAuth.",
+  "lanes": {},
+  "tile": [
+    "Outlook Calendar (${parameters.outlook_calendar.access})"
+  ],
+  "documentation": "https://docs.rocketride.org/nodes/tool_microsoft_365/outlook_calendar",
+  "icon": "87"
+}

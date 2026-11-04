@@ -1,0 +1,24 @@
+{
+  "title": "OCR",
+  "protocol": "ocr://",
+  "prefix": "ocr",
+  "plans": null,
+  "capabilities": 6144,
+  "classType": [
+    "image"
+  ],
+  "actions": 0,
+  "description": "A component that extracts machine-readable text from images and scanned documents \nusing optical character recognition. It enables the transformation of visual content (such \nas PDFs, screenshots, and photos) into structured text for further analysis and processing. \nSupporting various image formats and multilingual text, the component is ideal for digitizing \nprinted materials, enabling search, indexing, and downstream natural language tasks.",
+  "lanes": {
+    "documents": [
+      "text"
+    ],
+    "image": [
+      "text",
+      "table"
+    ]
+  },
+  "tile": [],
+  "documentation": "https://docs.rocketride.org/nodes/ocr",
+  "icon": "64"
+}

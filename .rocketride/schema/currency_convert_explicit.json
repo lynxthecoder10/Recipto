@@ -1,0 +1,19 @@
+{
+  "title": "Currency Convert (Explicit)",
+  "protocol": "currency_convert_explicit://",
+  "prefix": "currency_convert_explicit",
+  "plans": null,
+  "capabilities": 67584,
+  "classType": [
+    "text"
+  ],
+  "actions": 0,
+  "description": "An opt-in currency converter for the audit-grade financial extraction suite. \nConverts fact values from a source currency to a target currency at a stated rate \nand date supplied in the configuration — conversion is never implicit or fetched \nfrom a live rate. Reads and writes the <code>answers</code> lane.</br>\n</br>\nThe conversion is <b>non-destructive</b>: the original amount and currency are kept, \na <code>converted</code> block is added, and a <code>provenance</code> entry records \nthe rate, date and source/target currencies. Records that are not fact objects, or whose \ncurrency does not match the configured source, pass through unchanged.",
+  "lanes": {
+    "answers": [
+      "answers"
+    ]
+  },
+  "documentation": "https://docs.rocketride.org/nodes/currency_convert_explicit",
+  "icon": "6"
+}

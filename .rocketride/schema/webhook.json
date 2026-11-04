@@ -1,0 +1,26 @@
+{
+  "title": "Webhook",
+  "protocol": "webhook://",
+  "prefix": "WebHook",
+  "plans": null,
+  "capabilities": 2560,
+  "classType": [
+    "source"
+  ],
+  "actions": 0,
+  "description": "A source component that listens for incoming HTTP requests and accepts \nuploaded documents or data from external systems or processes. It enables \nseamless integration for document ingestion, allowing external systems to \ntrigger the component and send files for further processing. Configurable \nwith endpoint and authentication settings, it ensures secure and reliable \ndocument transfer for pipeline processing. Ideal for receiving documents, \nimages, or other files from external platforms via HTTP-based communication.",
+  "lanes": {
+    "_source": [
+      "tags",
+      "text",
+      "json",
+      "audio",
+      "video",
+      "image",
+      "questions"
+    ]
+  },
+  "tile": [],
+  "documentation": "https://docs.rocketride.org/nodes/webhook/webhook",
+  "icon": "118"
+}
